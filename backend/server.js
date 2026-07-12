@@ -7,6 +7,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const pool = require('./src/config/db');
+const inventoryRoutes = require('./src/routes/inventoryRoutes');
 
 const app = express();
 const PORT = process.env.SERVER_PORT || 4000;
@@ -27,6 +28,8 @@ app.get('/api/health', async (req, res) => {
       res.status(500).json({ status: 'error', message: err.message });  
     }
 });
+
+app.use('/api/inventory', inventoryRoutes);
 
 app.listen(PORT, () => {
     console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
