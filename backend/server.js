@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const pool = require('./src/config/db');
 const inventoryRoutes = require('./src/routes/inventoryRoutes');
+const salesRoutes = require('./src/routes/salesRoutes');
 
 const app = express();
 const PORT = process.env.SERVER_PORT || 4000;
@@ -30,6 +31,7 @@ app.get('/api/health', async (req, res) => {
 });
 
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/sales', salesRoutes);
 
 app.listen(PORT, () => {
     console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
