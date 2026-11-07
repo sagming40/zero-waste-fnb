@@ -6,7 +6,8 @@
 ## 지금 상태 (2026-11-07)
 
 - **재설계 중.** 옛 Express + React 계획을 버리고 스택을 새로 고르는 중이다. 정한 것 · 열린 질문은 [docs/BRAINSTORM.md](docs/BRAINSTORM.md)에 있다.
-- 새 스택 (안): Java 25 + Spring Boot 4.x · Angular + TypeScript + Tailwind + spartan/ui · PostgreSQL. 편집기는 VS Code.
+- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code. 후보: Angular + TypeScript + Tailwind + spartan/ui · PostgreSQL.
+- 취업 일정에 쫓기는 프로젝트가 아니다 — 자기계발용이라 범위를 넓혀 깊게 배워도 된다(2026-11-07).
 - `backend/`(Express) · `seed/`(Python) · `schema.sql`은 **옛 버전**이다. 고치거나 기능을 더하지 않는다. M0에서 태그 `v0-express`로 남기고 지운다.
 - 다음에 할 일: BRAINSTORM 7절 체크리스트를 정한다 → M0(재정비 + 뼈대).
 
@@ -19,9 +20,10 @@
 - 비유를 곁들인 주석을 단 코드를 **채팅으로 보여 준다.** 내가 치고 "코드 검수!"라고 하면 오타 · 버그를 리뷰한다.
 - 수정 지시는 **"파일 위치 + 지금 코드 + 바꿀 코드"** 형식으로 한다.
 - 명령(Gradle · npm · git · docker)도 내가 친다. Claude는 명령과 "왜 필요한지"를 보여 준다.
-- 커밋도 내가 한다. Claude는 [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) 형식의 메시지 초안을 보여 준다.
+- **커밋 · push는 Claude가 한다** (2026-11-07 사용자 지시 — 나는 코드 타이핑에만 집중한다). 내가 친 코드는 "코드 검수!"가 통과한 뒤, 문서는 고친 뒤 Claude가 [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) 형식으로 커밋하고 push한다. 검수에서 버그가 남아 있으면 커밋하지 않는다.
 - **Claude가 직접 해도 되는 것**
   - 읽기 전용 확인 명령: `git status` · `git diff` · `git log`, `./gradlew test` · `build`, `npm test` · `ng build`, 화면 띄워 보기. 내가 친 결과를 관찰값으로 확인하는 용도다.
+  - `git add` · `git commit` · `git push` · `git tag`(위 커밋 규칙대로).
   - 문서 쓰기: `docs/` 아래 문서와 이 파일. 문서는 학습 대상이 아니다. 단 내가 "이건 내가 쓸게"라고 하면 그렇게 한다.
 - 새 도구 · 개념이 처음 나오면 **설명부터** 한다. 이 레포에서는 거의 모든 단계가 처음이다 — 짧게, 일상 비유를 섞고, 이 프로젝트 어디에 쓰는지까지 말한다.
 - 한 번에 보여 주는 코드 양은 내가 칠 수 있을 만큼(파일 하나 · 함수 몇 개)으로 끊는다. 다음 조각은 앞 조각 검수가 끝난 뒤에 보여 준다.
@@ -48,6 +50,6 @@
 
 ## 환경
 
-- 경로: 노트북 `C:\_dev\zero-waste-fnb`. 집 PC · 회사 PC는 처음 클론할 때 여기 적는다.
+- 경로: 노트북 `C:\_dev\zero-waste-fnb`, 집 PC `D:\_dev\zero-waste-fnb`(2026-11-07). 회사 PC는 처음 클론할 때 여기 적는다.
 - 기기별 설치 상태(JDK · VS Code 확장 · Docker)는 [BRAINSTORM 8절](docs/BRAINSTORM.md#8-기기별-환경).
 - 비밀값은 `.env`에만 둔다(`.gitignore` 등록됨). 견본은 `.env.example`.
