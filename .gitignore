@@ -1,36 +1,32 @@
 # ============================================================
-# ZeroWaste F&B — .gitignore
-# React(Node) + Python + PostgreSQL 스택 통합
+# ZeroWaste F&B — 루트 .gitignore
+# 레포 "전체"에 걸리는 것만 둔다 (건물 정문 경비).
+# 백엔드 · 프런트 빌드 결과물은 각 폴더의 .gitignore가 맡는다 (층마다 있는 경비).
+#   backend/.gitignore  ← Spring Initializr가 만들어 준다 (build/, .gradle/ …)
+# ⚠️ 여기에 *.jar를 넣지 않는다 — gradle-wrapper.jar는 커밋해야 하는 jar다
 # ============================================================
 
-# --- 환경변수 / 민감정보 (제일 중요) ---
+# --- 비밀값 (제일 중요) ---
+# 금고 열쇠는 사진을 찍어 두지 않는다 — .env는 내 PC · 서버에만 둔다
 .env
-.env.local
 *.env
+.env.*
+# 견본(열쇠 모양만 그린 그림)은 올린다
+!*.env.example
 !.env.example
 
-# --- Node.js / React (frontend) ---
-node_modules/
-frontend/build/
-frontend/dist/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# --- Python (pipeline, seed) ---
-__pycache__/
-*.pyc
-venv/
-.venv/
-*.egg-info/
-
-# --- 에디터 / OS ---
-.vscode/
-.idea/
+# --- OS가 몰래 만드는 파일 ---
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# --- 로그 / 임시파일 ---
+# --- 편집기 ---
+# 내 VS Code 설정은 내 책상 위 물건 — 남의 PC에선 의미가 없다
+.vscode/*
+# 단, "이 레포엔 이 확장을 깔아라" 추천 목록은 세 기기가 같이 쓴다
+!.vscode/extensions.json
+.idea/
+
+# --- 로그 · 임시 파일 ---
 *.log
 *.tmp

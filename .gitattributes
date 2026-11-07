@@ -1,0 +1,37 @@
+# ============================================================
+# ZeroWaste F&B — 루트 .gitattributes
+# 줄바꿈 규칙표: 어느 PC에서 꺼내든 같은 줄바꿈으로 맞춘다.
+#   PC마다 다른 core.autocrlf(개인 습관)보다 이 파일(레포 공용 규칙)이 먼저다.
+# 서버 · CI가 Linux라 기본은 LF. Windows 전용 스크립트만 CRLF.
+# backend/.gitattributes는 Spring Initializr가 따로 만든다 (gradlew = LF 등) — 같은 방향이라 충돌하지 않는다
+# ============================================================
+
+# --- 기본: 글자 파일이면 LF ---
+# text=auto → git이 글자 파일인지 스스로 판단, 글자면 LF로 맞춘다
+* text=auto eol=lf
+
+# --- Windows 전용 스크립트는 CRLF ---
+# cmd.exe · Windows PowerShell 5.1은 CRLF가 안전하다
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# --- Linux에서 도는 스크립트는 반드시 LF ---
+# CRLF면 서버에서 'sh\r' 오류로 바로 죽는다 (위 기본값과 같지만, 중요해서 한 번 더 박아 둔다)
+*.sh  text eol=lf
+gradlew text eol=lf
+
+# --- 바이너리: 절대 건드리지 마 ---
+# 줄바꿈을 "고쳐" 버리면 파일이 깨진다 (사진에 펜으로 줄 긋는 셈)
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.7z  binary
+*.woff binary
+*.woff2 binary
