@@ -1,20 +1,17 @@
 # ZeroWaste F&B — 프로젝트 지침
 
 > **이 레포에서 Claude가 따를 규칙이다** — 전역 지침(`~/.claude/CLAUDE.md`)을 바탕으로, 이 프로젝트만의 세부와 **전역과 다르게 하는 것**을 적는다.
-> 무엇을 만드는지는 [README](README.md), 지금 고민 중인 스택 · 설계는 [docs/BRAINSTORM.md](docs/BRAINSTORM.md).
+> 무엇을 만드는지는 [README](README.md) · [docs/REQUIREMENTS](docs/REQUIREMENTS.md), 진행 상황은 [docs/PLAN](docs/PLAN.md).
 
-## 지금 상태 (2026-11-07)
+## 지금 상태
 
-- **재설계 중.** 옛 Express + React 계획을 버리고 스택을 새로 고르는 중이다. 정한 것 · 열린 질문은 [docs/BRAINSTORM.md](docs/BRAINSTORM.md)에 있다.
-- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code · PostgreSQL 18 · Flyway · Spring Security(세션 + CSRF) · JUnit 5 + Testcontainers · springdoc · `@Scheduled` · JPA + JdbcClient. M1에서 정할 것: 프런트(후보 Angular + Tailwind + spartan/ui).
-- 정한 범위: 베이커리 카페 + 델리 메뉴, 돈 · 탄소 두 축, 여러 매장 · 역할, M2 ~ M5 네 묶음, M2 뒤 첫 배포(BRAINSTORM 6 · 10 · 11절).
+- 재설계 · 문서 재정비가 끝났다(2026-11-07). 지금은 **M0 재정비 + 뼈대** — 진행 상황은 [PLAN](docs/PLAN.md), 짧은 현재 상태는 [DEVLOG](docs/DEVLOG.md) 맨 위.
 - 취업 일정에 쫓기는 프로젝트가 아니다 — 자기계발용이라 범위를 넓혀 깊게 배워도 된다(2026-11-07).
 - `backend/`(Express) · `seed/`(Python) · `schema.sql`은 **옛 버전**이다. 고치거나 기능을 더하지 않는다. M0에서 태그 `v0-express`로 남기고 지운다.
-- 다음에 할 일: 데이터 모델 설계(BRAINSTORM 7절 체크리스트) → M0(재정비 + 뼈대).
 
 ## 작업 방식 — 전역 작업 방식과 다르게
 
-> **이유**: 이 레포는 Spring · Angular · JPA · Tailwind · spartan **전부 처음 쓰는 스택**이다. 내가 직접 쳐 봐야 손에 남는다. 그래서 전역 기본값(자동)을 뒤집어 **타이핑 학습 모드를 기본값**으로 한다 (2026-11-07 사용자 지시).
+> **이유**: 이 레포는 Spring · JPA · 프런트(후보 Angular · Tailwind · spartan) **전부 처음 쓰는 스택**이다. 내가 직접 쳐 봐야 손에 남는다. 그래서 전역 기본값(자동)을 뒤집어 **타이핑 학습 모드를 기본값**으로 한다 (2026-11-07 사용자 지시).
 
 **기본: 타이핑 학습 모드**
 - Claude는 **코드 · 설정 파일에 쓰지 않는다.** 한 줄짜리 수정도 마찬가지다. 대상: `src/` · `build.gradle` · `application.yml` · `package.json` · `angular.json` · 마이그레이션 SQL · compose 파일 · 스크립트.
@@ -43,26 +40,30 @@
 
 - **문서는 Claude가 쓴다.** 내 시간은 코드 타이핑에 쓴다. 나는 결정만 하고, 문서를 읽고 고치는 일에 시간을 쓰지 않는다.
 - **전역 세트 밖의 문서를 늘리지 않는다.** 딥 태스크 기록도 따로 문서를 두지 않는다: 커밋 메시지(COMMIT_CONVENTION ②의 문제 → 분석 → 해결 → 수치) + DEVLOG 날짜 블록 제목의 `🧩n` 태그 + README "딥 태스크" 표(끝낸 날 한 줄씩).
-- **빈 문서를 미리 만들지 않는다.** 파일은 처음 채울 내용이 생긴 날 만든다. 예: `DESIGN.md`는 M1, `DATA_MODEL.md`는 M2 마이그레이션을 쓸 때.
-- **BRAINSTORM을 한꺼번에 쪼개 옮기지 않는다.** 그 단계에 필요한 절만 그때 옮긴다. M0에서 새로 만드는 건 PLAN · DEVLOG · decisions 2개(재설계 · 스택)뿐이다.
+- **빈 문서를 미리 만들지 않는다.** 파일은 처음 채울 내용이 생긴 날 만든다. 예: `DESIGN.md` · `mockups/`는 M1, `SERVER.md`는 첫 배포.
+- **임시 문서는 오래 두지 않는다.** 브레인스토밍 같은 임시 문서는 결정이 굳으면 한 번에 제자리(세트 문서 · decisions)로 녹이고 지운다 — 2026-11-07 BRAINSTORM을 그렇게 했다. 임시 문서가 원본으로 남으면 "이 절은 옮겼나?"를 계속 따지게 된다.
 - **설계 결정은 계속 한다** — 탄탄하고 정교하게 설계하는 게 목표다. 줄이는 건 문서 수와 문서 손질이지 결정이 아니다. 단, 근거가 아직 없는 결정(화면을 안 그린 프런트, 크레딧 결과에 달린 인프라)은 근거가 생기는 단계에서 한다.
 - **경보**: M0를 시작한 뒤 코드 커밋 없이 문서 커밋만 두 세션 연속이면, Claude가 먼저 "문서 함정"이라고 말한다.
 
 ## 문서 지도
 
-전역 문서 체계를 따른다. 재정비(M0) 전이라 지금은 옛 문서와 새 문서가 섞여 있다.
+전역 문서 체계를 따른다(2026-11-07 재정비, [decisions/0001](docs/decisions/0001-revival.md)).
 
-| 파일 | 상태 |
+| 파일 | 적는 것 |
 |---|---|
-| [README.md](README.md) | 옛 스택 기준. M0에서 새 스택으로 고친다 |
-| [docs/BRAINSTORM.md](docs/BRAINSTORM.md) | **지금 원본.** 스택 · 설계 고민. 굳으면 decisions · PLAN으로 옮기고 archive로 보낸다 |
-| [BE_트러블슈팅.md](BE_트러블슈팅.md) | 옛 문서 → M0에서 archive. 새 트러블슈팅 문서는 만들지 않는다(위 "문서 함정 막기") |
-| [FE_메모_모음.md](FE_메모_모음.md) | 옛 문서 → M0에서 archive. 프런트 메모는 DEVLOG "막힌 것"에 쓴다 |
-| [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) | **유효.** 커밋 메시지는 이 형식을 따른다. 딥 태스크 목록 · 파일 이름은 M0에서 새 기준으로 고친다 |
-| `docs/PLAN.md` · `DEVLOG.md` · `decisions/` | M0에서 만든다 |
+| [README.md](README.md) | 처음 보는 사람용 소개 · 딥 태스크 결과 표 · 실행 방법(M0 뒤) |
+| [docs/PLAN.md](docs/PLAN.md) | 목표 · 단계 · 완료 기준 · 진행 현황 · 딥 태스크 목록 |
+| [docs/DEVLOG.md](docs/DEVLOG.md) | 겪은 일 · 막힌 일 · 배운 것. 딥 태스크는 블록 제목에 `🧩n`, 프런트 메모도 여기 |
+| [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 개요 · 기능 F · N · 외부 데이터 · 데모 데이터 한계 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 코드 구조 · 요청 · 배치 흐름 · 인증 · 운영 · 개발 환경(기기별) |
+| [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | 테이블 지도 · 관계 · RLS · 재고 규칙. M2 마이그레이션이 생기면 컬럼은 마이그레이션이 원본 |
+| [docs/decisions/](docs/decisions/README.md) | 결정 하나 = 파일 하나 |
+| [docs/archive/](docs/archive/README.md) | 옛 문서(v0 README · 빈 트러블슈팅 · FE 메모). 고치지 않는다 |
+| [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) | 커밋 메시지 형식. 딥 태스크 커밋은 문제 → 분석 → 해결 → 수치 |
+| 아직 없음 | `DESIGN.md` · `mockups/`(M1), `SERVER.md`(첫 배포) |
 
 ## 환경
 
 - 경로: 노트북 `C:\_dev\zero-waste-fnb`, 집 PC `D:\_dev\zero-waste-fnb`(2026-11-07). 회사 PC는 처음 클론할 때 여기 적는다.
-- 기기별 설치 상태(JDK · VS Code 확장 · Docker)는 [BRAINSTORM 8절](docs/BRAINSTORM.md#8-기기별-환경).
+- 기기별 설치 상태(JDK · VS Code 확장 · Docker)는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
 - 비밀값은 `.env`에만 둔다(`.gitignore` 등록됨). 견본은 `.env.example`.
