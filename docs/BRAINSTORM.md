@@ -1,0 +1,192 @@
+# 재설계 브레인스토밍
+
+> **스택을 처음부터 다시 고르면서 정한 것 · 버린 것 · 아직 열린 질문을 모아 두는 임시 문서다** — 다른 기기에서 이어서 생각하기 위한 메모.
+> 결정이 굳으면 `decisions/`(결정 하나 = 파일 하나)와 `PLAN.md`(단계 · 진행 현황)로 옮기고, 이 문서는 `archive/`로 보낸다.
+> 프로젝트 소개 · 문제 정의는 루트 [README](../README.md), 작업 규칙은 루트 [CLAUDE.md](../CLAUDE.md).
+
+---
+
+## 1. 왜 다시 설계하나
+
+2026-11-07에 레포를 다시 열어 본 상태:
+
+- 커밋 5개가 모두 2026-07-12 하루에 몰려 있다. origin/main과 같고, 작업 트리는 깨끗하다.
+- 구현된 것: Express 5 + pg로 만든 `GET /api/health` · `GET /api/inventory` · `POST /api/sales`(트랜잭션을 일부러 안 건 "before" 버전), `schema.sql`(테이블 7개), Python 더미 시드.
+- 없는 것: 프런트 · 예측 파이프라인 · 인증(`userId = 1` 고정) · 입력 검증 · 테스트.
+- 버릴 코드가 200줄 남짓이라 **기존 코드를 고치는 것보다 스택을 새로 고르는 쪽이 싸다**고 판단했다.
+
+옛 코드는 지우기 전에 태그 `v0-express`로 남긴다. 아직 만들지 않았다.
+
+**가져갈 것**: README의 문제 정의 · 핵심 기능, `schema.sql`의 테이블 설계(Flyway 마이그레이션으로 옮김), 더미 데이터 규칙(정기 휴무 · 예외 휴무 · 요일 가중치 · 말차라떼 콜드스타트, `random.seed(42)`), 딥 태스크 5개(`BE_트러블슈팅.md`).
+**버릴 것**: Express 코드 전부, Python 파이프라인 계획(가중 이동 평균은 pandas 없이 SQL이나 Java 몇 줄이면 된다), CRA · React 계획.
+
+---
+
+## 2. 스택
+
+### 2.1 확정
+
+| 층 | 선택 | 메모 |
+|---|---|---|
+| 백엔드 | **Java 25 (LTS) + Spring Boot 4.x** | 노트북에 JDK `25.0.5` 설치 확인(2026-11-07) |
+| 빌드 | Gradle (Groovy DSL) | Kotlin DSL은 VS Code 편집 지원이 약해서 쓰지 않는다 |
+| 편집기 | **VS Code** | IntelliJ는 안 쓴다(아래 3절) |
+| 프런트 | **Angular (21 이상) + TypeScript** | spartan/ui가 Angular 21 이상을 요구한다 |
+| UI 부품 | **spartan/ui** | shadcn/ui는 React 전용이라 Angular용으로 같은 방식을 옮긴 것을 쓴다. 동작은 `@spartan-ng/brain` 패키지로, 겉모습(helm)은 파일을 프로젝트에 복사해서 내 코드로 둔다. 1.0 안정판이고 컴포넌트가 55개 이상 |
+| 스타일 | **Tailwind CSS** | spartan helm이 Tailwind 클래스로 되어 있다. ⚠️ v4와 맞는지는 아직 확인 못 했다 |
+
+### 2.2 거의 확정 (집에서 한 번 더 보기)
+
+| 층 | 안 | 메모 |
+|---|---|---|
+| DB | **PostgreSQL 18** | 데이터가 메뉴 ↔ BOM ↔ 식자재처럼 관계가 엄격한 정형 데이터라 다른 엔진을 고를 이유가 없다. 이번엔 엔진을 바꾸는 대신 **PostgreSQL을 깊게 쓰는 것**(RLS · 윈도 함수 · 실행 계획)으로 변화를 준다. 4절 참고 |
+| DB 접근 | Spring Data JPA, UPSERT만 네이티브 쿼리 | JPA가 `ON CONFLICT`를 깔끔하게 표현하지 못한다. "왜 여기만 네이티브를 썼는지"를 decisions에 남긴다 |
+| 마이그레이션 | Flyway | `schema.sql`을 `V1__init.sql`로 옮긴다 |
+| API 문서 | springdoc-openapi (Swagger) | 엔드포인트 목록의 원본. 문서에 따로 옮기지 않는다 |
+| 인증 | Spring Security, 세션 쿠키 + CSRF | Spring의 `XSRF-TOKEN` 쿠키와 Angular `HttpClient`의 `X-XSRF-TOKEN` 헤더가 기본값부터 서로 맞는다 |
+| 배치 | `@Scheduled(cron = …, zone = "Asia/Seoul")` | 같은 앱 안에서 돈다 |
+| 테스트 | JUnit 5 + Testcontainers(진짜 PostgreSQL) | Docker 엔진이 켜져 있어야 한다 |
+| 개발 연결 | Angular 개발 서버의 프록시로 `/api`를 Spring에 넘긴다 | 같은 주소처럼 보여서 CORS를 다루지 않아도 된다 |
+| 배포 | Caddy가 Angular 빌드 파일을 내보내고 `/api`만 Spring으로 넘긴다 | 하위 주소는 `sagming.com` 아래에(이름 미정). 12월 AWS 이사와 같이 진행 |
+
+### 2.3 아직 안 정함
+
+- [ ] 차트: Chart.js(ng2-charts)로 할지, spartan 쪽에 쓸 만한 게 있는지 — M1 목업 때 본다
+- [ ] OpenAPI 문서에서 TypeScript 타입을 자동 생성할지 — M2쯤
+- [ ] Tailwind 버전(v4 가능 여부) — M0 뼈대 만들 때 spartan 변경 기록을 확인
+- [ ] 패키지 관리자: npm / pnpm
+- [ ] 하위 주소 이름
+- [ ] 레포 구조: `backend/` + `frontend/` 두 폴더 (안)
+
+---
+
+## 3. 검토한 대안
+
+`G:\내 드라이브\_private\.claude\신박한_풀스택_기술스택_조합_정리_v1.1.md`의 조합과 그 밖의 후보를 이 프로젝트 기준으로 봤다.
+
+**이미 써 본 스택** (그래서 이번엔 뺐다)
+| 레포 | 스택 |
+|---|---|
+| cbt-journal | Go + SvelteKit + PostgreSQL + Valkey |
+| PlayLedger | Vue 3 + FastAPI + PostgreSQL |
+| material-dict | React + FastAPI |
+| cosmic-watch-explorer | React + Django |
+| filmtong | Streamlit |
+| (이 레포 v0) | Express + React(계획) |
+
+**백엔드**
+| 후보 | 판단 |
+|---|---|
+| Go + Templ · HTMX · Alpine.js | 아는 언어 위에서 화면 방식만 새로 배워서 완주 가능성이 제일 높다. 대신 새로 배우는 양이 적다 |
+| Elixir Phoenix LiveView | 대시보드 + Oban 배치가 잘 맞고 학습은 제일 신선하다. 국내 취업 범용성 ★1 |
+| Rust Axum + SvelteKit | 계산할 게 이동 평균뿐이라 Rust의 장점을 살릴 데가 없다. PC 부품 프로젝트(Go와 비교 구현)에 남겨 둔다 |
+| Kotlin + Spring | Kotlin + Spring은 IntelliJ가 정석이다. VS Code에서는 JetBrains 공식 확장(유료, 학생 라이선스로 쓸 수는 있다)이 테스트 실행을 아직 지원하지 않고 Spring 전용 기능도 문서에 없다. 무료 `kotlin-lsp`는 pre-alpha. IntelliJ가 손에 안 잡혀서 뺐다. Spring에 익숙해진 뒤 언어만 바꿔 보는 것은 가능 |
+| C# ASP.NET Core | C# 경험이 있어 진입이 쉽고 구조도 Spring과 닮았다. 국내 채용은 Spring보다 적다. 차선이었다 |
+| Ruby on Rails 8 · Bun + Hono | Rails는 CRUD가 제일 빠르지만 취업 범용성 ★1. Hono는 Express와 많이 겹친다 |
+
+**Java + Spring을 고른 이유**: 써 본 적 없는 생태계이고, 국내 백엔드 수요가 제일 크고, 이 프로젝트의 딥 태스크(N+1 · 트랜잭션 · 배치 멱등성)가 JPA · `@Transactional`의 대표 주제와 그대로 겹친다. VS Code에서도 무료 확장(Microsoft Java 팩 + Spring Boot 팩)으로 실행 · 디버그 · 테스트가 된다.
+
+**프런트**
+| 후보 | 판단 |
+|---|---|
+| Thymeleaf + htmx | Spring 교과서 짝이고 서버 하나로 끝난다. 학습을 Spring에 몰 수 있다. 처음 추천했던 안 |
+| **Angular** (채택) | Spring과 설계 철학이 닮았다(TypeScript 기본 · DI · 서비스 구조). 같은 개념을 앞뒤로 두 번 보게 된다. 대신 학습량이 두 배라 일정이 길어진다 |
+| React | 국내 Spring 짝으로는 제일 흔하지만 이미 써 봤다 |
+
+"정통 짝"은 기준마다 다르다: Spring 교과서는 Thymeleaf, 국내 채용 시장은 React, 설계 철학 · 엔터프라이즈 문화는 Angular.
+
+**DB**
+| 후보 | 판단 |
+|---|---|
+| **PostgreSQL** | 2.2절 |
+| MySQL 8 | 국내 Spring + JPA 조합에서 제일 흔하지만, MariaDB를 써 봐서 새로 배우는 게 적다 |
+| MongoDB | 관계가 엄격한 데이터라 맞지 않다 |
+| Oracle | 개인 프로젝트로는 무겁고 배포가 번거롭다 |
+
+DB 엔진은 데이터 모양이 다를 때 갈린다: 문서형 → MongoDB, 그래프(부품 호환성 등) → Neo4j, 대용량 분석 → ClickHouse · DuckDB, 로컬 우선 → SQLite, 검색 → 검색 엔진을 옆에 붙인다.
+
+---
+
+## 4. 딥 태스크
+
+옛 `BE_트러블슈팅.md`의 5개에 PostgreSQL을 깊게 쓰는 후보 2개를 더했다. **6 · 7번은 넣을지 아직 안 정했다.**
+
+| # | 주제 | 이 스택에서 |
+|---|---|---|
+| 1 | N+1 → JOIN · 인덱스 | JPA 지연 로딩에서 저절로 생긴다 → fetch join · `@EntityGraph` · 배치 사이즈 비교, `EXPLAIN ANALYZE`로 전후 ms를 잰다 |
+| 2 | 트랜잭션 | 반쪽 저장을 테스트로 먼저 재현 → `@Transactional`. 함정도 소재다: checked 예외는 기본적으로 롤백되지 않고, 같은 클래스 안에서 호출하면 프록시를 타지 않는다 |
+| 3 | 배치 멱등성 | 두 번 돌려 중복을 확인 → `ON CONFLICT DO UPDATE`(네이티브) |
+| 4 | 엣지 케이스 | 휴무일과 판매 0을 구분하기, 신규 메뉴 콜드스타트 |
+| 5 | 배포 | 환경변수 · 프록시 · DB 연결 · JVM 메모리 |
+| 6 (후보) | **행 수준 보안(RLS)** | 남의 매장 데이터를 막는 두 번째 벽. 앱의 `WHERE user_id`를 빼먹어도 DB가 막는다. JPA + 커넥션 풀에서 트랜잭션마다 현재 매장 ID를 DB에 넘기는 게 어렵다 — 그 어려움이 소재 |
+| 7 (후보) | **윈도 함수로 WMA** | 3번에 붙인다. 가중 이동 평균을 Java로 짠 버전과 SQL 윈도 함수 버전의 결과 · 속도 · 읽기 쉬움을 비교 |
+
+---
+
+## 5. 사전 검증에서 찾은 설계 구멍
+
+옛 설계를 끝까지 따라가 보다가 발견한 것. 실제로 겪은 오류는 아니다.
+
+1. **휴무일과 입력 누락을 구분할 수 없다.** 판매 행이 없으면 쉰 날인지 안 적은 날인지 모른다. 딥 태스크 4의 전제가 깨진다.
+   → `business_days`(날짜 · 영업/휴무)를 두고 마감 입력 때 함께 저장한다.
+2. **재고가 변하는 흐름이 없다.** `current_stock`을 바꾸는 곳이 없어서, 발주 권장량("예측 − 재고")이 매일 같은 재고로 계산된다. → **열린 질문**:
+   - A. 마감 입력 때 BOM으로 재고 자동 차감 + 입고 입력 화면 (추천: 계산이 실제로 돌아간다)
+   - B. 마감 때 남은 재고를 직접 적기(실사). 입력은 늘지만 오차가 안 쌓인다
+   - C. 재고는 수동으로만 고치기. 제일 단순하지만 발주 계산의 의미가 줄어든다
+3. **단위가 안 맞을 수 있다.** `recipes_bom.unit`(g)과 `ingredients.unit`(kg)이 다르면 계산이 틀린다.
+   → BOM 단위는 식자재의 기본 단위로 고정하고 `recipes_bom.unit`은 없앤다.
+4. **같은 날을 두 번 입력할 수 있다.** 지금은 두 번 쌓인다.
+   → (매장, 날짜, 메뉴)에 UNIQUE를 걸고, 다시 입력하면 그날 것을 한 트랜잭션 안에서 통째로 바꾼다.
+5. **시간대**: 서버는 UTC라 "자정" 배치가 한국 시간 오전 9시에 돌 수 있다.
+   → cron에 `Asia/Seoul`을 지정하고, 날짜는 모두 KST 기준으로 다룬다.
+6. **탄소 환산 계수에 근거가 없다.** 음식물 쓰레기 1kg당 CO₂e를 얼마로 칠지, 출처와 함께 decisions에 남긴다.
+7. **남의 매장 데이터**: 모든 조회를 세션의 매장 ID로 거르고, 남의 `menu_id`로 입력하면 거부되는지 테스트한다. (6번 딥 태스크 RLS와 이어진다)
+
+---
+
+## 6. 진행 순서 (초안)
+
+Spring과 Angular가 둘 다 처음이라 단계마다 백엔드(BE) · 프런트(FE) 완료 기준을 따로 둔다. 순서와 완료 기준은 PLAN으로 옮길 때 다시 다듬는다.
+
+| 단계 | 내용 | 완료 기준 (안) |
+|---|---|---|
+| M0 재정비 + 뼈대 | 태그 `v0-express`, 옛 문서는 `docs/archive/`로, PLAN · DEVLOG · decisions 0001(재설계) · 0002(스택). Spring Initializr 뼈대 + compose(PostgreSQL) + Flyway V1, Angular + Tailwind + spartan 뼈대 | BE: `./gradlew test`가 Testcontainers 위에서 1건 통과, `/actuator/health` 200 · FE: spartan 버튼 하나가 뜨는 화면 |
+| M1 화면 설계 | 로그인 · 마감 입력 · 대시보드 · 재고 목업 시안을 비교 → DESIGN.md | 시안 채택 |
+| M2 로그인 + 마감 입력 | Spring Security, 데모 시드(`demo` 프로필), 🧩2 트랜잭션, 남의 데이터 막기, Angular 로그인 · 입력 폼 | 실패 시나리오 테스트 통과, 브라우저에서 로그인 → 입력 |
+| M3 예측 배치 | WMA → BOM → 재고 → `predictions`, 🧩3 멱등성, 🧩4 휴무 · 콜드스타트 | 두 번 돌려도 행 수가 같다 |
+| M4 대시보드 | 발주 권장량 · 탄소 차트 · 유통기한 경고, 🧩1 N+1 | `EXPLAIN ANALYZE` 전후 수치 |
+| M5 배포 + 마감 점검 | AWS 이사와 함께, 하위 주소 + Caddy, 🧩5 | 운영 주소에서 로그인 → 입력 → 대시보드 |
+
+---
+
+## 7. 이어서 정할 것 (체크리스트)
+
+- [ ] DB = PostgreSQL 확정
+- [ ] 딥 태스크 6(RLS) · 7(윈도 함수 WMA)을 넣을지
+- [ ] 재고 흐름 A / B / C (5절 2번)
+- [ ] 2.3절 미정 항목
+- [ ] 트러블슈팅 문서를 어떻게 둘지 — 안: `docs/TROUBLESHOOTING.md`로 살리고, CLAUDE.md에 "전역 문서 체계와 다르게"라고 적어 둔다(포트폴리오용 딥 태스크 기록). FE 메모는 DEVLOG로, 커밋 컨벤션은 지금처럼 루트 파일을 유지하거나 CLAUDE.md로 옮긴다
+- [ ] M0 시작 전에 설치할 npm · Gradle 의존성 목록 확인 (Claude가 목록을 먼저 보여 준다)
+
+---
+
+## 8. 기기별 환경
+
+**노트북** (`C:\_dev\zero-waste-fnb`, 2026-11-07 확인)
+- JDK `25.0.5` LTS ✅
+- VS Code 확장: Extension Pack for Java · Spring Boot Extension Pack · Gradle · Java 테스트 ✅
+  - ⚠️ `oracle.oracle-java`도 깔려 있다. `redhat.java`와 기능이 겹쳐 충돌할 수 있으니 **사용 안 함**으로 꺼 둔다. Spring 확장은 Red Hat 쪽에 붙어서 돈다
+- Docker CLI 29.9 있음. ⚠️ 엔진이 응답하지 않았다 — Docker Desktop을 켜야 한다
+- PostgreSQL 18 서비스 실행 중 (로컬 설치). `zerowaste` DB가 있는지는 확인 못 했다
+- Python 없음 — 새 스택에서는 필요 없다
+
+**집 PC · 회사 PC**: 아직 확인 전. 같은 항목(JDK 25 · VS Code 확장 · Docker 엔진)을 본다.
+
+---
+
+## 참고 링크
+
+- spartan/ui: [GitHub](https://github.com/spartan-ng/spartan) · [문서](https://spartan.ng/documentation/introduction)
+- Java and Kotlin by IntelliJ IDEA (VS Code 확장): [소개](https://jetbrains.com/help/intellij-vscode/About-instance.html) · [실행 · 디버그](https://www.jetbrains.com/help/intellij-vscode/Run-and-debug.html)
+- Kotlin LSP: [Kotlin/kotlin-lsp](https://github.com/Kotlin/kotlin-lsp)
+- IntelliJ IDEA 통합판: [발표](https://blog.jetbrains.com/idea/2025/12/intellij-idea-unified-release/) · [FAQ](https://lp.jetbrains.com/intellij-idea-unified-faq/)
