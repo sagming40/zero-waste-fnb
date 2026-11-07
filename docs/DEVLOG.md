@@ -6,7 +6,8 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: compose(PostgreSQL 18) + `application.yml` + Flyway `V1` → Modulith 검사 테스트 · health → CI
+- **다음에 할 일**: Modulith 검사 테스트 → CI(GitHub Actions) → M0 닫기 점검
+- **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
   - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
   - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)
@@ -22,11 +23,15 @@
 - Initializr가 Modulith를 통째로(core · jpa · observability · runtime · actuator) 넣어서 `starter-test`만 남김, Testcontainers 이미지를 `postgres:latest` → `postgres:18`
 - **첫 테스트**: `./gradlew test` → `ZwfnbApplicationTests` 1건 통과(실패 0, 8.07s). `postgres:18` 컨테이너 1.28s 기동, Flyway "0 migrations" 검증, 앱 조립 7.57s
 - `gradlew`에 실행 권한(+x)을 git에 기록 — Windows에서 add하면 빠져서 Linux CI가 `Permission denied`로 죽는다
+- 개발 DB: `infra/compose.local.yaml`(PostgreSQL 18.6, 5433) healthy. 설정은 공용 `application.yml`(DB 정보 없음 — 빠지면 안 뜨게) + `application-local.yml`. `bootRun`(local) 1.76s 기동, `GET /actuator/health` → `{"status":"UP"}`, 테스트 다시 1건 통과(5.23s)
 
 **막힌 것**
 - **`Rename-Item zwfnb backend`가 "다른 프로세스가 사용 중"으로 실패** — 원인: VS Code Java 확장이 새 `build.gradle`을 보자마자 프로젝트를 자동으로 가져오면서 Java 언어 서버 4개 + Gradle 데몬 2개가 폴더를 붙잡았다. 해결: VS Code 창 닫기 → `gradlew --stop`(1 Daemon stopped) → 이름 바꾸기 성공. 배운 것: **Initializr로 만들 땐 처음부터 최종 폴더 이름으로 만들거나, VS Code가 가져오기 전에 이름을 바꾼다**
 - Initializr 질문에 "Package Name"이 Artifact 다음에 따로 나온다(확장 버전에 따라). Packaging인 줄 알고 `Jar`를 넣어 "Invalid Package Name"
 - 새 PowerShell 창은 홈 폴더에서 열려서 `.\zwfnb\gradlew.bat`이 안 잡혔다 — 레포 폴더로 `cd` 먼저
+- `spring.applicaton`(i 빠짐) 오타 — Spring은 모르는 설정 이름을 **오류 없이 무시**한다. VS Code Spring 확장의 `YAML_UNKNOWN_PROPERTY` 경고로 잡았고, 고친 뒤 로그에 `[zwfnb]`가 찍히는 걸로 확인. 배운 것: 설정 파일은 Problems 창을 꼭 본다
+- `bootRun`이 `80% EXECUTING`에서 안 끝난다 — 정상. 서버를 켜 두는 작업이라 `Ctrl + C`까지 계속 "실행 중"
+- 사전 검증에서 발견: PostgreSQL 18 이미지는 볼륨을 `/var/lib/postgresql`에 묶는다(17까지 `.../data`, cbt-journal에서 겪은 함정)
 
 **이번 세션 커밋**: `0974dbe`(옛 코드 삭제) · `8d226c9`(.gitignore · .gitattributes) · `06d6e64`(Spring 뼈대), 문서 `27e7ed9` · 이 블록 커밋
 
