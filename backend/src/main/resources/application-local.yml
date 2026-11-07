@@ -1,0 +1,15 @@
+# ====================================================================
+# 내 PC 전용 (프로필 local) ─ infra/compose.local.yaml의 DB에 붙는다
+# 켜는 법: .\gradlew bootRun --args="--spring.profiles.active=local"
+# ====================================================================
+spring:
+  datasource:
+    # compose가 PC 쪽에 연 5433번 문 (5432는 PC에 이미 설치되어 있던 PostgreSQL 서비스)
+    url: jdbc:postgresql://localhost:5433/zwfnb
+    username: zwfnb
+    password: zwfnb   # 개발용 값 ─ compose와 동일해야 한다
+
+logging:
+  level:
+    # JPA가 실제로 날리는 SQL을 log로 본다 ─ N+1을 눈으로 잡을 때 사용한다
+    "[org.hibernate.SQL]": debug

@@ -1,0 +1,17 @@
+# ====================================================================
+# 공용 설정 ─ 내 PC · 테스트 · 운영 어디서든 동일한 규칙
+# ⚠️ DB 접속 정보는 여기 두지 않는다
+#   내 PC는 application-local.yml(프로필 local), 운영은 환경변수가 채운다
+#   → 깜빡하면 app이 "뜨지 않는다" (엉뚱한 DB에 조용히 붙는 것보단 낫다)
+# ====================================================================
+spring:
+  application:
+    name: zwfnb
+
+  jpa:
+    # 화면을 그리는 동안 DB 연결을 붙잡아 두는 기능(OSIV)을 끈다
+    # 켜두면 controller에서도 지연 loading이 몰래 돌아서 N+1이 숨는다 (🧩1)
+    open-in-view: false
+    hibernate:
+      # Table은 Flyway만 만든다 ─ JPA는 "Entity와 Table이 맞는지" 검사만 (decisions 0003)
+      ddl-auto: validate

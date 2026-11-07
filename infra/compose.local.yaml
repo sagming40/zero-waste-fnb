@@ -1,0 +1,38 @@
+# ========================================================================================
+# 개발용 PostgreSQL ─ 내 PC에서만 사용한다 (주방 세팅표)
+#   켜기: docker compose -f infra/compose.local.yaml up -d
+#   끄기: docker compose -f infra/compose.local.yaml down       ← data는 volume에 남는다
+#   초기화: docker compose -f infra/compose.local.yaml down -v   ← volume까지 지운다
+# 운영용 compose는 first deploy 때 따로 만든다
+# ========================================================================================
+
+# Project 이름을 못 박는다 ─ 정하지 않으면 폴더 이름(infra) 그대로
+# 컨테이너의 이름이 엉뚱하게 지어진다 ("infra-db-1")
+name: zwfnb
+
+services:
+  db:
+    image: postgres:18  # 운영 · Testcontainers와 같은 major version
+    environment:
+      POSTGRES_DB: zwfnb
+      POSTGRES_USER: zwfnb
+      # 개인 PC에서만 사용하는 dev용 값이라 그냥 적는다 (실제 secret 값은 .env ─ ARCHITECTURE 8절)
+      # ⚠️ 이 값은 volume을 "처음 만들 때만" 적용된다 → 변경하려면 down -v로 volume 부터 지운다
+      POSTGRES_PASSWORD: zwfnb
+    ports:
+      # 왼쪽 = 내 PC쪽의 문, 오른쪽 = container 안의 문
+      # 5432는 PC에 이미 다운로드 되어있는 PostgreSQL 18 서비스가 사용중이라 5433으로 연다
+      - "5433:5432"
+    volumes:
+      # ⚠️ PostgreSQL 18 이미지 부터는 /var/lib/postgresql 자체를 묶는다 (17까지는 .../data)
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      # "container가 떴다"와 "접속받dmf 준비가 됐다"는 엄연히 다르다 ─ 준비된게 확실한 건지 직접 물어본다
+      test: ["CMD-SHELL", "pg_isready -U zwfnb -d zwfnb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  # data를 담는 상자 ─ container를 지워도 이 상자는 남는다
+  pgdata:
