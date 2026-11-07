@@ -66,4 +66,4 @@
 
 - 경로: 노트북 `C:\_dev\zero-waste-fnb`, 집 PC `D:\_dev\zero-waste-fnb`(2026-11-07). 회사 PC는 처음 클론할 때 여기 적는다.
 - 기기별 설치 상태(JDK · VS Code 확장 · Docker)는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
-- 비밀값은 `.env`에만 둔다(`.gitignore` 등록됨). 견본은 `.env.example`.
+- 비밀값은 `.env`에만 둔다(`.gitignore` 등록됨). 견본 `.env.example`은 첫 진짜 비밀값이 생길 때 만든다(ARCHITECTURE 8절).

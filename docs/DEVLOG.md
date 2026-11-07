@@ -6,13 +6,29 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: `.gitignore` · `.env.example`을 새 스택 기준으로 → Spring 뼈대(Initializr, PLAN M0)
+- **다음에 할 일**: compose(PostgreSQL 18) + `application.yml` + Flyway `V1` → Modulith 검사 테스트 · health → CI
 - **기기별로 할 일**
-  - 집 PC: Spring Boot Extension Pack 설치
   - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
   - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)
 
 ---
+
+## 2026-11-07 (3) · M0 시작: 옛 코드 정리와 Spring 뼈대 (집 PC)
+
+**한 일**
+- 태그 `v0-express`(→ `93e31dc`, 옛 코드의 마지막 커밋)를 달고 `backend/`(Express) · `seed/` · `schema.sql` 삭제
+- 루트 `.gitignore`를 레포 전체 규칙만으로(빌드 폴더는 각 폴더가), `.gitattributes`로 줄바꿈 통일(기본 LF, Windows 스크립트 CRLF). 옛 `.env.example` 삭제
+- VS Code Spring Initializr로 `backend/` 생성: Boot 4.1.2 · Java 25 · Gradle 9.8.2 · `com.sagming.zwfnb`, Lombok 포함
+- Initializr가 Modulith를 통째로(core · jpa · observability · runtime · actuator) 넣어서 `starter-test`만 남김, Testcontainers 이미지를 `postgres:latest` → `postgres:18`
+- **첫 테스트**: `./gradlew test` → `ZwfnbApplicationTests` 1건 통과(실패 0, 8.07s). `postgres:18` 컨테이너 1.28s 기동, Flyway "0 migrations" 검증, 앱 조립 7.57s
+- `gradlew`에 실행 권한(+x)을 git에 기록 — Windows에서 add하면 빠져서 Linux CI가 `Permission denied`로 죽는다
+
+**막힌 것**
+- **`Rename-Item zwfnb backend`가 "다른 프로세스가 사용 중"으로 실패** — 원인: VS Code Java 확장이 새 `build.gradle`을 보자마자 프로젝트를 자동으로 가져오면서 Java 언어 서버 4개 + Gradle 데몬 2개가 폴더를 붙잡았다. 해결: VS Code 창 닫기 → `gradlew --stop`(1 Daemon stopped) → 이름 바꾸기 성공. 배운 것: **Initializr로 만들 땐 처음부터 최종 폴더 이름으로 만들거나, VS Code가 가져오기 전에 이름을 바꾼다**
+- Initializr 질문에 "Package Name"이 Artifact 다음에 따로 나온다(확장 버전에 따라). Packaging인 줄 알고 `Jar`를 넣어 "Invalid Package Name"
+- 새 PowerShell 창은 홈 폴더에서 열려서 `.\zwfnb\gradlew.bat`이 안 잡혔다 — 레포 폴더로 `cd` 먼저
+
+**이번 세션 커밋**: `0974dbe`(옛 코드 삭제) · `8d226c9`(.gitignore · .gitattributes) · `06d6e64`(Spring 뼈대), 문서 `27e7ed9` · 이 블록 커밋
 
 ## 2026-11-07 (2) · 재설계 마무리와 문서 재정비 (집 PC)
 

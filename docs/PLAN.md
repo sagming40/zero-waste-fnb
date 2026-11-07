@@ -34,9 +34,10 @@ M2 ~ M5는 REQUIREMENTS의 M 기능을 네 묶음으로 끊은 것이다 — **�
 - [x] 문서를 전역 문서 체계로 재정비, 옛 문서는 `archive/` (2026-11-07)
 - [x] **M0 의존성 목록** 확인 (2026-11-07): Boot 4.1.2 · Java 25 · Gradle Groovy, `com.sagming.zwfnb`. M0 = Web · Data JPA · PostgreSQL · Flyway · Actuator · Validation · Testcontainers · Modulith(test만) · Lombok. Security · Session JDBC · springdoc은 M2. 설치: Spring Boot Extension Pack
 - [x] 옛 코드에 태그 `v0-express`(→ `93e31dc`)를 달고 `backend/`(Express) · `seed/` · `schema.sql`을 지웠다 (2026-11-07, `0974dbe`)
-- [ ] `.gitignore` · `.env.example`을 새 스택 기준으로 (Gradle `build/` · `.gradle/`, 프런트 빌드 폴더)
-- [ ] Spring 뼈대(`backend/`, Spring Initializr) + compose(PostgreSQL, 로컬 PostgreSQL 서비스와 포트가 겹치지 않게) + Flyway `V1`(빈 껍데기)
-- [ ] Testcontainers 테스트 1건 · Modulith 검사 테스트 · `/actuator/health`
+- [x] `.gitignore` · `.gitattributes`를 새 스택 기준으로, 옛 `.env.example` 삭제 (2026-11-07, `8d226c9`). 빌드 폴더는 각 폴더의 `.gitignore`가 맡는다
+- [x] Spring 뼈대(`backend/`, Spring Initializr, Boot 4.1.2 · Gradle 9.8.2) + Testcontainers 테스트 1건 통과 (2026-11-07, `06d6e64`)
+- [ ] compose(PostgreSQL 18, 로컬 PostgreSQL 서비스와 포트가 겹치지 않게) + `application.yml` + Flyway `V1`(빈 껍데기)
+- [ ] Modulith 검사 테스트 · `/actuator/health`
 - [ ] CI: GitHub Actions에서 `./gradlew test`
 - [ ] COMMIT_CONVENTION · README의 실행 방법을 실제 명령으로
 

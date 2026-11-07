@@ -107,4 +107,5 @@ PlayLedger · cbt-journal에서 검증된 틀을 가져온다 — [0012](decisio
 | 회사 PC | — | 처음 클론할 때 같은 항목(JDK 25 · VS Code 확장 · Docker 엔진)을 본다 |
 
 - 로컬 DB는 compose의 PostgreSQL을 쓴다. 기기에 깔린 PostgreSQL 18 서비스와 포트가 겹치지 않게 compose 쪽 포트를 바꾼다(M0)
-- 비밀값은 `.env`에만(`.gitignore` 등록), 견본은 `.env.example`
+- 비밀값은 `.env`에만(`.gitignore` 등록). 개발용 DB 비밀번호는 내 PC 전용 값이라 compose · 설정 파일에 그냥 둔다. 견본 `.env.example`은 첫 진짜 비밀값(M2 도로명주소 키) 때 만든다
+- 줄바꿈은 루트 `.gitattributes`가 정한다(기본 LF, Windows 스크립트만 CRLF) — PC마다 다른 `core.autocrlf`보다 먼저다
