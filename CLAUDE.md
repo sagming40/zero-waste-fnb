@@ -6,10 +6,11 @@
 ## 지금 상태 (2026-11-07)
 
 - **재설계 중.** 옛 Express + React 계획을 버리고 스택을 새로 고르는 중이다. 정한 것 · 열린 질문은 [docs/BRAINSTORM.md](docs/BRAINSTORM.md)에 있다.
-- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code. 후보: Angular + TypeScript + Tailwind + spartan/ui · PostgreSQL.
+- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code · PostgreSQL 18 · Flyway · Spring Security(세션 + CSRF) · JUnit 5 + Testcontainers · springdoc · `@Scheduled`. 데이터 모델과 같이 정할 것: DB 접근 기술. M1에서 정할 것: 프런트(후보 Angular + Tailwind + spartan/ui).
+- 정한 범위: 베이커리 카페 + 델리 메뉴, 돈 · 탄소 두 축, 여러 매장 · 역할, M2 ~ M5 네 묶음, M2 뒤 첫 배포(BRAINSTORM 6 · 10 · 11절).
 - 취업 일정에 쫓기는 프로젝트가 아니다 — 자기계발용이라 범위를 넓혀 깊게 배워도 된다(2026-11-07).
 - `backend/`(Express) · `seed/`(Python) · `schema.sql`은 **옛 버전**이다. 고치거나 기능을 더하지 않는다. M0에서 태그 `v0-express`로 남기고 지운다.
-- 다음에 할 일: BRAINSTORM 7절 체크리스트를 정한다 → M0(재정비 + 뼈대).
+- 다음에 할 일: 데이터 모델 설계(BRAINSTORM 7절 체크리스트) → M0(재정비 + 뼈대).
 
 ## 작업 방식 — 전역 작업 방식과 다르게
 
@@ -21,6 +22,7 @@
 - 수정 지시는 **"파일 위치 + 지금 코드 + 바꿀 코드"** 형식으로 한다.
 - 명령(Gradle · npm · git · docker)도 내가 친다. Claude는 명령과 "왜 필요한지"를 보여 준다.
 - **커밋 · push는 Claude가 한다** (2026-11-07 사용자 지시 — 나는 코드 타이핑에만 집중한다). 내가 친 코드는 "코드 검수!"가 통과한 뒤, 문서는 고친 뒤 Claude가 [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) 형식으로 커밋하고 push한다. 검수에서 버그가 남아 있으면 커밋하지 않는다.
+  - **문서는 결정마다 커밋하지 않는다** (2026-11-07 사용자 지시). 브레인스토밍 · 설계 중에는 로컬 파일만 고쳐 두고, 내가 "정리하자" · "푸시해"라고 하거나 한 묶음이 끝났을 때 한 커밋으로 묶어 push한다. 다른 기기로 옮기기 전에 안 올린 변경이 있으면 Claude가 먼저 알려 준다.
 - **Claude가 직접 해도 되는 것**
   - 읽기 전용 확인 명령: `git status` · `git diff` · `git log`, `./gradlew test` · `build`, `npm test` · `ng build`, 화면 띄워 보기. 내가 친 결과를 관찰값으로 확인하는 용도다.
   - `git add` · `git commit` · `git push` · `git tag`(위 커밋 규칙대로).
