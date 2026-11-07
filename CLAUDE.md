@@ -6,7 +6,7 @@
 ## 지금 상태 (2026-11-07)
 
 - **재설계 중.** 옛 Express + React 계획을 버리고 스택을 새로 고르는 중이다. 정한 것 · 열린 질문은 [docs/BRAINSTORM.md](docs/BRAINSTORM.md)에 있다.
-- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code · PostgreSQL 18 · Flyway · Spring Security(세션 + CSRF) · JUnit 5 + Testcontainers · springdoc · `@Scheduled`. 데이터 모델과 같이 정할 것: DB 접근 기술. M1에서 정할 것: 프런트(후보 Angular + Tailwind + spartan/ui).
+- 확정: Java 25 + Spring Boot 4.x(Gradle) · VS Code · PostgreSQL 18 · Flyway · Spring Security(세션 + CSRF) · JUnit 5 + Testcontainers · springdoc · `@Scheduled` · JPA + JdbcClient. M1에서 정할 것: 프런트(후보 Angular + Tailwind + spartan/ui).
 - 정한 범위: 베이커리 카페 + 델리 메뉴, 돈 · 탄소 두 축, 여러 매장 · 역할, M2 ~ M5 네 묶음, M2 뒤 첫 배포(BRAINSTORM 6 · 10 · 11절).
 - 취업 일정에 쫓기는 프로젝트가 아니다 — 자기계발용이라 범위를 넓혀 깊게 배워도 된다(2026-11-07).
 - `backend/`(Express) · `seed/`(Python) · `schema.sql`은 **옛 버전**이다. 고치거나 기능을 더하지 않는다. M0에서 태그 `v0-express`로 남기고 지운다.
@@ -37,6 +37,17 @@
 
 **그대로 따르는 것**: 전역의 구현 전 사전 검증, 관찰값 검증, 마일스톤 닫기 전 점검. 타이핑 학습 모드에서는 이걸 **Claude가 코드를 보여 주기 전에** 머릿속으로 돌리고, 찾은 구멍은 보여 줄 때 같이 말한다.
 
+## 문서 함정 막기 — 전역 문서 체계와 다르게
+
+> **이유**: 전역 문서 체계가 생긴 계기("문서 고치는 시간이 구현보다 길어져 손 놓은 레포")를 이 레포가 그대로 밟을 위험이 크다. 브레인스토밍만 하루를 썼고, 이 레포 v0에도 빈 템플릿 문서(`BE_트러블슈팅.md`의 빈 절 5개, 내용 없는 `FE_메모_모음.md`)가 남아 있다 (2026-11-07 사용자 지시).
+
+- **문서는 Claude가 쓴다.** 내 시간은 코드 타이핑에 쓴다. 나는 결정만 하고, 문서를 읽고 고치는 일에 시간을 쓰지 않는다.
+- **전역 세트 밖의 문서를 늘리지 않는다.** 딥 태스크 기록도 따로 문서를 두지 않는다: 커밋 메시지(COMMIT_CONVENTION ②의 문제 → 분석 → 해결 → 수치) + DEVLOG 날짜 블록 제목의 `🧩n` 태그 + README "딥 태스크" 표(끝낸 날 한 줄씩).
+- **빈 문서를 미리 만들지 않는다.** 파일은 처음 채울 내용이 생긴 날 만든다. 예: `DESIGN.md`는 M1, `DATA_MODEL.md`는 M2 마이그레이션을 쓸 때.
+- **BRAINSTORM을 한꺼번에 쪼개 옮기지 않는다.** 그 단계에 필요한 절만 그때 옮긴다. M0에서 새로 만드는 건 PLAN · DEVLOG · decisions 2개(재설계 · 스택)뿐이다.
+- **설계 결정은 계속 한다** — 탄탄하고 정교하게 설계하는 게 목표다. 줄이는 건 문서 수와 문서 손질이지 결정이 아니다. 단, 근거가 아직 없는 결정(화면을 안 그린 프런트, 크레딧 결과에 달린 인프라)은 근거가 생기는 단계에서 한다.
+- **경보**: M0를 시작한 뒤 코드 커밋 없이 문서 커밋만 두 세션 연속이면, Claude가 먼저 "문서 함정"이라고 말한다.
+
 ## 문서 지도
 
 전역 문서 체계를 따른다. 재정비(M0) 전이라 지금은 옛 문서와 새 문서가 섞여 있다.
@@ -45,9 +56,9 @@
 |---|---|
 | [README.md](README.md) | 옛 스택 기준. M0에서 새 스택으로 고친다 |
 | [docs/BRAINSTORM.md](docs/BRAINSTORM.md) | **지금 원본.** 스택 · 설계 고민. 굳으면 decisions · PLAN으로 옮기고 archive로 보낸다 |
-| [BE_트러블슈팅.md](BE_트러블슈팅.md) | 옛 문서. 딥 태스크 목록은 BRAINSTORM 4절로 옮겼다. 어떻게 살릴지는 BRAINSTORM 7절 |
-| [FE_메모_모음.md](FE_메모_모음.md) | 옛 문서. 내용 없음 |
-| [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) | **유효.** 커밋 메시지는 이 형식을 따른다 |
+| [BE_트러블슈팅.md](BE_트러블슈팅.md) | 옛 문서 → M0에서 archive. 새 트러블슈팅 문서는 만들지 않는다(위 "문서 함정 막기") |
+| [FE_메모_모음.md](FE_메모_모음.md) | 옛 문서 → M0에서 archive. 프런트 메모는 DEVLOG "막힌 것"에 쓴다 |
+| [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) | **유효.** 커밋 메시지는 이 형식을 따른다. 딥 태스크 목록 · 파일 이름은 M0에서 새 기준으로 고친다 |
 | `docs/PLAN.md` · `DEVLOG.md` · `decisions/` | M0에서 만든다 |
 
 ## 환경
