@@ -12,6 +12,7 @@
 | DB 접근 | Spring Data JPA + JdbcClient | [0004](decisions/0004-jpa-jdbcclient.md) |
 | 코드 구조 | 기능별 패키지 + Spring Modulith 검사 테스트 | [0005](decisions/0005-package-by-feature.md) |
 | 인증 | Spring Security, 세션 쿠키 + CSRF, 세션은 Spring Session JDBC | [0006](decisions/0006-session-auth.md) |
+| Lombok | 쓴다 (2026-11-07) — 국내 실무 코드와 모양을 맞춘다. 규칙은 2절 끝 | Java `record`가 있어 DTO에는 안 쓴다 |
 | 테스트 | JUnit 5 + Testcontainers(진짜 PostgreSQL) | H2 같은 가짜 DB는 RLS · 윈도 함수 · `ON CONFLICT`가 다르게 돈다 |
 | API 문서 | springdoc-openapi | 엔드포인트 목록의 원본. Spring REST Docs는 정확하지만 손이 많이 간다 |
 | 배치 | 앱 안 `@Scheduled(cron = …, zone = "Asia/Seoul")` | Spring Batch는 대형 배치용이라 과하다 |
@@ -38,6 +39,7 @@
 
 - **Spring Modulith는 검사 테스트만** 쓴다: 기능끼리 공개된 것만 부르는지 테스트가 지킨다. 모듈 이벤트는 쓰지 않는다 — 마감 저장 → 재고 차감은 한 트랜잭션이어야 하는데 이벤트는 커밋 뒤에 돈다
 - **SQL이 강한 쿼리는 기능 패키지마다 SQL 전용 클래스 하나**(`StockQueries` 등)에 JdbcClient로 모으고, 클래스마다 Testcontainers 테스트를 붙인다 — 문자열 SQL의 오타는 실행해야 드러난다
+- **Lombok 규칙**: 요청 · 응답 · "특징 한 줄" 같은 값 객체는 `record`(Lombok 안 씀). JPA 엔티티는 `@Getter` + `@NoArgsConstructor(access = PROTECTED)`까지만 — `@Data` · `@Setter` · `@EqualsAndHashCode` · 연관관계를 포함한 `@ToString`은 쓰지 않는다(양방향 연관에서 `toString` 무한 순환, 지연 로딩 프록시와 equals 충돌, 아무 데서나 값이 바뀜). 서비스 생성자 주입은 `@RequiredArgsConstructor`. `lombok.config`에 `lombok.addLombokGeneratedAnnotation = true`
 - **시간**: 현재 시각을 직접 부르지 않고 `Clock`을 주입받는다. 영업일은 KST `LocalDate`, 시각은 `Instant`/`timestamptz`. 테스트에서 자정 · 날짜 경계를 만든다
 
 ## 3. 요청 흐름

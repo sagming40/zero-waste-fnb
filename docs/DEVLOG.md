@@ -6,7 +6,7 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: M0 의존성 목록 보기(Claude가 먼저 보여 준다) → 태그 `v0-express` + 옛 코드 지우기 → Spring 뼈대
+- **다음에 할 일**: `.gitignore` · `.env.example`을 새 스택 기준으로 → Spring 뼈대(Initializr, PLAN M0)
 - **기기별로 할 일**
   - 집 PC: Spring Boot Extension Pack 설치
   - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
