@@ -24,7 +24,7 @@
 | **대상** | 베이커리 카페 + 델리 메뉴(샐러드 · 샌드위치 · 도시락) — 당일 만들어 당일 폐기하는 품목과 유통기한 짧은 재료 |
 | **하는 일** | 마감 기록 → 내일 **생산 권장 · 발주 권장** → 폐기 손실(원) · 폐기율 · 탄소 감축량 |
 | **지표** | 돈(매일) + 탄소(월간 · 누적). "낭비된 돈을 줄이면 탄소도 같이 줄어든다" |
-| **기술** | Java 25 · Spring Boot 4 · PostgreSQL 18(RLS · 윈도 함수) · Flyway · Testcontainers / Angular 22 · TypeScript · Tailwind 4 · spartan/ui · GSAP(연출) |
+| **기술** | Java 25 · Spring Boot 4 · PostgreSQL 18(RLS · 윈도 함수) · Flyway · Testcontainers / Angular 22 · TypeScript · Tailwind 4 · spartan/ui · ECharts(차트) · GSAP(연출) |
 | **성격** | 프런트 · 백엔드 · DB · 서버 · 배포 · 운영까지 혼자 설계 · 구현하는 자기계발 프로젝트 |
 
 ## 🎯 문제 정의

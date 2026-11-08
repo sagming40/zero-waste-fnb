@@ -18,6 +18,7 @@
 | 배치 | 앱 안 `@Scheduled(cron = …, zone = "Asia/Seoul")` | Spring Batch는 대형 배치용이라 과하다 |
 | 프런트 | Angular SPA + TypeScript(signals) + Tailwind 4 + spartan/ui, 패키지 관리자 **pnpm**. SSR 없음 | [0013](decisions/0013-frontend-angular.md) |
 | 움직임 | Angular 내장 `animate.enter` / `animate.leave` + GSAP(소개 · 리포트만, 지연 로딩) | [0014](decisions/0014-motion-gsap.md) |
+| 차트 | Apache ECharts + ngx-echarts, 쓰는 부품만 등록 · SVG 렌더러 · 차트 화면만 지연 로딩 | [0015](decisions/0015-charts-echarts.md) |
 | 운영 | 컨테이너 + Caddy, 이미지 GHCR, 백업 R2 — PlayLedger 틀 재사용 | [0012](decisions/0012-ops-reuse-playledger.md) |
 | 주소 | `zwfnb.sagming.com` (Cloudflare DNS만 · 회색 구름, HTTPS는 Caddy) | 레포 이름과 이어지고 휴대폰으로 치기 쉽다 |
 
