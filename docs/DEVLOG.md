@@ -9,7 +9,6 @@
 - **다음에 할 일**: 실행 방법 문서(COMMIT_CONVENTION · README) → M0 닫기 점검
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
-  - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
   - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)
 
 ---
@@ -27,6 +26,8 @@
   - PowerShell에서 한글 합계가 `寃곌낵`로 깨짐: Gradle은 UTF-8, 콘솔은 CP949(949). 리눅스 CI는 정상. PowerShell 프로필에 `[Console]::OutputEncoding` · `InputEncoding` · `$OutputEncoding`을 BOM 없는 UTF-8로 → `chcp` 65001, 한글 합계 정상
   - VS Code Gradle 확장이 `TestListener`를 "unable to resolve class"(힌트)로 표시 — 확장의 정적 분석이 Gradle 기본 import(`org.gradle.api.tasks.testing.*`)를 모르는 것. 실제 빌드 · CI는 통과
 - 노트북에 GitHub CLI 설치(winget, 2.103.3) + `gh auth login`(HTTPS, git 인증 연동)
+- 노트북 VS Code: 오른쪽 아래 Java 알림이 계속 떠서 Java · Spring 확장 12개를 지우고 두 팩만 다시 설치(Oracle 언어 서버는 빼서 Red Hat 하나만), `Java: Clean Java Language Server Workspace` → `Java: Ready` · Problems 0, Gradle 확장의 `TestListener` 힌트도 사라짐. 팩을 지우면 부품도 같이 지워진다. 동기화 "Always"는 설정 `java.configuration.updateBuildConfiguration: automatic`
+- 노트북 Docker Desktop 4.97.0(엔진 29.9.2)을 켜고 `./gradlew test --rerun` → **전체 2건, 통과 2**(41s). CI와 같은 결과
 - 검수에서 잡은 것: `upload-artifact@4`(v 빠짐) — GitHub는 시작 전에 `uses:` 액션을 전부 받아서, 실패 때만 도는 단계라도 매번 작업이 시작도 못 한다
 
 **막힌 것**
