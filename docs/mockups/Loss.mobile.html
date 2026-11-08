@@ -68,7 +68,7 @@ function linesCard(lines, title = '무엇이 낭비됐나') {
     <div class="why">${l.why}</div><div class="hbar"><i class="${l.kind === 'ingredient' ? 'ing' : ''}" style="width:${l.loss / max * 100}%"></i></div></div>`).join('')}</div>`;
 }
 function savedCard() {
-  return `<div class="card"><h2>낭비되지 않고 구한 것<span class="muted">손실에서 빠짐</span></h2>${L.SAVED.map(s => `
+  return `<div class="card"><h2>절약<span class="muted">손실에서 제외됨</span></h2>${L.SAVED.map(s => `
     <div class="line"><div class="r"><span>${s.name} <span class="muted small">${s.qty} · ${s.how}</span></span><b class="num" style="color:var(--accent)">${won(s.value)}</b></div></div>`).join('')}</div>`;
 }
 function weekCard(opts = {}) {
@@ -79,19 +79,19 @@ function weekCard(opts = {}) {
     <div class="line" style="margin-top:8px"><div class="r"><span class="muted">이번 주 손실</span><b class="num">${won(L.weekSum)}</b></div>
       <div style="margin-top:4px">${L.delta(L.weekSum, L.lastWeekSum, '지난주 같은 요일보다')}</div></div>
     <div class="line"><div class="r"><span class="muted">평균 폐기율</span><b class="num">${L.pct(L.weekRate)}</b></div></div>
-    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일').join(', ')} 마감을 입력하지 않아 합계와 비교에서 뺐어요 <a href="Closing.mobile.html">입력하기</a></div>` : ''}
+    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일').join(', ')} 마감을 입력하지 않아 합계와 비교에서 제외됐어요 <a href="Closing.mobile.html">입력하기</a></div>` : ''}
   </div>`;
 }
 function todayHero() {
   const t = L.today;
   if (t.pending) return `<div class="card hero"><div class="k">오늘 폐기 손실</div><div class="amt" style="color:var(--muted)">마감 전</div>
     <div class="sub">마감을 입력하면 오늘 낭비된 돈이 여기 보여요.</div><a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 입력하기</a></div>`;
-  if (t.closed) return `<div class="card hero"><div class="k">오늘</div><div class="amt" style="color:var(--muted)">휴무</div><div class="sub">휴무일은 손실 · 폐기율 계산에서 빠져요.</div></div>`;
+  if (t.closed) return `<div class="card hero"><div class="k">오늘</div><div class="amt" style="color:var(--muted)">휴무</div><div class="sub">휴무일은 손실 · 폐기율 계산에서 제외돼요.</div></div>`;
   return `<div class="card hero"><div class="k">오늘 폐기 손실 · 원가 기준</div><div class="amt num">${won(t.loss)}</div>
     ${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}
     <div class="stats"><div><div class="v num">${t.wasted}개</div><div class="l">메뉴 폐기</div></div>
       <div><div class="v num">${L.pct(t.rate)}</div><div class="l">폐기율</div></div>
-      <div><div class="v num" style="color:var(--accent)">${won(L.SAVED.reduce((a, s) => a + s.value, 0))}</div><div class="l">구한 것</div></div></div></div>`;
+      <div><div class="v num" style="color:var(--accent)">${won(L.SAVED.reduce((a, s) => a + s.value, 0))}</div><div class="l">절약</div></div></div></div>`;
 }
 
 /* ── 시안 A: 숫자 먼저 ── */
@@ -111,7 +111,7 @@ function renderB() {
     <div class="amt num" style="font-size:28px;font-weight:800;color:var(--loss)">${won(L.weekSum)}</div>
     ${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}
     <div style="margin-top:10px">${L.bars({ ghost: true, selectable: true, selected: sel, height: 160 })}</div>
-    ${L.week.some(w => w.missing) ? `<div class="note">⚠ 수요일 마감이 비어 합계에서 뺐어요</div>` : ''}</div>`;
+    ${L.week.some(w => w.missing) ? `<div class="note">⚠ 수요일 마감이 비어 합계에서 제외됐어요</div>` : ''}</div>`;
   if (x.loss == null) {
     h += `<div class="card"><h2>${x.d} ${x.date}</h2><div class="sub">${x.closed ? '휴무' : x.pending ? '아직 마감 전이에요.' : '마감을 입력하지 않은 날이에요.'}</div>
       ${x.closed ? '' : `<a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">마감 입력하기</a>`}</div>`;
@@ -141,7 +141,7 @@ function renderC() {
   h += `<div class="card"><div class="say"><b>${top.name}</b>가 오늘 손실의 <b class="num">${share}%</b>예요.</div>
     <div class="sub">${top.qty} 남아서 폐기했어요 (${top.why}). 원가가 높은 메뉴라 하나만 줄여도 크게 줄어요.</div>
     <span class="pill">내일 권장 생산량은 예측 기능(M4)이 생기면 여기에</span></div>`;
-  h += `<div class="card"><div class="say">크루아상 2개는 <em>직원식</em>으로 구했어요.</div><div class="sub">구한 것 ${won(2200)} — 손실에서 빠져요.</div></div>`;
+  h += `<div class="card"><div class="say">크루아상 2개는 <em>직원식</em>으로 절약했어요.</div><div class="sub">절약 ${won(2200)} — 손실에서 제외돼요.</div></div>`;
   h += linesCard(lines, '자세히');
   return h;
 }

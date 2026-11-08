@@ -78,7 +78,7 @@ function weekBox(extra = {}) {
   const missing = L.week.filter(x => x.missing);
   return `<div class="box"><h2>이번 주 요일별<span class="muted">월 ~ 일 · 원가 기준</span></h2>${L.bars({ ghost: true, height: 170, ...extra })}
     <div class="legend"><span><i style="background:var(--loss)"></i>오늘</span><span><i style="border:1px dashed var(--muted)"></i>지난주 같은 요일</span><span><i style="border:1px dashed var(--warn)"></i>입력 안 함 · 마감 전</span></div>
-    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일(' + x.date + ')').join(', ')} 마감이 비어 합계 · 비교에서 뺐어요 — <a href="Closing.desktop.html">입력하기</a></div>` : ''}</div>`;
+    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일(' + x.date + ')').join(', ')} 마감이 비어 합계 · 비교에서 제외됐어요 — <a href="Closing.desktop.html">입력하기</a></div>` : ''}</div>`;
 }
 function byCategory(lines) {
   const m = {};
@@ -94,12 +94,12 @@ function renderA() {
   const saved = L.SAVED.reduce((a, s) => a + s.value, 0);
   const todayV = t.loss != null ? `<div class="v num" style="color:var(--loss)">${won(t.loss)}</div>${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}`
     : t.pending ? `<div class="v" style="color:var(--muted)">마감 전</div><a href="Closing.desktop.html">오늘 마감 입력하기 →</a>`
-    : `<div class="v" style="color:var(--muted)">휴무</div><span class="muted small">계산에서 빠져요</span>`;
+    : `<div class="v" style="color:var(--muted)">휴무</div><span class="muted small">계산에서 제외돼요</span>`;
   let h = `<div class="kpis">
     <div class="box kpi"><div class="l">오늘 폐기 손실 · 원가 기준</div>${todayV}</div>
     <div class="box kpi"><div class="l">오늘 폐기율 (폐기 ÷ 만든)</div><div class="v num">${t.rate != null && t.loss != null ? L.pct(t.rate) : '—'}</div><span class="muted small">메뉴 폐기 ${t.loss != null ? t.wasted + '개' : '—'}</span></div>
     <div class="box kpi"><div class="l">이번 주 손실</div><div class="v num">${won(L.weekSum)}</div>${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
-    <div class="box kpi"><div class="l">낭비되지 않고 구한 것 (오늘)</div><div class="v num" style="color:var(--accent)">${t.loss != null ? won(saved) : '—'}</div><span class="muted small">${t.loss != null ? '크루아상 2개 직원식' : ''}</span></div></div>`;
+    <div class="box kpi"><div class="l">오늘 절약 (할인 판매 · 직원식 · 기부)</div><div class="v num" style="color:var(--accent)">${t.loss != null ? won(saved) : '—'}</div><span class="muted small">${t.loss != null ? '크루아상 2개 직원식' : ''}</span></div></div>`;
   h += `<div class="two">${weekBox()}${t.loss != null ? byCategory(L.TODAY_LINES) : '<div class="box"><h2>분류별</h2><p class="muted">오늘 마감 뒤에 보여요.</p></div>'}</div>`;
   if (t.loss != null) h += `<div class="box" style="margin-top:16px"><h2>오늘 낭비된 것<span class="muted">손실 큰 순</span></h2>${linesTable(L.TODAY_LINES)}</div>`;
   return h;
@@ -115,7 +115,7 @@ function renderB() {
   const x = L.week[sel];
   let detail;
   if (x.loss == null) {
-    detail = `<div class="box"><h2>${x.d}요일 ${x.date}</h2><p class="muted">${x.closed ? '휴무일이에요. 손실 · 폐기율 계산에서 빠져요.' : x.pending ? '아직 오늘 마감 전이에요.' : '이날 마감을 입력하지 않았어요. 합계 · 비교에서 빠져 있어요.'}</p>
+    detail = `<div class="box"><h2>${x.d}요일 ${x.date}</h2><p class="muted">${x.closed ? '휴무일이에요. 손실 · 폐기율 계산에서 제외돼요.' : x.pending ? '아직 오늘 마감 전이에요.' : '이날 마감을 입력하지 않았어요. 합계 · 비교에서 제외돼 있어요.'}</p>
       ${x.closed ? '' : '<a class="primary" href="Closing.desktop.html" style="text-decoration:none;display:inline-block;width:auto;padding:10px 16px">마감 입력하기</a>'}</div>`;
   } else {
     const lines = L.linesFor(sel);
@@ -128,7 +128,7 @@ function renderB() {
   }
   return `<div class="split"><div class="box days"><h2>이번 주<span class="muted num">${won(L.weekSum)}</span></h2>${list}
       <div style="margin-top:8px">${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
-      ${L.week.some(w => w.missing) ? '<div class="note">⚠ 빠진 날은 합계에서 뺐어요</div>' : ''}</div><div>${detail}</div></div>`;
+      ${L.week.some(w => w.missing) ? '<div class="note">⚠ 입력 안 한 날은 합계에서 제외됐어요</div>' : ''}</div><div>${detail}</div></div>`;
 }
 
 function render() {
