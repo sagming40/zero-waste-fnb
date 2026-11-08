@@ -1,0 +1,48 @@
+# 🤖 GitHub에 사는 Test 대행인에게 주는 작업지시서
+name: CI
+
+# 언제 일하나: main에 push할 때 + PR이 열리거나 바뀔 때
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# repo는 읽기만 한다 (Test만 돌리니 쓰기 권한은 필요 없다)
+permissions:
+  contents: read
+
+# 같은 branch에 연달아 push하면 앞의 실행은 취소 (낡은 결과를 기다리지 않게)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest           # 빌려 쓰는 깨끗한 Linux 컴퓨터 (Docker 포함)
+    timeout-minutes: 15              # 어딘가 멈추면 15분 뒤 강제 종료
+    defaults:
+      run:
+        working-directory: backend   # 모든 run 명령은 backend/ 안에서
+
+    steps:
+      # 1. repo 받아 오기
+      - uses: actions/checkout@v5
+
+      # 2. JDK 25 설치 (build.gradle toolchain이 25를 요구한다)
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      # 3. Gradle 준비 + 의존성 cache (2번째 실행부터 download를 skip 한다)
+      - uses: gradle/actions/setup-gradle@v5
+
+      # 4. 본 작업: 전체 Test (Modulith 검사 + Testcontainers)
+      - run: ./gradlew test
+
+      # 5. 실패했을 때만 Test Report를 보관 → Actions 화면에서 내려받아 원인을 본다
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: backend/build/reports/tests/test
