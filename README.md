@@ -74,7 +74,7 @@
 ## 🚀 시작하기
 
 **준비물**: JDK 25, Docker(Windows · macOS는 Docker Desktop). Gradle은 레포의 wrapper(`gradlew`)가 받아 오므로 따로 설치하지 않습니다.
-명령은 PowerShell 기준이며 macOS · Linux는 `.\gradlew` 대신 `./gradlew`입니다. 기기별 설치 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
+명령은 PowerShell 기준이며 macOS · Linux는 `.\gradlew` 대신 `./gradlew`입니다. 새 기기 세팅 순서와 기기별 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
 
 **1. 개발 DB 켜기** (레포 루트에서) — PostgreSQL 18이 `localhost:5433`에 뜹니다(5432는 PC에 설치된 PostgreSQL과 겹치지 않게 비워 둠).
 

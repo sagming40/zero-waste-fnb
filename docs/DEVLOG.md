@@ -9,7 +9,8 @@
 - **다음에 할 일**: M0 닫기 점검(README "시작하기"를 노트북에서 처음부터 따라가기 포함)
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
-  - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)
+  - 집 PC: ARCHITECTURE 8.1의 ② PowerShell UTF-8 · ③ 확장 정리(Spring Boot 팩, Oracle 확인, 설정 두 개) · GitHub CLI
+  - 회사 PC: 처음 클론 + ARCHITECTURE 8.1을 처음부터
 
 ---
 

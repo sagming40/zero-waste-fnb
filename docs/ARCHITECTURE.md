@@ -100,12 +100,73 @@ PlayLedger · cbt-journal에서 검증된 틀을 가져온다 — [0012](decisio
 
 ## 8. 개발 환경
 
+새 기기는 8.1의 순서대로 세팅하고, 확인한 값을 8.2 표에 남긴다. 순서는 노트북에서 실제로 해 본 것이다(2026-11-08, DEVLOG 같은 날 블록).
+
+### 8.1 새 기기 세팅 순서 (Windows)
+
+**① 설치할 것** — 버전은 그 기기에서 확인해 8.2에 적는다
+
+| 도구 | 확인 명령 | 비고 |
+|---|---|---|
+| JDK 25 (Temurin 권장) | `java -version` | `build.gradle` toolchain이 25를 요구한다 |
+| Docker Desktop | `docker version` → `Server:` 부분이 나와야 함 | 앱을 켜야 엔진이 뜬다. `Client:`만 나오고 `failed to connect ... dockerDesktopLinuxEngine`이면 앱이 꺼진 것 |
+| Git | `git --version` | |
+| GitHub CLI | `gh --version` | `winget install --id GitHub.cli` → 터미널 새로 열기 → `gh auth login`(GitHub.com · HTTPS · Git 인증 Yes · 웹 브라우저) → `gh auth status` |
+
+Gradle은 설치하지 않는다 — 레포의 wrapper(`gradlew`)가 받아 온다.
+
+**② PowerShell 한글 깨짐 막기** — Windows 콘솔 기본값은 CP949(`chcp` → 949)이고 Gradle · Spring은 UTF-8로 내보내서 한글이 `寃곌낵`처럼 깨진다. `code $PROFILE`(없으면 `if (!(Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force }` 먼저)로 프로필을 열어 **맨 아래**에 붙인다. conda가 써 둔 `#region conda initialize` 블록은 건드리지 않는다.
+
+```powershell
+# 콘솔 글자를 UTF-8로 (BOM 없음 ─ BOM이 붙으면 다른 프로그램에 넘기는 글 맨 앞에 보이지 않는 글자가 낀다)
+$utf8 = New-Object System.Text.UTF8Encoding $false
+[Console]::OutputEncoding = $utf8   # 화면에 찍는 글자
+[Console]::InputEncoding  = $utf8   # 키보드로 넣는 글자
+$OutputEncoding           = $utf8   # PowerShell → 다른 프로그램(git 등)으로 넘기는 글자
+```
+
+터미널을 새로 열고 `chcp` → `65001`이면 된다. 프로필은 레포 밖이라 기기마다 한 번씩 한다.
+
+**③ VS Code 확장** — Java 언어 서버는 **Red Hat(`redhat.java`) 하나만**. Oracle 것(`oracle.oracle-java`)이 같이 있으면 같은 오류가 두 번 뜨고 알림이 계속 뜬다. Java 팩 · Spring 확장은 전부 Red Hat 쪽에 붙어 돈다.
+
+- 처음 까는 기기: 팩 두 개만 깐다. 필요한 확장(redhat.java · 디버그 · 테스트 · Maven · Gradle · 프로젝트 보기 / Spring Boot 도구 · Initializr · 대시보드)은 팩이 끌어온다
+
+  ```powershell
+  code --install-extension vscjava.vscode-java-pack
+  code --install-extension vmware.vscode-boot-dev-pack
+  ```
+
+- 이미 깔려 있는데 꼬였으면(알림이 계속 뜸, Oracle 확장이 있음): **VS Code를 다 닫고** 바깥 PowerShell에서 전부 지운 뒤 위 두 줄로 다시 깐다. 팩을 지우면 팩이 끌어온 확장도 같이 지워지므로 뒤쪽 줄은 `is not installed`가 떠도 정상이다
+
+  ```powershell
+  $exts = @(
+    'vmware.vscode-boot-dev-pack', 'vscjava.vscode-java-pack',
+    'vmware.vscode-spring-boot', 'vscjava.vscode-spring-boot-dashboard', 'vscjava.vscode-spring-initializr',
+    'vscjava.vscode-java-debug', 'vscjava.vscode-java-test', 'vscjava.vscode-java-dependency',
+    'vscjava.vscode-maven', 'vscjava.vscode-gradle',
+    'oracle.oracle-java', 'redhat.java'
+  )
+  foreach ($e in $exts) { code --uninstall-extension $e }
+  code --list-extensions | Select-String "java|spring|gradle|maven|oracle"   # 아무것도 안 나오면 다 지워진 것
+  ```
+
+- 깐 뒤 VS Code에서 레포를 열고
+  1. `Ctrl + Shift + P` → `Java: Clean Java Language Server Workspace` → Restart and delete (옛 분석 캐시가 꼬여 있으면 다시 깔아도 알림이 남는다)
+  2. 오른쪽 아래 `Java: Ready`, Problems 0 확인
+  3. 설정(`Ctrl + ,`) → `update build configuration` → **`automatic`** (build.gradle을 고칠 때마다 "동기화할래?"를 묻지 않고 다시 읽는다. 지금 한 번만 다시 읽히려면 `Java: Reload Projects`, `Shift + Alt + U`)
+  4. "Null annotation types have been detected" 알림 → **Enable** (Spring 7의 JSpecify `@Nullable`을 읽어 null 위험을 편집기에서 노란 줄로. 빌드 · CI와는 상관없고, 설정은 git에 안 들어가는 `.vscode/`에 저장된다)
+- `build.gradle`(Groovy)에는 이모지를 쓰지 않는다 — 🧑‍🏫처럼 보이지 않는 접착 문자(ZWJ)로 붙인 이모지를 Gradle 확장 파서가 거부한다
+
+**④ 확인** — README "시작하기"를 그대로 따라간다: 개발 DB `healthy` → `bootRun`(local) → `/actuator/health` `UP` → `backend/`에서 `.\gradlew test --rerun` → 마지막 줄 `전체 n건, 통과 n`(CI와 같은 건수).
+
+### 8.2 기기별 상태
+
 | 기기 | 경로 | 상태 (확인한 날) |
 |---|---|---|
-| 노트북 | `C:\_dev\zero-waste-fnb` | JDK 25.0.5 ✅. 로컬 PostgreSQL 18 서비스 있음 (2026-11-07). Java · Spring 확장을 전부 지우고 Extension Pack for Java + Spring Boot Extension Pack만 다시 설치(`redhat.java` 1.58.0, `oracle.oracle-java`는 겹쳐서 설치 안 함), 언어 서버 캐시 청소, null 분석 켬 ✅. Docker Desktop 4.97.0 · 엔진 29.9.2, `./gradlew test` 2건 통과 ✅. GitHub CLI 2.103.3(winget, `gh auth login` HTTPS · git 인증 연동) ✅. PowerShell 프로필(`$PROFILE`)에 콘솔 UTF-8(BOM 없음) 세 줄 — 기본 CP949라 Gradle 한글 출력이 깨졌다, `chcp` → 65001 ✅ (2026-11-08) |
-| 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15. ⚠️ Spring Boot Extension Pack 설치 필요(사용자가 설치한다고 함), Angular Language Service는 프런트가 정해지면 (2026-11-07) |
-| 회사 PC | — | 처음 클론할 때 같은 항목(JDK 25 · VS Code 확장 · Docker 엔진)을 본다 |
+| 노트북 | `C:\_dev\zero-waste-fnb` | 8.1 전부 ✅ (2026-11-08): JDK 25.0.5, Docker Desktop 4.97.0 · 엔진 29.9.2, GitHub CLI 2.103.3, 프로필 UTF-8(`chcp` 65001), 확장 다시 설치(`redhat.java` 1.58.0 · Java 팩 0.31.2 · Spring Boot 팩 0.2.2, Oracle 없음), `./gradlew test` 2건 통과. 로컬 PostgreSQL 18 서비스 있음 |
+| 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15 (2026-11-07). ⚠️ 8.1의 ② 프로필 UTF-8 · ③ Spring Boot 팩 · Oracle 확장 여부 · 설정 두 개 · GitHub CLI는 아직 |
+| 회사 PC | — | 처음 클론할 때 8.1을 처음부터 |
 
-- 로컬 DB는 compose의 PostgreSQL을 쓴다. 기기에 깔린 PostgreSQL 18 서비스와 포트가 겹치지 않게 compose 쪽 포트를 바꾼다(M0)
+- 로컬 DB는 compose의 PostgreSQL을 쓴다. 기기에 깔린 PostgreSQL 18 서비스와 포트가 겹치지 않게 compose 쪽 포트를 5433으로 연다
 - 비밀값은 `.env`에만(`.gitignore` 등록). 개발용 DB 비밀번호는 내 PC 전용 값이라 compose · 설정 파일에 그냥 둔다. 견본 `.env.example`은 첫 진짜 비밀값(M2 도로명주소 키) 때 만든다
 - 줄바꿈은 루트 `.gitattributes`가 정한다(기본 LF, Windows 스크립트만 CRLF) — PC마다 다른 `core.autocrlf`보다 먼저다
