@@ -101,11 +101,11 @@ PlayLedger · cbt-journal에서 검증된 틀을 가져온다 — [0012](decisio
 
 ## 8. 개발 환경
 
-새 기기는 8.1의 순서대로 세팅하고, 확인한 값을 8.2 표에 남긴다. 순서는 노트북에서 실제로 해 본 것이다(2026-11-08, [archive/DEVLOG_M0](archive/DEVLOG_M0.md) 같은 날 블록).
+새 기기는 8.1의 순서대로 세팅하고, 확인한 값을 8.3 표에 남긴다. **회사 PC는 8.2 체크리스트**(8.1에 회사 사정 — 권한 · 네트워크 · 회사 git 계정 — 을 더해 처음부터 편 것). 순서는 노트북에서 실제로 해 본 것이다(2026-11-08, [archive/DEVLOG_M0](archive/DEVLOG_M0.md) 같은 날 블록).
 
 ### 8.1 새 기기 세팅 순서 (Windows)
 
-**① 설치할 것** — 버전은 그 기기에서 확인해 8.2에 적는다
+**① 설치할 것** — 버전은 그 기기에서 확인해 8.3에 적는다
 
 | 도구 | 확인 명령 | 비고 |
 |---|---|---|
@@ -161,13 +161,86 @@ $OutputEncoding           = $utf8   # PowerShell → 다른 프로그램(git 등
 
 **④ 확인** — README "시작하기"를 그대로 따라간다: 개발 DB `healthy` → `bootRun`(local) → `/actuator/health` `UP` → `backend/`에서 `.\gradlew test --rerun` → 마지막 줄 `전체 n건, 통과 n`(CI와 같은 건수) → `frontend/`에서 `pnpm install` · `pnpm test --watch=false` → `pnpm start` 화면의 "서버 상태 확인"이 정상 (UP).
 
-### 8.2 기기별 상태
+### 8.2 회사 PC 처음 세팅 — 체크리스트
+
+8.1을 회사 PC 사정에 맞춰 처음부터 끝까지 순서대로 편 것이다. 회사 PC는 관리자 권한 · 설치 정책 · 회사 네트워크(프록시 · 보안 검사) · 회사 계정이 이미 깔린 git 때문에 집 · 노트북에서 안 겪은 문제가 난다. 줄마다 확인하고, 막히면 증상을 DEVLOG에 남긴다. 전역 원칙대로 회사 PC에는 **개인 계정 열쇠(복구 코드 · 패스키 · 비밀번호 관리자 확장)를 두지 않는다**.
+
+**0. 시작 전에 (5분)**
+- [ ] 다른 기기에 안 올린 변경이 없는지 — 그 기기에서 `git status`가 깨끗하고 `git log origin/main..`이 비어 있어야 한다
+- [ ] 개인 레포를 회사 PC에 받아도 되는지 회사 정책 확인(이미 cbt-journal · PlayLedger를 회사 PC에서 쓰고 있으면 같은 기준)
+- [ ] **Docker Desktop 라이선스**: 직원 250명 이상 또는 매출 1,000만 달러 이상인 회사 기기에서는 유료 구독이 필요하다. 회사가 구독이 없으면 무료 대안 **Rancher Desktop**(엔진 dockerd 선택) — Testcontainers도 그 위에서 돈다. 어느 쪽을 깔았는지 8.3에 적는다
+
+**1. 설치** — 회사 소프트웨어 센터가 있으면 거기서, 없으면 `winget`(관리자 권한이 필요할 수 있다). 하나 깔 때마다 **터미널을 새로 열고** 확인 명령을 친다(새 PATH는 새 창만 안다)
+
+| 순서 | 도구 | 설치 | 확인 |
+|---|---|---|---|
+| 1 | Git | `winget install --id Git.Git` | `git --version` |
+| 2 | VS Code | `winget install --id Microsoft.VisualStudioCode` | `code --version` |
+| 3 | JDK 25 | `winget install --id EclipseAdoptium.Temurin.25.JDK` | `java -version` → 25 |
+| 4 | Docker Desktop (또는 Rancher Desktop) | `winget install --id Docker.DockerDesktop` → **재부팅** · WSL2 설치 안내를 따른다 → 앱을 켠다 | `docker version`에 `Server:`가 나온다 |
+| 5 | Node.js **24 LTS** | nodejs.org에서 v24 Windows Installer(.msi) — 다른 기기와 같은 24줄로 맞춘다. 26 LTS도 Angular 22가 지원하지만 기기마다 다르면 원인 찾기가 어렵다 | `node -v` → v24.x(24.15 이상) |
+| 6 | pnpm 12 | `npm install -g pnpm@12.15.0` — `frontend/package.json`의 `packageManager`와 같은 버전 | `pnpm -v` → 12.15.0 |
+| 7 | GitHub CLI | `winget install --id GitHub.cli` | `gh --version` |
+
+- `pnpm -v`가 "**이 시스템에서 스크립트를 실행할 수 없으므로**"로 막히면 PowerShell 실행 정책이다: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`. 회사 정책(GPO)이 이것도 막으면 `pnpm.cmd`로 부르거나 Git Bash에서 친다. 같은 이유로 ②의 프로필도 안 읽힌다
+
+**2. GitHub 로그인 — 개인 계정**
+- [ ] `gh auth status`부터. 회사 계정으로 이미 로그인돼 있으면 **덮어쓰지 말고 개인 계정을 더한다**: `gh auth login`(GitHub.com · HTTPS · Git 인증 Yes · 웹 브라우저) → 브라우저에서 **sagming40**으로 승인
+- [ ] 두 계정이면 `gh auth switch`로 이 레포 작업 때 sagming40을 고른다. `gh auth status`의 Active account 확인
+- [ ] 브라우저 로그인은 회사 Chrome 프로필이 아니라 개인용 창(시크릿 창이나 별도 프로필)에서 하고, 승인 뒤 GitHub에서 로그아웃한다
+
+**3. 클론 + 이 레포만 개인 이름으로**
+```powershell
+New-Item -ItemType Directory -Force C:\_dev
+cd C:\_dev
+git clone https://github.com/sagming40/zero-waste-fnb.git
+cd zero-waste-fnb
+git config user.name  "sagming40"
+git config user.email "<GitHub 계정 이메일 또는 noreply 주소>"
+git config user.email    # 회사 메일이 아니어야 한다
+```
+- **왜**: 회사 PC는 전역 git 이름 · 메일이 회사 것으로 잡혀 있기 쉽다. `--global` 없이 치면 이 레포에만 적용된다. 확인 안 하고 커밋하면 회사 메일이 공개 레포 기록에 영원히 남는다
+- 경로는 다른 회사 PC 레포와 같은 `C:\_dev\`
+
+**4. 회사 네트워크 확인** — 세 군데에서 받아 와야 한다. 하나씩 먼저 찔러 본다
+
+| 무엇 | 확인 | 막히면 |
+|---|---|---|
+| Gradle · Maven Central | `backend/`에서 `.\gradlew --version` 뒤 `.\gradlew build -x test` | `PKIX path building failed` · `unable to find valid certification path` = 회사가 HTTPS를 중간에서 검사한다. 회사 루트 인증서를 JDK 신뢰 목록에 넣어야 한다(IT에 인증서 파일 요청) |
+| npm 레지스트리 | `frontend/`에서 `pnpm install` | `UNABLE_TO_GET_ISSUER_CERT_LOCALLY` = 같은 원인. 회사 인증서 파일을 `NODE_EXTRA_CA_CERTS` 환경 변수로 |
+| Docker Hub | `docker pull postgres:18` | 회사 프록시면 Docker Desktop → Settings → Resources → Proxies |
+
+- 프록시 주소 · 인증서 위치는 회사 값이라 레포에 적지 않는다. 겪은 증상과 푼 방법만 DEVLOG에
+
+**5. 포트 비어 있는지** — 5433(개발 DB) · 8080(Spring) · 4200(Angular)
+```powershell
+Get-NetTCPConnection -State Listen | Where-Object LocalPort -in 5433,8080,4200
+```
+아무것도 안 나와야 한다. 회사 프로그램이 쓰고 있으면 무엇이 쓰는지 DEVLOG에 적고 바꿀 포트를 같이 정한다
+
+**6. 8.1의 ② ③** — PowerShell UTF-8 프로필(위 1의 실행 정책을 먼저), VS Code 확장(팩 두 개) · 설정 두 개. 회사 VS Code에 이미 Oracle Java 확장이 있으면 8.1 ③의 "꼬였으면" 절차로 정리한다. Claude Code 확장 · 데스크톱 앱은 회사 정책을 보고
+
+**7. 8.1의 ④ 끝까지 따라가기** — README "시작하기" 1 ~ 4
+- [ ] 개발 DB `healthy`
+- [ ] `bootRun` → `/actuator/health` `UP`
+- [ ] `.\gradlew test --rerun` → `전체 n건, 통과 n`(CI와 같은 건수)
+- [ ] `frontend/`: `pnpm install` → `pnpm test --watch=false` 통과 → `pnpm start` → "서버 상태 확인" 정상 (UP)
+- [ ] 목업: `start docs\mockups\Closing.html`
+
+**8. 결과 남기기** — 8.3 회사 PC 줄에 버전 · 경로 · 고른 Docker 종류 · 막힌 것을 적고, CLAUDE.md "환경"의 경로 줄에 회사 PC 경로를 더한다
+
+**회사를 옮기거나 PC를 반납할 때**
+- `gh auth logout --user sagming40`, GitHub → Settings → Applications에서 그 기기의 GitHub CLI 승인 취소
+- `C:\_dev\zero-waste-fnb` 삭제(먼저 `git status`로 안 올린 것 확인), `docker compose -f infra/compose.local.yaml down -v`로 개발 DB 볼륨 삭제
+- 8.3에서 회사 PC 줄을 "반납"으로
+
+### 8.3 기기별 상태
 
 | 기기 | 경로 | 상태 (확인한 날) |
 |---|---|---|
 | 노트북 | `C:\_dev\zero-waste-fnb` | 8.1 전부 ✅ (2026-11-08): JDK 25.0.5, Docker Desktop 4.97.0 · 엔진 29.9.2, GitHub CLI 2.103.3, 프로필 UTF-8(`chcp` 65001), 확장 다시 설치(`redhat.java` 1.58.0 · Java 팩 0.31.2 · Spring Boot 팩 0.2.2, Oracle 없음), `./gradlew test` 2건 통과. 로컬 PostgreSQL 18 서비스 있음 |
 | 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15 (2026-11-07). 8.1 ② ③ ✅ (2026-11-08): GitHub CLI 2.103.3(`gh auth status` sagming40), 프로필 UTF-8(`chcp` 65001), `redhat.java` 1.58.0 · Java 팩 0.31.2 · Spring Boot 팩 0.2.2, Oracle 없음, 설정 두 개(automatic · Null 분석) |
-| 회사 PC | — | 처음 클론할 때 8.1을 처음부터 |
+| 회사 PC | (예정) `C:\_dev\zero-waste-fnb` | 아직 클론 안 함 — **8.2 체크리스트**를 처음부터 |
 
 - 로컬 DB는 compose의 PostgreSQL을 쓴다. 기기에 깔린 PostgreSQL 18 서비스와 포트가 겹치지 않게 compose 쪽 포트를 5433으로 연다
 - 비밀값은 `.env`에만(`.gitignore` 등록). 개발용 DB 비밀번호는 내 PC 전용 값이라 compose · 설정 파일에 그냥 둔다. 견본 `.env.example`은 첫 진짜 비밀값(M2 도로명주소 키) 때 만든다

@@ -12,14 +12,14 @@
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` (README "시작하기")
 - **목업 보기**: `start docs\mockups\Closing.html` (서버 없이)
 - **기기별로 할 일**
-  - 회사 PC: 처음 클론 + ARCHITECTURE 8.1을 처음부터
+  - 회사 PC: 아직 클론 안 함 → [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터. 특히 Docker 라이선스 · 이 레포만 개인 git 이름 · 회사 네트워크 인증서
 
 ---
 
 ## 2026-11-08 (3) · M1 컬러 · 마감 입력 시안 채택, 프런트 Angular 뼈대 (집 PC)
 
 **한 일**
-- 집 PC 세팅 마무리: GitHub CLI 2.103.3 · 프로필 UTF-8(`chcp` 65001) · VS Code 설정 두 개 → ARCHITECTURE 8.2
+- 집 PC 세팅 마무리: GitHub CLI 2.103.3 · 프로필 UTF-8(`chcp` 65001) · VS Code 설정 두 개 → ARCHITECTURE 8.3
 - `docs/mockups/` 시작: 마감 입력 휴대폰 3 · 데스크톱 3 시안, 컬러 8개 비교 보드(WCAG 대비율 표 포함). 주소 파라미터 `v` · `state` · `palette` · `dark` · `device`
 - 채택: 컬러 **E 올리브**, 마감 입력 **휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약** → `DESIGN.md`를 만들어 2 · 3절로 옮겼다
 

@@ -67,5 +67,5 @@
 ## 환경
 
 - 경로: 노트북 `C:\_dev\zero-waste-fnb`, 집 PC `D:\_dev\zero-waste-fnb`(2026-11-07). 회사 PC는 처음 클론할 때 여기 적는다.
-- 새 기기 세팅 순서(JDK · Docker · gh · PowerShell UTF-8 · VS Code 확장)와 기기별 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경). 기기에서 뭔가 새로 세팅하면 8.1 순서와 8.2 표를 같이 고친다.
+- 새 기기 세팅 순서(JDK · Docker · gh · PowerShell UTF-8 · VS Code 확장)와 기기별 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경). 기기에서 뭔가 새로 세팅하면 8.1 순서와 8.3 표를 같이 고친다(회사 PC는 8.2 체크리스트).
 - 비밀값은 `.env`에만 둔다(`.gitignore` 등록됨). 견본 `.env.example`은 첫 진짜 비밀값이 생길 때 만든다(ARCHITECTURE 8절).
