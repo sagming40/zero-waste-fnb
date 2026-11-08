@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>컬러 시안 비교</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="_shared/shared.css">
 <style>
   body { padding: 20px 16px 60px; }
   h1 { font-size: 22px; margin: 0 0 4px; }
@@ -39,7 +39,7 @@
   <label>상태 <select id="st"><option value="entry">입력 중</option><option value="error">입력 오류</option><option value="reentry">이미 저장한 날</option></select></label>
 </div>
 <div id="list"></div>
-<script src="shared.js"></script>
+<script src="_shared/shared.js"></script>
 <script>
 const SW = [['bg', '바탕'], ['surface', '카드'], ['text', '글'], ['muted', '보조 글'], ['accent', '주 색'], ['accent-soft', '주 색 옅게'], ['loss', '손실'], ['loss-soft', '손실 옅게']];
 const PAIRS = [
@@ -80,7 +80,7 @@ function draw() {
       </div>
       <div class="frames">
         ${[0, 1].map(d => `<div class="fr"><div class="cap">${d ? '어둡게' : '밝게'}</div><div class="box">
-          <iframe title="${p.name} ${d ? '어둡게' : '밝게'}" src="Closing.mobile.html?v=${vSel.value}&state=${stSel.value}&palette=${k}&dark=${d}" loading="lazy"></iframe></div></div>`).join('')}
+          <iframe title="${p.name} ${d ? '어둡게' : '밝게'}" src="closing/Closing.mobile.html?v=${vSel.value}&state=${stSel.value}&palette=${k}&dark=${d}" loading="lazy"></iframe></div></div>`).join('')}
       </div>
     </section>`).join('');
 }

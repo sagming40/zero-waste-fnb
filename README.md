@@ -113,7 +113,7 @@ pnpm start                  # http://localhost:4200 → "서버 상태 확인" �
 pnpm test --watch=false     # Vitest, 한 번 돌고 끝
 ```
 
-화면 시안은 서버 없이 `start docs\mockups\Closing.html`(레포 루트에서).
+화면 시안은 서버 없이 `start docs\mockups\Map.html`(레포 루트에서, 화면 지도 — 각 화면은 `docs\mockups\<화면>\` 폴더).
 
 ## 📖 참고문헌
 

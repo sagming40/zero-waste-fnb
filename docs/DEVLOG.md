@@ -12,7 +12,7 @@
   2. 그다음 M4(내일 권장 · 백테스트) · M5(탄소 리포트) · 소개(F27) 시안 → M1 닫기 전 점검
   3. 회사 PC에서 처음이면: [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터 — 클론 전. 끝나면 8.3 표에 회사 PC 줄
 - **열린 질문**: 비밀번호 찾기 — M2에 메일 발송이 없고, "점주가 직원 비밀번호를 정해 줌"은 다른 매장 계정까지 넘어가서 버렸다. 본인 확인 수단(메일)을 언제 넣을지 — DESIGN 9.4
-- **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도) · `Auth.html` · `Store.html` · `Settings.html` · `Members.html` · `Closing.html` · `Loss.html` · `Colors.html`. Claude 미리보기는 `.claude/launch.json`의 `mockups`(파이썬) 또는 `mockups-node`(노드, 파이썬 없는 노트북)
+- **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도). 화면마다 폴더(`auth\` · `store\` · `settings\` · `members\` · `closing\` · `loss\`)에 보드 `화면.html`, 공용은 `_shared\` — [mockups README](mockups/README.md). Claude 미리보기는 `.claude/launch.json`의 `mockups`(파이썬) 또는 `mockups-node`(노드, 파이썬 없는 노트북)
 - **기기별로 할 일**
   - 회사 PC: 위 3번
   - 집 PC · 노트북: 없음 (노트북 2026-11-09 끝까지 push)
@@ -26,6 +26,7 @@
 - `Settings.html` 메뉴 · 식자재 · 레시피 → **휴대폰 A 상세 화면 + 데스크톱 A 목록 + 상세** → DESIGN 11절. 데스크톱 B 표는 나중 "한 번에 넣기" 후보
 - `Members.html` 매장 · 직원 → **휴대폰 A 한 화면 + 데스크톱 B 두 칸 + 사람 표** → DESIGN 12절
 - 화면 지도 · 이동 틀(Shell)에서 "메뉴 · 레시피" · "매장 · 직원"이 자리표시 대신 채택 시안을 끼워 보인다
+- **목업을 화면별 폴더로 나눴다**(사용자 제안, 파일 35개 · M5까지 가면 60개 가까이): `auth/` · `store/` · `settings/` · `members/` · `closing/` · `loss/`, 공용은 `_shared/`(`auth.css` → `forms.css`, 로고는 `ZW.brand`로 — 옆 폴더 파일을 읽지 않게), 화면을 넘나드는 보드(Map · Shell · Colors)는 맨 위. 규칙은 mockups README "파일"
 - 문구를 사용자가 다듬었다 → DESIGN 6절 한 줄: 쓰다 → 사용하다 · 측정해요 · 판매하는 · 알맞은 · "빠지다" 대신 제외된 / 분류돼요
 
 **[설계]**
@@ -40,7 +41,7 @@
 - 휴대폰 B 탭(매장 · 사람)이 "주소 없음" 상태로 넘어감 — 탭을 상태로 흉내 낸 탓. `?tab=`을 따로 둬서 해결
 - 초대 기한의 요일이 틀림(11월 16일을 일요일로) — 11월 8일이 일요일이라 16일은 월요일. 지어낸 날짜도 요일은 달력으로 확인
 
-**확인한 것 (관찰값)**: Store 2 × 3시안 · 8상태, Settings 2 × 2 × 7(28가지), Members 2 × 2 × 6(24가지)을 iframe으로 하나씩 열어 모두 그려짐, 콘솔 오류 0건. 휴대폰 Settings 14가지 문서 폭 374 ~ 389(넘침 0). Shell 데스크톱에서 "매장 · 직원"을 누르면 `Members.desktop.html`이 뜸. 스크린숏은 앱 창이 가려져 일부만 — 나머지는 텍스트로 확인
+**확인한 것 (관찰값)**: Store 2 × 3시안 · 8상태, Settings 2 × 2 × 7(28가지), Members 2 × 2 × 6(24가지)을 iframe으로 하나씩 열어 모두 그려짐, 콘솔 오류 0건. 휴대폰 Settings 14가지 문서 폭 374 ~ 389(넘침 0). Shell 데스크톱에서 "매장 · 직원"을 누르면 `Members.desktop.html`이 뜸. 스크린숏은 앱 창이 가려져 일부만 — 나머지는 텍스트로 확인. 폴더로 옮긴 뒤 22개 파일(맨 위 4 + 화면 6 × 3)을 다시 열어 모두 그려짐 · `ZW` 있음 · 보드 안 iframe 다 뜸, 요청 404 · 콘솔 오류 0건
 
 ---
 

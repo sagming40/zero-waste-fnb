@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>마감 입력 — 목업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="../_shared/shared.css">
 <style>
   /* ── 시안 A: 카드 ── */
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; }
@@ -95,7 +95,7 @@
 <div class="bottom"><div class="inner" id="bottom"></div></div>
 <div class="variant-tag" id="vtag"></div>
 
-<script src="shared.js"></script>
+<script src="../_shared/shared.js"></script>
 <script>
 const { params, won, MENUS, CATS, SOLDOUT_AT, DEST } = ZW;
 const variant = (params.get('v') || 'A').toUpperCase();

@@ -226,7 +226,7 @@ Get-NetTCPConnection -State Listen | Where-Object LocalPort -in 5433,8080,4200
 - [ ] `bootRun` → `/actuator/health` `UP`
 - [ ] `.\gradlew test --rerun` → `전체 n건, 통과 n`(CI와 같은 건수)
 - [ ] `frontend/`: `pnpm install` → `pnpm test --watch=false` 통과 → `pnpm start` → "서버 상태 확인" 정상 (UP)
-- [ ] 목업: `start docs\mockups\Closing.html`
+- [ ] 목업: `start docs\mockups\Map.html`
 
 **8. 결과 남기기** — 8.3 회사 PC 줄에 버전 · 경로 · 고른 Docker 종류 · 막힌 것을 적고, CLAUDE.md "환경"의 경로 줄에 회사 PC 경로를 더한다
 

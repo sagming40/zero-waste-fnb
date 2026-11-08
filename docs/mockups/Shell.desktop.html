@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>앱 이동 (데스크톱) — 목업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="_shared/shared.css">
 <style>
   html, body { height: 100%; font-size: 14px; }
   .app { height: 100vh; display: grid; }
@@ -56,8 +56,8 @@
 </head>
 <body>
 <div id="app"></div>
-<script src="shared.js"></script>
-<script src="nav-data.js"></script>
+<script src="_shared/shared.js"></script>
+<script src="_shared/nav-data.js"></script>
 <script>
 const P = ZW.params;
 const variant = (P.get('v') || 'A').toUpperCase();

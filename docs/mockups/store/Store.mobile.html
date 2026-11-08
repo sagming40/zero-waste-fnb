@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>첫 매장 등록 · 매장 고르기 — 목업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
-<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
 <link rel="stylesheet" href="store.css">
 </head>
 <body>
@@ -16,8 +16,8 @@
     <form id="box" class="authbox" novalidate style="margin-top:22px"></form>
   </main>
 </div>
-<script src="shared.js"></script>
-<script src="auth.js"></script>
+<script src="../_shared/shared.js"></script>
+
 <script src="store.js"></script>
 <script>
 const S = STORE;
@@ -26,7 +26,7 @@ ZW.switcher([
   ['상태', 'state', S.STATES, S.state],
   ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
 ], 'top:auto;bottom:8px');
-document.getElementById('brand').innerHTML = AUTH.brand(true);
+document.getElementById('brand').innerHTML = ZW.brand(true);
 document.getElementById('box').innerHTML = S.body(S.state, S.variant);
 S.wire(document);
 </script>

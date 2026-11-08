@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>앱 이동 (휴대폰) — 목업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="_shared/shared.css">
 <style>
   html, body { height: 100%; }
   .app { max-width: 430px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: var(--bg); }
@@ -37,8 +37,8 @@
 </head>
 <body>
 <div class="app" id="app"></div>
-<script src="shared.js"></script>
-<script src="nav-data.js"></script>
+<script src="_shared/shared.js"></script>
+<script src="_shared/nav-data.js"></script>
 <script>
 const P = ZW.params;
 const variant = (P.get('v') || 'A').toUpperCase();

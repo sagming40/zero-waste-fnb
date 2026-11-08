@@ -9,13 +9,13 @@ M1에서 시안을 그리며 채운다. 채택한 것만 이 문서에 규칙을
 
 | 화면 | 기능 | 시안 |
 |---|---|---|
-| 마감 입력 | F08 | 휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약 채택 (2026-11-08, [mockups/Closing.html](mockups/Closing.html)) → 3절 |
-| 오늘 손실 | F19 | 휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드 채택 (2026-11-08, [mockups/Loss.html](mockups/Loss.html)) → 7절 |
+| 마감 입력 | F08 | 휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약 채택 (2026-11-08, [mockups/closing/Closing.html](mockups/closing/Closing.html)) → 3절 |
+| 오늘 손실 | F19 | 휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드 채택 (2026-11-08, [mockups/loss/Loss.html](mockups/loss/Loss.html)) → 7절 |
 | 재고 · 입고 · 예측 · 리포트 | F11 · F10 · F16 · F17 · F20 | 아직 |
-| 로그인 · 가입 · 초대 | F01 · F03 | 휴대폰 A 탭 + 데스크톱 B 소개 + 입력 채택 (2026-11-09, [mockups/Auth.html](mockups/Auth.html)) → 9절 |
-| 첫 매장 등록 · 매장 고르기 · 시작 체크리스트 | F02 · F03 | C 한 화면 + 질문형 채택 (2026-11-09, [mockups/Store.html](mockups/Store.html)) → 10절 |
-| 메뉴 · 식자재 · 레시피 | F04 ~ F06 | 휴대폰 A 상세 화면 + 데스크톱 A 목록 + 상세 채택 (2026-11-09, [mockups/Settings.html](mockups/Settings.html)) → 11절 |
-| 매장 · 직원 | F02 · F03 | 휴대폰 A 한 화면 + 데스크톱 B 두 칸 + 사람 표 채택 (2026-11-09, [mockups/Members.html](mockups/Members.html)) → 12절 |
+| 로그인 · 가입 · 초대 | F01 · F03 | 휴대폰 A 탭 + 데스크톱 B 소개 + 입력 채택 (2026-11-09, [mockups/auth/Auth.html](mockups/auth/Auth.html)) → 9절 |
+| 첫 매장 등록 · 매장 고르기 · 시작 체크리스트 | F02 · F03 | C 한 화면 + 질문형 채택 (2026-11-09, [mockups/store/Store.html](mockups/store/Store.html)) → 10절 |
+| 메뉴 · 식자재 · 레시피 | F04 ~ F06 | 휴대폰 A 상세 화면 + 데스크톱 A 목록 + 상세 채택 (2026-11-09, [mockups/settings/Settings.html](mockups/settings/Settings.html)) → 11절 |
+| 매장 · 직원 | F02 · F03 | 휴대폰 A 한 화면 + 데스크톱 B 두 칸 + 사람 표 채택 (2026-11-09, [mockups/members/Members.html](mockups/members/Members.html)) → 12절 |
 | 소개(랜딩) | F27 | 아직 |
 | **앱 이동 · 첫 화면** | 전체 | 휴대폰 A 아래 탭 + 데스크톱 A 왼쪽 메뉴 채택 (2026-11-08, [mockups/Map.html](mockups/Map.html)) → 8절 |
 
@@ -162,7 +162,7 @@ M1에서 시안을 그리며 채운다. 채택한 것만 이 문서에 규칙을
 
 ## 9. 로그인 · 가입 · 초대
 
-시안은 [mockups/Auth.html](mockups/Auth.html), 고른 이유는 [mockups/README](mockups/README.md#로그인--가입--초대--시안-휴대폰-a--데스크톱-b-채택-2026-11-09).
+시안은 [mockups/auth/Auth.html](mockups/auth/Auth.html), 고른 이유는 [mockups/README](mockups/README.md#로그인--가입--초대--시안-휴대폰-a--데스크톱-b-채택-2026-11-09).
 
 ### 9.1 모양
 
@@ -197,7 +197,7 @@ M1에서 시안을 그리며 채운다. 채택한 것만 이 문서에 규칙을
 
 ## 10. 첫 매장 등록 · 매장 고르기
 
-시안은 [mockups/Store.html](mockups/Store.html), 고른 이유는 [mockups/README](mockups/README.md#첫-매장-등록--매장-고르기--시안-c-채택-2026-11-09).
+시안은 [mockups/store/Store.html](mockups/store/Store.html), 고른 이유는 [mockups/README](mockups/README.md#첫-매장-등록--매장-고르기--시안-c-채택-2026-11-09).
 
 ### 10.1 모양
 
@@ -230,7 +230,7 @@ M1에서 시안을 그리며 채운다. 채택한 것만 이 문서에 규칙을
 
 ## 11. 메뉴 · 식자재 · 레시피
 
-시안은 [mockups/Settings.html](mockups/Settings.html), 고른 이유는 [mockups/README](mockups/README.md#메뉴--식자재--레시피--시안-휴대폰-a--데스크톱-a-채택-2026-11-09). 점주만 본다(8.4).
+시안은 [mockups/settings/Settings.html](mockups/settings/Settings.html), 고른 이유는 [mockups/README](mockups/README.md#메뉴--식자재--레시피--시안-휴대폰-a--데스크톱-a-채택-2026-11-09). 점주만 본다(8.4).
 
 ### 11.1 모양
 
@@ -270,7 +270,7 @@ M1에서 시안을 그리며 채운다. 채택한 것만 이 문서에 규칙을
 
 ## 12. 매장 · 직원
 
-시안은 [mockups/Members.html](mockups/Members.html), 고른 이유는 [mockups/README](mockups/README.md#매장--직원--시안-휴대폰-a--데스크톱-b-채택-2026-11-09). 점주만 본다(8.4).
+시안은 [mockups/members/Members.html](mockups/members/Members.html), 고른 이유는 [mockups/README](mockups/README.md#매장--직원--시안-휴대폰-a--데스크톱-b-채택-2026-11-09). 점주만 본다(8.4).
 
 ### 12.1 모양
 

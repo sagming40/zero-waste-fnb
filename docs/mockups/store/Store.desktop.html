@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>첫 매장 등록 · 매장 고르기 (데스크톱) — 목업</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
-<link rel="stylesheet" href="shared.css">
-<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
 <link rel="stylesheet" href="store.css">
 </head>
 <body>
 <div id="root"></div>
-<script src="shared.js"></script>
-<script src="auth.js"></script>
+<script src="../_shared/shared.js"></script>
+
 <script src="store.js"></script>
 <script>
 const S = STORE;
@@ -31,7 +31,7 @@ const side = onboarding
       <ol class="journey">${J.map((t, i) => `<li class="${i < at ? 'ok' : i === at ? 'on' : ''}"><span class="n">${i < at ? '✓' : i + 1}</span>${t}</li>`).join('')}</ol></div>`
   : `<div><h2>${S.state === 'pick' ? '어느 매장을<br>볼까요?' : '매장에<br>들어가 볼까요?'}</h2><p>한 계정으로 여러 매장에 속할 수 있어요. 매장마다 점주 · 직원이 따로예요.</p></div>`;
 document.getElementById('root').innerHTML = `<div class="auth-split">
-  <section class="side">${AUTH.brand()}${side}<div class="small" style="opacity:.7">서지우 · jiwoo@example.com · <u>로그아웃</u></div></section>
+  <section class="side">${ZW.brand()}${side}<div class="small" style="opacity:.7">서지우 · jiwoo@example.com · <u>로그아웃</u></div></section>
   <section class="form"><form class="authbox" novalidate>${S.body(S.state, S.variant)}</form></section></div>`;
 S.wire(document);
 </script>

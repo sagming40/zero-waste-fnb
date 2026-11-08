@@ -5,8 +5,9 @@
 
 ## 보는 방법
 
-- 파일을 브라우저로 바로 열면 된다(`file://`, 서버 없이). 보드(`Closing.html`)를 열면 시안이 나란히 뜬다 — 휴대폰은 옆으로 스크롤, 데스크톱은 아래로 스크롤
-- 화면 파일(`Closing.mobile.html` · `Closing.desktop.html`)을 따로 열면 오른쪽 아래 검은 단추로 시안 · 상태 · 밝기를 바꾼다. 다른 시안 안에 끼울 때는 `embed=1`로 단추를 숨긴다
+- **화면 하나 = 폴더 하나**(2026-11-09). 폴더 안에 보드 · 휴대폰 · 데스크톱 파일과 그 화면만 쓰는 js · css. 여러 화면이 같이 쓰는 것은 `_shared/`, 화면을 넘나드는 보드(화면 지도 · 이동 틀 · 컬러)는 맨 위
+- 파일을 브라우저로 바로 열면 된다(`file://`, 서버 없이). 보드(`closing/Closing.html`)를 열면 시안이 나란히 뜬다 — 휴대폰은 옆으로 스크롤, 데스크톱은 아래로 스크롤. 어디서 시작할지 모르면 `Map.html`
+- 화면 파일(`closing/Closing.mobile.html` · `closing/Closing.desktop.html`)을 따로 열면 오른쪽 아래 검은 단추로 시안 · 상태 · 밝기를 바꾼다. 다른 시안 안에 끼울 때는 `embed=1`로 단추를 숨긴다
 - `file://`에서는 Chrome이 주소 바꾸기(`history.replaceState`)를 막는다. 보드는 그 오류를 삼키게 해 두었다 — 그래서 보드에서 고른 값이 주소창에는 남지 않는다
 - Claude 데스크톱 앱 미리보기에서는 `file://`이 정적 스냅숏으로만 떠서 스크립트가 안 돈다. 그때는 `.claude/launch.json`의 `mockups`(파이썬 `http.server` 5500)로 띄운다. 파이썬이 없는 기기(노트북)는 `mockups-node`(노드 한 줄 서버 5501)
 - 주소 파라미터
@@ -19,31 +20,41 @@
 | `palette` | `A` 숲 · `B` 밀 · `C` 청록 · `D` 먹 · `E` 올리브 · `F` 남색 · `G` 파랑 · `H` 자두 | `E` (채택) |
 | `dark` | `1` 어둡게 · `0` 밝게 | 시스템 설정 |
 
-예: `Closing.mobile.html?v=B&state=error&palette=C&dark=1`
+예: `closing/Closing.mobile.html?v=B&state=error&palette=C&dark=1`
 
 ## 파일
+
+```
+mockups/
+  README.md · Map.html · Shell.mobile.html · Shell.desktop.html · Colors.html   화면을 넘나드는 보드
+  _shared/   shared.css · shared.js · forms.css · nav-data.js                    여러 화면이 같이 쓰는 것
+  auth/ · store/ · settings/ · members/ · closing/ · loss/                       화면 하나 = 폴더 하나
+```
+
+새 화면은 소문자 폴더(`stock/`)를 만들고 그 안에 `화면.html`(보드) · `화면.mobile.html` · `화면.desktop.html`, 그 화면만 쓰는 `화면.js` · `화면.css`. 공용 파일은 `../_shared/`로 읽는다. 다른 화면 폴더의 파일을 읽지 않는다 — 같이 쓰게 되면 `_shared/`로 옮긴다(로고 `ZW.brand`를 그렇게 옮겼다). 이동 틀에 끼울 화면은 `_shared/nav-data.js`의 `src`에 화면 이름(`'Settings'`)을 적으면 `settings/Settings.기기.html`을 찾는다.
 
 | 파일 | 무엇 | DESIGN 절 | 채택 |
 |---|---|---|---|
 | [Map.html](Map.html) | **앱 화면 지도** — 화면과 흐름(공개 → 로그인 → 매장 → 앱), 하루 흐름과 첫 화면 규칙, 이동 시안(휴대폰 3 · 데스크톱 2, 점주 / 직원 · 마감 전 / 후), 점주와 직원 | [DESIGN 8절](../DESIGN.md#8-앱-이동--첫-화면) | **휴대폰 A 아래 탭 + 데스크톱 A 왼쪽 메뉴(폭 조절 · 접기) 채택 (2026-11-08)** |
 | [Shell.mobile.html](Shell.mobile.html) · [Shell.desktop.html](Shell.desktop.html) | 이동 틀(아래 탭 · 왼쪽 메뉴 등). 오늘 · 마감은 채택 시안을 끼워 넣고 나머지는 자리표시. 파라미터 `v` · `role`(owner · staff) · `time`(before · after) | DESIGN 8절 | 휴대폰 A · 데스크톱 A 채택 |
-| [Auth.html](Auth.html) | 로그인 · 가입 · 초대 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
-| [Auth.mobile.html](Auth.mobile.html) · [Auth.desktop.html](Auth.desktop.html) | 로그인 · 가입(F01) · 직원 초대 링크(F03). 공용 `auth.js` · `auth.css` | [DESIGN 9절](../DESIGN.md#9-로그인--가입--초대) | **휴대폰 A 탭 + 데스크톱 B 소개 + 입력 채택 (2026-11-09)**. 나머지는 비교용 |
-| [Store.html](Store.html) | 첫 매장 등록 · 매장 고르기 시안 비교 보드 — 휴대폰 A · B · C, 데스크톱 A · B · C | — | — |
-| [Store.mobile.html](Store.mobile.html) · [Store.desktop.html](Store.desktop.html) | 첫 매장 등록(F02 주소 검색) · 매장 고르기 · 매장 없음 · 시작 체크리스트. 공용 `store.js` · `store.css`(`auth.css` 위에) | [DESIGN 10절](../DESIGN.md#10-첫-매장-등록--매장-고르기) | **C 한 화면 + 질문형 채택 (2026-11-09)**. A · B는 비교용 |
-| [Settings.html](Settings.html) | 메뉴 · 식자재 · 레시피 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
-| [Settings.mobile.html](Settings.mobile.html) · [Settings.desktop.html](Settings.desktop.html) | 메뉴(F04) · 식자재(F05, 기본 단가) · 레시피(F06). 데스크톱은 앱 틀 안의 내용 영역만. 공용 `settings.js` · `settings.css`(`auth.css` 위에) | [DESIGN 11절](../DESIGN.md#11-메뉴--식자재--레시피) | **휴대폰 A 상세 화면 + 데스크톱 A 목록 + 상세 채택 (2026-11-09)**. B는 비교용, 데스크톱 B 표는 나중에 "한 번에 넣기" 후보 |
-| [Members.html](Members.html) | 매장 · 직원 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
-| [Members.mobile.html](Members.mobile.html) · [Members.desktop.html](Members.desktop.html) | 매장 정보(F02 주소 바꾸기) · 직원 초대 링크 · 내보내기(F03). 데스크톱은 앱 틀 안의 내용 영역만. 공용 `members.js` · `members.css`(`auth.css` 위에), 휴대폰 B는 `tab`(store · people) | [DESIGN 12절](../DESIGN.md#12-매장--직원) | **휴대폰 A 한 화면 + 데스크톱 B 두 칸 + 사람 표 채택 (2026-11-09)**. 나머지는 비교용 |
+| [auth/Auth.html](auth/Auth.html) | 로그인 · 가입 · 초대 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
+| [auth/Auth.mobile.html](auth/Auth.mobile.html) · [auth/Auth.desktop.html](auth/Auth.desktop.html) | 로그인 · 가입(F01) · 직원 초대 링크(F03). `auth.js`, 모양은 `_shared/forms.css` | [DESIGN 9절](../DESIGN.md#9-로그인--가입--초대) | **휴대폰 A 탭 + 데스크톱 B 소개 + 입력 채택 (2026-11-09)**. 나머지는 비교용 |
+| [store/Store.html](store/Store.html) | 첫 매장 등록 · 매장 고르기 시안 비교 보드 — 휴대폰 A · B · C, 데스크톱 A · B · C | — | — |
+| [store/Store.mobile.html](store/Store.mobile.html) · [store/Store.desktop.html](store/Store.desktop.html) | 첫 매장 등록(F02 주소 검색) · 매장 고르기 · 매장 없음 · 시작 체크리스트. 공용 `store.js` · `store.css`(`_shared/forms.css` 위에) | [DESIGN 10절](../DESIGN.md#10-첫-매장-등록--매장-고르기) | **C 한 화면 + 질문형 채택 (2026-11-09)**. A · B는 비교용 |
+| [settings/Settings.html](settings/Settings.html) | 메뉴 · 식자재 · 레시피 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
+| [settings/Settings.mobile.html](settings/Settings.mobile.html) · [settings/Settings.desktop.html](settings/Settings.desktop.html) | 메뉴(F04) · 식자재(F05, 기본 단가) · 레시피(F06). 데스크톱은 앱 틀 안의 내용 영역만. 공용 `settings.js` · `settings.css`(`_shared/forms.css` 위에) | [DESIGN 11절](../DESIGN.md#11-메뉴--식자재--레시피) | **휴대폰 A 상세 화면 + 데스크톱 A 목록 + 상세 채택 (2026-11-09)**. B는 비교용, 데스크톱 B 표는 나중에 "한 번에 넣기" 후보 |
+| [members/Members.html](members/Members.html) | 매장 · 직원 시안 비교 보드 — 휴대폰 A · B, 데스크톱 A · B | — | — |
+| [members/Members.mobile.html](members/Members.mobile.html) · [members/Members.desktop.html](members/Members.desktop.html) | 매장 정보(F02 주소 바꾸기) · 직원 초대 링크 · 내보내기(F03). 데스크톱은 앱 틀 안의 내용 영역만. 공용 `members.js` · `members.css`(`_shared/forms.css` 위에), 휴대폰 B는 `tab`(store · people) | [DESIGN 12절](../DESIGN.md#12-매장--직원) | **휴대폰 A 한 화면 + 데스크톱 B 두 칸 + 사람 표 채택 (2026-11-09)**. 나머지는 비교용 |
 | [Colors.html](Colors.html) | 컬러 시안 A ~ H 비교 보드 — 색 견본, WCAG 대비율, 마감 입력 화면에 입힌 밝게 · 어둡게 | [DESIGN 2절](../DESIGN.md#2-색) | **E 올리브 채택 (2026-11-08)**. 나머지는 비교용 |
-| [Closing.html](Closing.html) | 마감 입력 시안 비교 보드 — 위쪽에서 휴대폰 · 데스크톱 전환 | — | — |
-| [Closing.mobile.html](Closing.mobile.html) | 마감 입력 (F08), 휴대폰 390 × 844 | [DESIGN 3절](../DESIGN.md#3-마감-입력) | **A 카드 채택 (2026-11-08)**. B · C는 비교용 |
-| [Closing.desktop.html](Closing.desktop.html) | 마감 입력 (F08), 데스크톱 1280 × 800 | [DESIGN 3절](../DESIGN.md#3-마감-입력) | **A 표 + 옆 요약 채택 (2026-11-08)**. B는 비교용, C는 나중에 "모든 칸 펼치기" 모드 후보 |
-| [Loss.html](Loss.html) | 오늘 손실 시안 비교 보드 — 휴대폰 A · B · C, 데스크톱 A · B | — | — |
-| [Loss.mobile.html](Loss.mobile.html) · [Loss.desktop.html](Loss.desktop.html) | 오늘 손실 (F19) | [DESIGN 7절](../DESIGN.md#7-오늘-손실) | **휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드 채택 (2026-11-08)**. 나머지는 비교용 |
-| `shared.css` · `shared.js` | 시안용 색 토큰 · 예시 데이터 · 손실 계산 · 시안 전환 단추 | — | — |
-| `loss-data.js` | 오늘 손실 시안의 한 주 데이터 · 막대 그래프(SVG) | — | — |
-| `nav-data.js` | 화면 목록(기능 번호 · 단계 · 직원 사용 여부) · 선 아이콘 · 자리표시 | — | — |
+| [closing/Closing.html](closing/Closing.html) | 마감 입력 시안 비교 보드 — 위쪽에서 휴대폰 · 데스크톱 전환 | — | — |
+| [closing/Closing.mobile.html](closing/Closing.mobile.html) | 마감 입력 (F08), 휴대폰 390 × 844 | [DESIGN 3절](../DESIGN.md#3-마감-입력) | **A 카드 채택 (2026-11-08)**. B · C는 비교용 |
+| [closing/Closing.desktop.html](closing/Closing.desktop.html) | 마감 입력 (F08), 데스크톱 1280 × 800 | [DESIGN 3절](../DESIGN.md#3-마감-입력) | **A 표 + 옆 요약 채택 (2026-11-08)**. B는 비교용, C는 나중에 "모든 칸 펼치기" 모드 후보 |
+| [loss/Loss.html](loss/Loss.html) | 오늘 손실 시안 비교 보드 — 휴대폰 A · B · C, 데스크톱 A · B | — | — |
+| [loss/Loss.mobile.html](loss/Loss.mobile.html) · [loss/Loss.desktop.html](loss/Loss.desktop.html) | 오늘 손실 (F19) | [DESIGN 7절](../DESIGN.md#7-오늘-손실) | **휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드 채택 (2026-11-08)**. 나머지는 비교용 |
+| `_shared/shared.css` · `_shared/shared.js` | 시안용 색 토큰 · 예시 데이터 · 손실 계산 · 시안 전환 단추 · 로고(`ZW.brand`) | — | — |
+| `_shared/forms.css` | 입력 칸 · 버튼 · 로고 · 로그인 틀(왼쪽 소개 + 오른쪽 입력). 옛 `auth.css` — 매장 등록 · 메뉴 · 매장 · 직원도 써서 옮겼다 | — | — |
+| `_shared/nav-data.js` | 화면 목록(기능 번호 · 단계 · 직원 사용 여부) · 선 아이콘 · 자리표시 | — | — |
+| `loss/loss-data.js` | 오늘 손실 시안의 한 주 데이터 · 막대 그래프(SVG) | — | — |
 
 예시 데이터(매장 · 메뉴 · 원가 · 사람 이름)는 전부 지어낸 값이다.
 
@@ -131,7 +142,7 @@ F19. 마감을 저장하면 가는 화면이자 매일 여는 첫 화면 후보�
 
 ## 로그인 · 가입 · 초대 — 시안 (휴대폰 A + 데스크톱 B 채택, 2026-11-09)
 
-[Auth.html](Auth.html). 휴대폰 A 로그인 / 가입 탭 · B 이메일 먼저, 데스크톱 A 가운데 카드 · B 왼쪽 소개 + 오른쪽 입력.
+[auth/Auth.html](auth/Auth.html). 휴대폰 A 로그인 / 가입 탭 · B 이메일 먼저, 데스크톱 A 가운데 카드 · B 왼쪽 소개 + 오른쪽 입력.
 
 - **B(이메일 먼저)의 대가**: 이메일만 넣어도 "가입된 사람인지"가 드러난다(계정 존재 노출). A는 로그인 실패 문구를 "이메일이나 비밀번호가 맞지 않아요" 하나로 둬서 어느 쪽이 틀렸는지 말하지 않는다
 - **그리면서 정한 안**(채택 뒤 DESIGN으로): 비밀번호 8자 이상 · 조합 규칙 없음, 5번 실패하면 15분 잠김, 가입 칸은 이름 · 이메일 · 비밀번호 셋, "데모 매장 둘러보기"(읽기 전용)
@@ -143,7 +154,7 @@ F19. 마감을 저장하면 가는 화면이자 매일 여는 첫 화면 후보�
 
 ## 첫 매장 등록 · 매장 고르기 — 시안 (C 채택, 2026-11-09)
 
-[Store.html](Store.html). 휴대폰 A 한 화면(이름 → 주소 검색 → 등록) · B 3단계(이름 · 주소 · 확인) · C 한 화면 + 질문형(A의 흐름에 B의 큰 질문 제목 · 처음 시작 진행 막대, 이름 전에는 주소 칸이 흐림 — "B가 요즘 느낌, A가 편함"이라 둘을 섞어 봤다). 데스크톱은 로그인(데스크톱 B)과 같은 틀에 왼쪽을 "처음 시작" 단계(가입 · 매장 등록 · 메뉴 준비 · 첫 마감)로 바꿨다.
+[store/Store.html](store/Store.html). 휴대폰 A 한 화면(이름 → 주소 검색 → 등록) · B 3단계(이름 · 주소 · 확인) · C 한 화면 + 질문형(A의 흐름에 B의 큰 질문 제목 · 처음 시작 진행 막대, 이름 전에는 주소 칸이 흐림 — "B가 요즘 느낌, A가 편함"이라 둘을 섞어 봤다). 데스크톱은 로그인(데스크톱 B)과 같은 틀에 왼쪽을 "처음 시작" 단계(가입 · 매장 등록 · 메뉴 준비 · 첫 마감)로 바꿨다.
 
 - **받는 것은 이름과 주소뿐**(상세 주소는 선택). 격자 · 관측 지점 · 지역 코드는 서버가 주소로 계산하고, 화면에는 "이 위치로 날씨 · 공휴일을 가져와요 · 가까운 관측소"만 보인다
 - **주소 검색이 실패해도 등록은 막지 않는다** — 외부 데이터는 보조 신호다(REQUIREMENTS 3절). "주소 없이 먼저 등록"하면 날씨 신호만 빠지고 매장 설정에서 나중에 넣는다. 0건이면 입력 예시(도로명 + 건물번호 · 건물 이름)를 보인다
@@ -155,7 +166,7 @@ F19. 마감을 저장하면 가는 화면이자 매일 여는 첫 화면 후보�
 
 ## 메뉴 · 식자재 · 레시피 — 시안 (휴대폰 A + 데스크톱 A 채택, 2026-11-09)
 
-[Settings.html](Settings.html). 점주만 보는 설정. 한 화면 안에 메뉴 / 식자재 탭, 레시피는 메뉴 상세 안에. 휴대폰 A 상세 화면으로 넘어감 · B 아래 시트, 데스크톱 A 목록 + 상세 · B 표에서 바로 고치기(▸로 펼치면 레시피).
+[settings/Settings.html](settings/Settings.html). 점주만 보는 설정. 한 화면 안에 메뉴 / 식자재 탭, 레시피는 메뉴 상세 안에. 휴대폰 A 상세 화면으로 넘어감 · B 아래 시트, 데스크톱 A 목록 + 상세 · B 표에서 바로 고치기(▸로 펼치면 레시피).
 
 - **메뉴**: 이름 · 분류(고정 5) · 만드는 방식(미리 만들어 둠 = 당일 생산품 / 주문 때 만듦) · 판매가 · 레시피. 레시피에서 **1개 원가 · 원가율**이 바로 나온다. 판매가를 바꾸면 오늘 마감부터 적용, 지난 기록은 그날 값
 - **식자재**: 이름 · 기본 단위(g · ml · 개) · 기본 단가 · 탄소 분류 · 사용 중인 메뉴. 단가는 **사는 단위 그대로**(20,000원 / 20kg) 넣고 "= 1g당 1원"을 보여 준다 — 1g당 값을 사람이 계산하게 하지 않는다
@@ -168,7 +179,7 @@ F19. 마감을 저장하면 가는 화면이자 매일 여는 첫 화면 후보�
 
 ## 매장 · 직원 — 시안 (휴대폰 A + 데스크톱 B 채택, 2026-11-09)
 
-[Members.html](Members.html). 점주만 본다. 휴대폰 A 한 화면(매장 카드 → 사람 카드, 초대는 카드 안에서 펼침) · B 탭 + 아래 시트, 데스크톱 A 한 줄(폭 720) · B 두 칸 + 사람 표. 내보내기 확인은 모두 따로 묻는다(휴대폰 시트 · 데스크톱 창).
+[members/Members.html](members/Members.html). 점주만 본다. 휴대폰 A 한 화면(매장 카드 → 사람 카드, 초대는 카드 안에서 펼침) · B 탭 + 아래 시트, 데스크톱 A 한 줄(폭 720) · B 두 칸 + 사람 표. 내보내기 확인은 모두 따로 묻는다(휴대폰 시트 · 데스크톱 창).
 
 - **매장**: 이름 · 주소. 주소를 바꾸면 **오늘부터** 새 위치의 날씨, 지난 기록은 그대로. 주소 없이 등록한 매장은 "주소 넣기"
 - **초대 링크**: 한 사람 한 링크 · 7일 · 한 번 사용하면 끝. 복사 · 공유(휴대폰 공유 창). 대기 중인 초대는 목록에 남고 취소할 수 있다 — 로그인 시안의 "만료되었어요"(만료 · 사용 · 취소)와 짝

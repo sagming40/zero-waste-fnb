@@ -173,5 +173,12 @@
     clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 1800);
   }
 
-  window.ZW = { params, dark, PALETTES, paletteKey, applyPalette, contrast, won, MENUS, CATS, SOLDOUT_AT, DEST, blank, fromYesterday, initialState, totals, wasteOf, errorsOf, toast, switcher };
+  // 앱 이름(로고) — 로그인 · 매장 등록 화면 위쪽. 모양은 _shared/forms.css 의 .brand
+  const LEAF = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></svg>';
+  const brand = (small) => `<div class="brand${small ? ' sm' : ''}">
+      <span class="logo" aria-hidden="true">${LEAF}</span>
+      <span><b>ZeroWaste</b> <span class="muted">F&amp;B</span></span>
+    </div>`;
+
+  window.ZW = { params, dark, PALETTES, paletteKey, applyPalette, contrast, won, MENUS, CATS, SOLDOUT_AT, DEST, blank, fromYesterday, initialState, totals, wasteOf, errorsOf, toast, switcher, brand };
 })();

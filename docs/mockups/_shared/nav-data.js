@@ -39,7 +39,7 @@
   function srcFor(id, device, extra) {
     const s = byId[id];
     if (!s || !s.src) return null;
-    return `${s.src}.${device}.html?${extra}`;
+    return `${s.src.toLowerCase()}/${s.src}.${device}.html?${extra}`;
   }
 
   // 아직 안 그린 화면의 자리표시

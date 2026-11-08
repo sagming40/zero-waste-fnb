@@ -22,12 +22,8 @@
   const state = (ZW.params.get('state') || 'login');
   const variant = (ZW.params.get('v') || 'A').toUpperCase();
 
-  // 앱 이름 + 한 줄 (공용)
-  const brand = (small) => `<div class="brand${small ? ' sm' : ''}">
-      <span class="logo" aria-hidden="true">${ZW_LEAF}</span>
-      <span><b>ZeroWaste</b> <span class="muted">F&amp;B</span></span>
-    </div>`;
-  const ZW_LEAF = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></svg>';
+  // 앱 이름(로고)은 매장 등록과 같이 쓰려고 _shared/shared.js 의 ZW.brand 로 옮겼다
+  const brand = ZW.brand;
 
   const field = (id, label, type, opts = {}) => `
     <label class="fld" for="${id}">
