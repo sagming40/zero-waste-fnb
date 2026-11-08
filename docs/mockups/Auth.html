@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인 · 가입 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>로그인 · 가입 · 초대 — 시안 비교</h1>
+<div class="muted small">F01 가입 · 로그인, F03 직원 초대 링크. 안쪽 탭 · 링크를 눌러 상태를 오갈 수 있다. 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="shared.js"></script>
+<script src="auth.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 로그인 / 가입 탭 (채택)', d: '한 화면 위쪽 탭으로 로그인 · 가입을 오간다. 칸이 다 보여 빠르고 흔한 모양. 아래 "데모 매장 둘러보기".' },
+  { v: 'B', t: 'B · 이메일 먼저', d: '이메일 한 칸 → 계정이 있으면 비밀번호, 없으면 가입으로. 칸이 적어 보이지만 한 번 더 누르고, 이메일만 넣어도 "가입된 사람인지"가 드러난다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 가운데 카드', d: '휴대폰 A를 그대로 가운데에. 만들 것이 가장 적다.' },
+  { v: 'B', t: 'B · 왼쪽 소개 + 오른쪽 입력 (채택)', d: '왼쪽에 앱이 하는 일 한 줄 · 숫자 셋. 소개 페이지(F27)가 생기기 전에도 처음 온 사람이 무엇인지 안다.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+st.innerHTML = AUTH.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'login';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Auth.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Auth.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

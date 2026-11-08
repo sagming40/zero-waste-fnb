@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인 · 가입 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="shared.js"></script>
+<script src="auth.js"></script>
+<script>
+const A = AUTH;
+// 데스크톱 시안: A 가운데 카드 / B 왼쪽 소개 + 오른쪽 입력. 입력 방식은 휴대폰 A(탭)와 같다
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 가운데 카드'], ['B', 'B 소개 + 입력 (채택)']], A.variant],
+  ['상태', 'state', A.STATES, A.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const root = document.getElementById('root');
+const form = `<form class="authbox" novalidate>${A.body(A.state, 'A')}</form>`;
+const isInvite = A.state.startsWith('invite');
+if (A.variant === 'B') {
+  root.innerHTML = `<div class="auth-split">
+    <section class="side">${A.brand()}
+      <div><h2>남은 빵이 얼마였는지,<br>오늘 마감부터 보여 드려요</h2>
+        <p>마감 때 만든 수량과 남은 수량을 입력하면 낭비된 돈과 탄소가 얼마나 되는지 알 수 있어요. 기록이 쌓이면 내일은 몇 개를 만들지 권해 드려요.</p>
+        <div class="proof"><div><b class="num">3분</b><span>하루 마감 입력</span></div><div><b class="num">₩</b><span>원가 기준 손실</span></div><div><b class="num">CO₂e</b><span>낭비된 탄소</span></div></div>
+      </div>
+      <div class="small" style="opacity:.7">예시 숫자는 지어낸 값이에요</div>
+    </section>
+    <section class="form">${form}</section></div>`;
+} else {
+  root.innerHTML = `<div class="auth-d"><div class="card">${A.brand()}
+    ${isInvite ? '' : '<p class="tag">남은 빵이 얼마였는지, 오늘 마감부터 보여 드려요</p>'}${form}</div></div>`;
+}
+A.wire(document);
+</script>
+</body>
+</html>

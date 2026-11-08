@@ -6,15 +6,36 @@
 ## 현재 상태
 
 - **지금 단계**: M1 화면 설계 — 모든 화면 시안을 다 그리고 M2 구현 시작(2026-11-08 결정)
-- **채택된 것**: 컬러 E 올리브 · 마감 입력 · 오늘 손실 · 앱 이동(아래 탭 / 왼쪽 메뉴) · 문구 규칙 — [DESIGN](DESIGN.md) 2 ~ 8절. 프런트 Angular 뼈대 + CI 두 job 초록불. 결정 0013 Angular · 0014 GSAP · 0015 ECharts
-- **다음에 할 일 (회사 PC)**
-  1. [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터 — 클론 전. 특히 Docker 라이선스 · 이 레포만 개인 git 이름 · 회사 네트워크 인증서. 끝나면 8.3 표에 회사 PC 줄
-  2. M2에 필요한 화면 시안: 로그인 · 가입 → 첫 매장 등록 / 매장 고르기 → 메뉴 · 식자재 · 레시피 설정 → 매장 · 직원 (PLAN M1)
-  3. 그다음 M3 · M4 · M5 · 소개 시안
-- **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도) · `Closing.html` · `Loss.html` · `Colors.html`
+- **채택된 것**: 컬러 E 올리브 · 마감 입력 · 오늘 손실 · 앱 이동(아래 탭 / 왼쪽 메뉴) · 문구 규칙 · **로그인 · 가입 · 초대(휴대폰 A 탭 + 데스크톱 B 소개 + 입력)** — [DESIGN](DESIGN.md) 2 ~ 9절. 프런트 Angular 뼈대 + CI 두 job 초록불. 결정 0013 Angular · 0014 GSAP · 0015 ECharts
+- **다음에 할 일** (어느 기기든 `git pull`부터)
+  1. M2 화면 시안 이어서: **첫 매장 등록 / 매장 고르기**(`Store.html` — A 한 화면 · B 1·2·3 단계, 상태: 검색 중 · 결과 0건 · 주소 API 실패, 끝에 "메뉴 → 식자재 → 레시피 → 첫 마감" 시작 체크리스트) → 메뉴 · 식자재 · 레시피(식자재에 **기본 단가** 칸, 레시피에 쓰인 식자재는 단위 잠금) → 매장 · 직원
+  2. 그다음 M3 · M4 · M5 · 소개 시안
+  3. 회사 PC에서 처음이면: [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터 — 클론 전. 끝나면 8.3 표에 회사 PC 줄
+- **열린 질문**: 비밀번호 찾기(M2에 메일 발송 없음, 점주가 잊었을 때가 비어 있음) — DESIGN 9.4
+- **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도) · `Auth.html` · `Closing.html` · `Loss.html` · `Colors.html`. Claude 미리보기는 `.claude/launch.json`의 `mockups`(파이썬) 또는 `mockups-node`(노드, 파이썬 없는 노트북)
 - **기기별로 할 일**
-  - 회사 PC: 위 1번
-  - 집 PC · 노트북: 없음 (집 PC 2026-11-08 끝까지 push, 노트북은 다음에 열 때 `git pull`)
+  - 회사 PC: 위 3번
+  - 집 PC · 노트북: 없음 (노트북 2026-11-09 끝까지 push)
+
+---
+
+## 2026-11-09 (1) · M1 로그인 · 가입 · 초대 채택, M2 단가는 "기본 단가" (노트북)
+
+**한 일**
+- M2용 화면 순서를 보드 넷으로 잡았다: 로그인 · 가입(`Auth`) → 첫 매장 등록 · 매장 고르기(`Store`) → 메뉴 · 식자재 · 레시피(`Settings`) → 매장 · 직원(`Members`)
+- `Auth.html` 보드: 휴대폰 A 탭 · B 이메일 먼저, 데스크톱 A 가운데 카드 · B 소개 + 입력, 상태 8개(로그인 · 가입 · 실패 · 잠김 · 초대 넷). 공용 `auth.js` · `auth.css`
+- 채택 **휴대폰 A + 데스크톱 B** → DESIGN 9절. 문구 다섯 곳을 사용자가 다듬었다 → 규칙 둘을 DESIGN 6절에: 계정 보안 안내(실패 · 잠김)는 합쇼체, 점주를 부를 때는 "사장님"(역할 이름은 점주 · 직원 그대로)
+
+**[설계]**
+- **M2 단가 = 식자재 기본 단가**(사용자 결정): 손실은 레시피 × 단가인데 단가는 입고 로트(F10, M3)에서 온다 → M2 완료 기준 "손실 원화"를 못 채운다(사전 검증에서 발견). 로트 단가가 먼저, 없으면 기본 단가. 빈 단가는 0이 아니라 "단가 없는 재료 n개" → DATA_MODEL 4절 9, REQUIREMENTS F05
+- 기본 단가를 고치면 지난 손실이 바뀐다 → 마감 줄에 **그날 원가(1개당)**도 찍는다(DATA_MODEL 5절, 사전 검증에서 발견)
+- 이메일 먼저(B)는 이메일만 넣어도 가입 여부가 드러난다. 로그인 실패 문구도 어느 쪽이 틀렸는지 말하지 않는다
+- 초대 링크는 연 사람의 사정이 넷(계정 없음 · 로그인됨 · 이미 직원 · 만료)이라 상태를 나눴다. 만료 · 사용 · 취소는 한 문구
+
+**막힌 것**
+- 노트북에서 목업 미리보기가 안 뜸 — 원인: 노트북에 파이썬이 없다(`mockups` 설정이 `python -m http.server`). 해결: `launch.json`에 노드 한 줄 정적 서버 `mockups-node`(5501). 배운 것: 미리보기 설정도 기기마다 깔린 것에 기대니, 이미 있는 런타임(노드)으로 하나 더 둔다
+
+**확인한 것 (관찰값)**: 기기 2 × 시안 2 × 상태 8 = 32가지를 iframe으로 하나씩 열어 본문이 다 그려짐(90 ~ 353자), 콘솔 오류 0건. 문구 수정 뒤 실패 · 잠김 · 이미 직원 · 만료 화면에서 새 문구를 확인
 
 ---
 
