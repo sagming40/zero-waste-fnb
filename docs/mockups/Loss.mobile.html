@@ -60,7 +60,7 @@ ZW.switcher([
 ], 'top:auto;bottom:8px');
 
 /* ── 공용 조각 ── */
-function linesCard(lines, title = '무엇을 버렸나') {
+function linesCard(lines, title = '무엇이 낭비됐나') {
   if (!lines.length) return '';
   const max = Math.max(...lines.map(l => l.loss));
   return `<div class="card"><h2>${title}<span class="muted">손실 큰 순</span></h2>${lines.map(l => `
@@ -68,7 +68,7 @@ function linesCard(lines, title = '무엇을 버렸나') {
     <div class="why">${l.why}</div><div class="hbar"><i class="${l.kind === 'ingredient' ? 'ing' : ''}" style="width:${l.loss / max * 100}%"></i></div></div>`).join('')}</div>`;
 }
 function savedCard() {
-  return `<div class="card"><h2>버리지 않고 구한 것<span class="muted">손실에서 빠짐</span></h2>${L.SAVED.map(s => `
+  return `<div class="card"><h2>낭비되지 않고 구한 것<span class="muted">손실에서 빠짐</span></h2>${L.SAVED.map(s => `
     <div class="line"><div class="r"><span>${s.name} <span class="muted small">${s.qty} · ${s.how}</span></span><b class="num" style="color:var(--accent)">${won(s.value)}</b></div></div>`).join('')}</div>`;
 }
 function weekCard(opts = {}) {
@@ -85,7 +85,7 @@ function weekCard(opts = {}) {
 function todayHero() {
   const t = L.today;
   if (t.pending) return `<div class="card hero"><div class="k">오늘 폐기 손실</div><div class="amt" style="color:var(--muted)">마감 전</div>
-    <div class="sub">마감을 입력하면 오늘 버린 돈이 여기 보여요.</div><a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 입력하기</a></div>`;
+    <div class="sub">마감을 입력하면 오늘 낭비된 돈이 여기 보여요.</div><a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 입력하기</a></div>`;
   if (t.closed) return `<div class="card hero"><div class="k">오늘</div><div class="amt" style="color:var(--muted)">휴무</div><div class="sub">휴무일은 손실 · 폐기율 계산에서 빠져요.</div></div>`;
   return `<div class="card hero"><div class="k">오늘 폐기 손실 · 원가 기준</div><div class="amt num">${won(t.loss)}</div>
     ${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}
@@ -120,7 +120,7 @@ function renderB() {
       <div class="num" style="font-size:24px;font-weight:800;color:var(--loss)">${won(x.loss)}</div>
       ${L.delta(x.loss, x.lastWeek, '지난주 ' + x.d + '요일보다')}
       <div class="stats"><div><div class="v num">${x.wasted}개</div><div class="l">메뉴 폐기</div></div><div><div class="v num">${L.pct(x.rate)}</div><div class="l">폐기율</div></div><div><div class="v num">${L.linesFor(sel).filter(l => l.kind === 'ingredient').length}건</div><div class="l">재료 폐기</div></div></div></div>`;
-    h += linesCard(L.linesFor(sel), '그날 버린 것');
+    h += linesCard(L.linesFor(sel), '그날 낭비된 것');
   }
   return h;
 }
@@ -134,12 +134,12 @@ function renderC() {
   if (t.closed) return todayHero() + weekCard();
   const top = lines[0], share = Math.round(top.loss / t.loss * 100);
   const diff = t.lastWeek - t.loss;
-  h += `<div class="card"><div class="say">오늘은 <b class="num">${won(t.loss)}</b>어치를 버렸어요.</div>
+  h += `<div class="card"><div class="say">오늘은 <b class="num">${won(t.loss)}</b>이 낭비됐어요.</div>
     <div class="sub">원가 기준 · 메뉴 ${t.wasted}개 + 재료 ${lines.filter(l => l.kind === 'ingredient').length}건 · 폐기율 ${L.pct(t.rate)}</div></div>`;
-  h += `<div class="card"><div class="say">${diff >= 0 ? `지난 일요일보다 <em class="num">${won(diff)}</em> 덜 버렸어요.` : `지난 일요일보다 <b class="num">${won(-diff)}</b> 더 버렸어요.`}</div>
+  h += `<div class="card"><div class="say">${diff >= 0 ? `지난 일요일보다 <em class="num">${won(diff)}</em> 덜 낭비됐어요.` : `지난 일요일보다 <b class="num">${won(-diff)}</b> 더 낭비됐어요.`}</div>
     <div class="sub">이번 주 합계 ${won(L.weekSum)} · 지난주 같은 요일까지 ${won(L.lastWeekSum)}</div>${L.bars({ ghost: true, height: 110 })}</div>`;
   h += `<div class="card"><div class="say"><b>${top.name}</b>가 오늘 손실의 <b class="num">${share}%</b>예요.</div>
-    <div class="sub">${top.qty} 남아서 버렸어요 (${top.why}). 원가가 높은 메뉴라 하나만 줄여도 크게 줄어요.</div>
+    <div class="sub">${top.qty} 남아서 폐기했어요 (${top.why}). 원가가 높은 메뉴라 하나만 줄여도 크게 줄어요.</div>
     <span class="pill">내일 권장 생산량은 예측 기능(M4)이 생기면 여기에</span></div>`;
   h += `<div class="card"><div class="say">크루아상 2개는 <em>직원식</em>으로 구했어요.</div><div class="sub">구한 것 ${won(2200)} — 손실에서 빠져요.</div></div>`;
   h += linesCard(lines, '자세히');
@@ -149,7 +149,7 @@ function renderC() {
 function render() {
   const main = document.getElementById('main');
   if (L.empty) {
-    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 버린 돈이 보여요.</p>
+    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 낭비된 돈이 보여요.</p>
       <a class="primary" href="Closing.mobile.html" style="text-decoration:none;display:inline-block">첫 마감 입력하기</a></div>`;
     return;
   }

@@ -18,7 +18,7 @@
     { d: '일', date: '11/8', loss: 22800, rate: 0.079, wasted: 10, lastWeek: 29500, today: true },
   ];
 
-  // 오늘 무엇을 버렸나 — kind: menu(메뉴 폐기, 레시피로 펼친 원가) / ingredient(재료 폐기, 로트 단가)
+  // 오늘 무엇이 낭비됐나 — kind: menu(메뉴 폐기, 레시피로 펼친 원가) / ingredient(재료 폐기, 로트 단가)
   const TODAY_LINES = [
     { kind: 'menu', name: '리코타 샐러드', cat: '샐러드', qty: '3개', why: '남음 → 폐기', loss: 11700 },
     { kind: 'menu', name: '바게트', cat: '베이커리', qty: '4개', why: '남음 → 폐기', loss: 3600 },
@@ -26,7 +26,7 @@
     { kind: 'ingredient', name: '우유', cat: '재료', qty: '1L', why: '유통기한 만료', loss: 2800 },
     { kind: 'ingredient', name: '양상추', cat: '재료', qty: '350g', why: '손질', loss: 1400 },
   ];
-  // 구한 것 — 남았지만 버리지 않은 것 (손실에서 빠진다)
+  // 구한 것 — 남았지만 낭비되지 않은 것 (손실에서 빠진다)
   const SAVED = [{ name: '크루아상', qty: '2개', how: '직원식', value: 2200 }];
 
   // 상태에 맞게 고친 사본
@@ -51,7 +51,7 @@
     const diff = now - before;
     const p = Math.round(Math.abs(diff) / before * 100);
     const good = diff <= 0;
-    return `<span class="delta ${good ? 'good' : 'bad'}">${label} ${won(Math.abs(diff))} ${good ? '↓ 덜' : '↑ 더'} 버림 (${p}%)</span>`;
+    return `<span class="delta ${good ? 'good' : 'bad'}">${label} ${won(Math.abs(diff))} ${good ? '↓ 덜' : '↑ 더'} 낭비 (${p}%)</span>`;
   }
 
   // 막대 그래프 (SVG). 휴무 = 막대 없이 "휴무", 입력 안 함 = 점선 막대 + "?", 마감 전 = 점선 + "…"

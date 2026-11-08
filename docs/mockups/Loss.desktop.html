@@ -67,7 +67,7 @@ ZW.switcher([
 ], 'top:auto;bottom:8px');
 
 function linesTable(lines) {
-  if (!lines.length) return '<p class="muted">버린 것이 없어요.</p>';
+  if (!lines.length) return '<p class="muted">낭비된 것이 없어요.</p>';
   const sum = lines.reduce((a, l) => a + l.loss, 0);
   return `<table class="t"><thead><tr><th>무엇</th><th>구분</th><th class="n">양</th><th>원인 · 행방</th><th class="n">손실</th><th class="n">비중</th></tr></thead><tbody>
     ${lines.map(l => `<tr><td>${l.name}</td><td><span class="tag ${l.kind === 'menu' ? 'menu' : ''}">${l.kind === 'menu' ? l.cat : '재료'}</span></td><td class="n num">${l.qty}</td>
@@ -99,9 +99,9 @@ function renderA() {
     <div class="box kpi"><div class="l">오늘 폐기 손실 · 원가 기준</div>${todayV}</div>
     <div class="box kpi"><div class="l">오늘 폐기율 (폐기 ÷ 만든)</div><div class="v num">${t.rate != null && t.loss != null ? L.pct(t.rate) : '—'}</div><span class="muted small">메뉴 폐기 ${t.loss != null ? t.wasted + '개' : '—'}</span></div>
     <div class="box kpi"><div class="l">이번 주 손실</div><div class="v num">${won(L.weekSum)}</div>${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
-    <div class="box kpi"><div class="l">버리지 않고 구한 것 (오늘)</div><div class="v num" style="color:var(--accent)">${t.loss != null ? won(saved) : '—'}</div><span class="muted small">${t.loss != null ? '크루아상 2개 직원식' : ''}</span></div></div>`;
+    <div class="box kpi"><div class="l">낭비되지 않고 구한 것 (오늘)</div><div class="v num" style="color:var(--accent)">${t.loss != null ? won(saved) : '—'}</div><span class="muted small">${t.loss != null ? '크루아상 2개 직원식' : ''}</span></div></div>`;
   h += `<div class="two">${weekBox()}${t.loss != null ? byCategory(L.TODAY_LINES) : '<div class="box"><h2>분류별</h2><p class="muted">오늘 마감 뒤에 보여요.</p></div>'}</div>`;
-  if (t.loss != null) h += `<div class="box" style="margin-top:16px"><h2>오늘 버린 것<span class="muted">손실 큰 순</span></h2>${linesTable(L.TODAY_LINES)}</div>`;
+  if (t.loss != null) h += `<div class="box" style="margin-top:16px"><h2>오늘 낭비된 것<span class="muted">손실 큰 순</span></h2>${linesTable(L.TODAY_LINES)}</div>`;
   return h;
 }
 
@@ -124,7 +124,7 @@ function renderB() {
         <div><div class="muted small">폐기 손실</div><div class="num" style="font-size:30px;font-weight:800;color:var(--loss)">${won(x.loss)}</div>${L.delta(x.loss, x.lastWeek, '지난주 ' + x.d + '요일보다')}</div>
         <div><div class="muted small">폐기율</div><div class="num" style="font-size:22px;font-weight:700">${L.pct(x.rate)}</div></div>
         <div><div class="muted small">메뉴 폐기</div><div class="num" style="font-size:22px;font-weight:700">${x.wasted}개</div></div></div></div>
-      <div class="box" style="margin-top:16px"><h2>버린 것</h2>${linesTable(lines)}</div>`;
+      <div class="box" style="margin-top:16px"><h2>낭비된 것</h2>${linesTable(lines)}</div>`;
   }
   return `<div class="split"><div class="box days"><h2>이번 주<span class="muted num">${won(L.weekSum)}</span></h2>${list}
       <div style="margin-top:8px">${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
@@ -134,7 +134,7 @@ function renderB() {
 function render() {
   const main = document.getElementById('main');
   if (L.empty) {
-    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 버린 돈이 보여요.</p>
+    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 낭비된 돈이 보여요.</p>
       <a class="primary" href="Closing.desktop.html" style="text-decoration:none;display:inline-block;width:auto">첫 마감 입력하기</a></div>`;
     return;
   }
