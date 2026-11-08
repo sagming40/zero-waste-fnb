@@ -38,7 +38,7 @@ M2 ~ M5는 REQUIREMENTS의 M 기능을 네 묶음으로 끊은 것이다 — **�
 - [x] Spring 뼈대(`backend/`, Spring Initializr, Boot 4.1.2 · Gradle 9.8.2) + Testcontainers 테스트 1건 통과 (2026-11-07, `06d6e64`)
 - [x] compose(`infra/compose.local.yaml`, PostgreSQL 18 · 5433) + `application.yml`(공용) · `application-local.yml`(DB 접속) (2026-11-07, `82018a9`). Flyway `V1`은 빈 파일로 만들지 않고 M2 첫 테이블 때 만든다 — 빈 V1을 나중에 채우면 체크섬이 바뀐다
 - [x] `/actuator/health` → `{"status":"UP"}` (bootRun local, 2026-11-07)
-- [ ] Modulith 검사 테스트
+- [x] Modulith 검사 테스트 — 위반을 일부러 넣어 빨간불까지 확인 (2026-11-08, `f130c17`)
 - [ ] CI: GitHub Actions에서 `./gradlew test`
 - [ ] COMMIT_CONVENTION · README의 실행 방법을 실제 명령으로
 

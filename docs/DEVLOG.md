@@ -6,11 +6,22 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: Modulith 검사 테스트 → CI(GitHub Actions) → M0 닫기 점검
+- **다음에 할 일**: CI(GitHub Actions) → 실행 방법 문서 → M0 닫기 점검
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
   - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
   - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)
+
+---
+
+## 2026-11-08 (1) · Modulith 검사 테스트 (노트북)
+
+**한 일**
+- `ModularityTests`: `ApplicationModules.of(ZwfnbApplication.class).verify()`. 스프링 컨텍스트 · Docker 없이 돈다. 기능 폴더가 없어 모듈 0개로 통과(1건, 3.12s) — `f130c17`
+- **일부러 위반해서 빨간불 확인**(커밋 안 함): `menu.MenuPeek`가 `store.internal.StoreSecret`을 부르게 하자 `BUILD FAILED`, 모듈 2개(`store` · `menu`)를 찾고 `Module 'menu' depends on non-exposed type com.sagming.zwfnb.store.internal.StoreSecret within module 'store'!`. 컴파일은 통과한다 — 막는 건 이 테스트뿐. 실습 파일을 지우고 다시 통과(5s)
+
+**막힌 것**
+- 실습 파일을 `com/sagming/store/internal`(zwfnb 빠진 폴더)에 만들었는데 **Gradle 빌드는 통과**했다. 원인: `javac`는 `package` 선언으로 클래스 위치를 정하고 폴더가 틀려도 컴파일한다. VS Code(Java 확장)만 "declared package does not match the expected package"로 잡았다. 배운 것: 폴더 · 패키지 불일치는 빌드가 안 잡아 주니 Problems 창을 본다(설정 오타 때와 같은 교훈)
 
 ---
 
