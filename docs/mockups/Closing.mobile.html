@@ -300,7 +300,12 @@ function draw() {
   if (closed) { bottom.innerHTML = `<button class="primary" data-act="save">휴무로 저장</button>`; return; }
   const left = t.needed - t.done;
   const label = errs.length ? `고칠 곳 ${errs.length}개가 있어요` : left ? `저장 (${left}개 입력 안 함)` : '마감 저장';
-  bottom.innerHTML = `<div class="loss-line"><span><span class="small muted">오늘 폐기 손실 · 원가 기준</span><br>
+  // 직원에게는 금액(원가 · 손실)을 보이지 않는다 — 개수 · 폐기율만 (DESIGN 8절)
+  bottom.innerHTML = ZW.params.get('role') === 'staff'
+    ? `<div class="loss-line"><span><span class="small muted">오늘 폐기</span><br><span class="amt num">${t.wasted}개</span></span>
+      <span class="small muted num" style="text-align:right">폐기율<br>${(t.rate * 100).toFixed(1)}%</span></div>
+    <button class="primary" data-act="save" ${errs.length ? 'disabled' : ''}>${label}</button>`
+    : `<div class="loss-line"><span><span class="small muted">오늘 폐기 손실 · 원가 기준</span><br>
       <span class="amt num">${won(t.lossWon)}</span></span>
     <span class="small muted num" style="text-align:right">폐기 ${t.wasted}개<br>폐기율 ${(t.rate * 100).toFixed(1)}%</span></div>
     <button class="primary" data-act="save" ${errs.length ? 'disabled' : ''}>${label}</button>`;

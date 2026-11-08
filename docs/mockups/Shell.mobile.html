@@ -69,7 +69,7 @@ ZW.switcher([
 
 function screenHtml(id) {
   if (id === 'today') return `<iframe title="오늘" src="${NAV.srcFor('today', 'mobile', `v=A&state=${time === 'before' ? 'before' : 'normal'}&${common}`)}"></iframe>`;
-  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'mobile', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&${common}`)}"></iframe>`;
+  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'mobile', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&role=${role}&${common}`)}"></iframe>`;
   if (id === 'stockGroup') {
     return `<div class="subnav">${STOCK_SUB.map(s => `<button data-sub="${s}" aria-current="${s === stockSub ? 'page' : 'false'}">${NAV.byId[s].label}</button>`).join('')}</div>${NAV.placeholder(stockSub)}`;
   }

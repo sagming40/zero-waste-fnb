@@ -9,7 +9,24 @@
 <style>
   html, body { height: 100%; font-size: 14px; }
   .app { height: 100vh; display: grid; }
-  .app.side { grid-template-columns: 232px 1fr; }
+  .app.side { grid-template-columns: var(--sbw, 232px) 1fr; }
+  .app.side.folded { grid-template-columns: 64px 1fr; }
+  .app.side.dragging, .app.side.dragging * { cursor: col-resize !important; user-select: none; }
+  .app.side.dragging iframe { pointer-events: none; } /* 끄는 중에 마우스가 화면(iframe) 안으로 빨려 들어가지 않게 */
+  aside { position: relative; }
+  /* 폭 조절 손잡이 — 메뉴 오른쪽 가장자리 */
+  .grip { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 3; border: 0; padding: 0; background: transparent; }
+  .grip:hover, .grip:focus-visible, .dragging .grip { background: var(--accent); opacity: .5; outline: none; }
+  .fold { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; color: var(--muted); padding: 8px 10px; border-radius: 8px; font-size: 12px; }
+  .fold:hover { background: var(--surface-2); }
+  /* 접힌 상태: 아이콘만 */
+  .folded aside { padding: 14px 8px; align-items: center; }
+  .folded .lbl, .folded .grp, .folded .st, .folded .storepick small, .folded .me .lbl { display: none; }
+  .folded .grp-sep { display: block; }
+  .grp-sep { display: none; width: 24px; height: 1px; background: var(--line); margin: 8px 0; }
+  .folded .item, .folded .cta, .folded .fold { justify-content: center; padding: 10px 0; }
+  .folded .storepick { padding: 8px 0; text-align: center; }
+  .folded .brand { padding: 4px 0 12px; }
   .app.top { grid-template-rows: auto 1fr; }
   .content { min-height: 0; overflow: auto; }
   .content iframe { width: 100%; height: 100%; border: 0; display: block; }
@@ -61,10 +78,25 @@ const groups = [...new Set(visible.map(s => s.group))];
 
 function screenHtml(id) {
   if (id === 'today') return `<iframe title="오늘" src="${NAV.srcFor('today', 'desktop', `v=A&state=${time === 'before' ? 'before' : 'normal'}&${common}`)}"></iframe>`;
-  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'desktop', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&${common}`)}"></iframe>`;
+  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'desktop', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&role=${role}&${common}`)}"></iframe>`;
   return NAV.placeholder(id);
 }
-const storePick = `<button class="storepick">모래내 베이커리 &amp; 델리 ▾<small>${role === 'owner' ? '점주' : '직원'} · 매장 2곳</small></button>`;
+const storePick = `<button class="storepick" title="매장 바꾸기">${NAV.icon('store', 18)}<span class="lbl"> 모래내 베이커리 &amp; 델리 ▾</span><small>${role === 'owner' ? '점주' : '직원'} · 매장 2곳</small></button>`;
+
+/* ── 왼쪽 메뉴 폭 · 접힘: 사람마다 브라우저에 기억 (실패해도 기본값으로 돈다) ── */
+const SB = { min: 180, max: 360, def: 232, snap: 120 };
+let sb = { w: SB.def, folded: false };
+try { Object.assign(sb, JSON.parse(localStorage.getItem('zw.sidebar') || '{}')); } catch (e) { /* 저장소를 못 쓰면 기본값 */ }
+const saveSb = () => { try { localStorage.setItem('zw.sidebar', JSON.stringify(sb)); } catch (e) { /* 무시 */ } };
+function applySb() {
+  const app = document.getElementById('app');
+  app.style.setProperty('--sbw', sb.w + 'px');
+  app.classList.toggle('folded', sb.folded);
+  const g = app.querySelector('.grip');
+  if (g) { g.setAttribute('aria-valuenow', sb.folded ? 64 : sb.w); }
+  const f = app.querySelector('.fold');
+  if (f) { f.innerHTML = sb.folded ? '»' : '« <span class="lbl">메뉴 접기</span>'; f.title = sb.folded ? '메뉴 펴기' : '메뉴 접기'; f.setAttribute('aria-expanded', String(!sb.folded)); }
+}
 
 function render() {
   const app = document.getElementById('app');
@@ -81,13 +113,49 @@ function render() {
     return;
   }
   app.className = 'app side';
-  const nav = groups.map(g => `<div class="grp">${g}</div>${visible.filter(s => s.group === g).map(s =>
-    `<button class="item" data-go="${s.id}" aria-current="${s.id === cur ? 'page' : 'false'}">${NAV.icon(s.id, 18)}${s.label}${s.src ? '' : `<span class="st">${s.stage}</span>`}</button>`).join('')}`).join('');
-  const cta = time === 'before' && cur !== 'closing' ? `<button class="cta" data-go="closing">${NAV.icon('closing', 18)} 오늘 마감 입력</button>` : '';
-  app.innerHTML = `<aside aria-label="주 메뉴"><div class="brand">ZeroWaste F&amp;B</div>${storePick}${cta}${nav}
-    <div class="me">${role === 'owner' ? '김점주' : '박직원'} · 로그아웃</div></aside><div class="content">${screenHtml(cur)}</div>`;
+  const nav = groups.map((g, i) => `${i ? '<div class="grp-sep"></div>' : ''}<div class="grp">${g}</div>${visible.filter(s => s.group === g).map(s =>
+    `<button class="item" data-go="${s.id}" title="${s.label}" aria-current="${s.id === cur ? 'page' : 'false'}">${NAV.icon(s.id, 18)}<span class="lbl">${s.label}</span>${s.src ? '' : `<span class="st">${s.stage}</span>`}</button>`).join('')}`).join('');
+  const cta = time === 'before' && cur !== 'closing' ? `<button class="cta" data-go="closing" title="오늘 마감 입력">${NAV.icon('closing', 18)}<span class="lbl"> 오늘 마감 입력</span></button>` : '';
+  app.innerHTML = `<aside aria-label="주 메뉴"><div class="brand">${sb.folded ? 'ZW' : 'ZeroWaste F&amp;B'}</div>${storePick}${cta}${nav}
+    <div class="me"><button class="fold" data-act="fold"></button><span class="lbl">${role === 'owner' ? '김점주' : '박직원'} · 로그아웃</span></div>
+    <button class="grip" role="separator" aria-orientation="vertical" aria-label="메뉴 폭 조절 (← → 키, 두 번 누르면 원래 폭)" aria-valuemin="${SB.min}" aria-valuemax="${SB.max}"></button></aside>
+    <div class="content">${screenHtml(cur)}</div>`;
+  applySb();
 }
-document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) { cur = g.dataset.go; render(); } });
+
+/* 폭 조절: 손잡이를 끈다. 너무 좁히면(120px 아래) 접힌다. 두 번 누르면 원래 폭 */
+document.addEventListener('pointerdown', (e) => {
+  const grip = e.target.closest('.grip');
+  if (!grip) return;
+  e.preventDefault();
+  const app = document.getElementById('app');
+  grip.setPointerCapture(e.pointerId);
+  app.classList.add('dragging');
+  const move = (ev) => {
+    const x = ev.clientX;
+    if (x < SB.snap) { sb.folded = true; }
+    else { sb.folded = false; sb.w = Math.max(SB.min, Math.min(SB.max, Math.round(x))); }
+    applySb();
+    app.querySelector('.brand').textContent = sb.folded ? 'ZW' : 'ZeroWaste F&B';
+  };
+  const up = () => { app.classList.remove('dragging'); grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); saveSb(); };
+  grip.addEventListener('pointermove', move);
+  grip.addEventListener('pointerup', up);
+});
+document.addEventListener('dblclick', (e) => { if (e.target.closest('.grip')) { sb = { w: SB.def, folded: false }; saveSb(); render(); } });
+document.addEventListener('keydown', (e) => {
+  if (!e.target.closest || !e.target.closest('.grip')) return;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    sb.folded = false;
+    sb.w = Math.max(SB.min, Math.min(SB.max, sb.w + (e.key === 'ArrowRight' ? 16 : -16)));
+    applySb(); saveSb();
+  }
+});
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-act="fold"]')) { sb.folded = !sb.folded; saveSb(); render(); return; }
+  const g = e.target.closest('[data-go]'); if (g) { cur = g.dataset.go; render(); }
+});
 render();
 </script>
 </body>

@@ -50,6 +50,7 @@ M2 ~ M5는 REQUIREMENTS의 M 기능을 네 묶음으로 끊은 것이다 — **�
   - [x] 컬러: 8개 비교 → **E 올리브** 채택, 밝게 · 어둡게 대비 4.5 이상 (2026-11-08, DESIGN 2절)
   - [x] 마감 입력: 휴대폰 3 · 데스크톱 3 비교 → **휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약** 채택 (2026-11-08, DESIGN 3절)
   - [x] 오늘 손실: 휴대폰 3 · 데스크톱 2 비교 → **휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드** 채택 (2026-11-08, DESIGN 7절)
+  - [x] 앱 화면 지도 · 이동: **휴대폰 아래 탭 + 데스크톱 왼쪽 메뉴(폭 조절 · 접기)**, 첫 화면 규칙, 직원 금액 숨김 (2026-11-08, DESIGN 8절)
   - [ ] 재고 · 입고 · 예측 · 리포트, 소개(랜딩, F27 — 연출은 [0014](decisions/0014-motion-gsap.md)) · 로그인
 - [x] **프런트 결정**: Angular 22 · TypeScript · Tailwind 4 · spartan/ui (2026-11-08, [0013](decisions/0013-frontend-angular.md)) — 마감 입력 시안이 근거. 차트는 ECharts ([0015](decisions/0015-charts-echarts.md), 2026-11-08)
 - [x] 프런트 뼈대(pnpm): `frontend/`, E 올리브 토큰을 Tailwind 테마로, 버튼 하나, 개발 서버 프록시(`/api` · `/actuator`)로 백엔드 health를 화면에 표시 — Vitest 4건 통과 (2026-11-08)
@@ -66,7 +67,7 @@ F01 ~ F06 · F08 · F19, N02 · N03 · N04 · N05(헬스 부분). 외부 API는 
 - 첫 엔티티 전에 `backend/lombok.config`(`lombok.addLombokGeneratedAnnotation = true`, ARCHITECTURE 2절 Lombok 규칙) — M0 점검에서 미룸(아직 Lombok을 쓰는 코드가 없다)
 - 결정할 것: 오류 응답 형식(안: RFC 9457), OpenAPI → TypeScript 타입 생성 여부, `store_member` · `store_invitation`의 RLS
 
-**완료 기준**: 남의 매장 · 비로그인 · 직원 권한 실패 테스트 통과(앱 역할로 접속한 Testcontainers에서), 같은 날 마감을 두 번 입력해도 줄 수가 같다, 휴대폰에서 로그인 → 마감 입력 → 오늘 손실 원화를 본다.
+**완료 기준**: 남의 매장 · 비로그인 · 직원 권한 실패 테스트 통과(직원 요청에 금액이 내려가지 않는지 포함)(앱 역할로 접속한 Testcontainers에서), 같은 날 마감을 두 번 입력해도 줄 수가 같다, 휴대폰에서 로그인 → 마감 입력 → 오늘 손실 원화를 본다.
 
 ### 첫 배포 (M2 뒤)
 

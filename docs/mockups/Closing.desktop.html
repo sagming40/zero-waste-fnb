@@ -96,6 +96,7 @@
 <script>
 const { params, won, MENUS, CATS, SOLDOUT_AT, DEST } = ZW;
 const variant = (params.get('v') || 'A').toUpperCase();
+const STAFF = params.get('role') === 'staff'; // 직원에게는 금액(원가 · 손실)을 보이지 않는다 — 개수 · 폐기율만 (DESIGN 8절)
 const scenario = params.get('state') || 'entry';
 document.getElementById('vtag').remove();
 ZW.switcher([
@@ -162,7 +163,7 @@ function catTable(c) {
       <td class="n">${num(m.id, 'left', s, `class="${err ? 'bad' : ''}" ${s.soldout ? 'disabled' : ''}`)}</td>
       <td class="c"><input type="checkbox" data-act="soldout" data-id="${m.id}" ${s.soldout ? 'checked' : ''} aria-label="${m.name} 품절"></td>
       <td>${s.soldout ? atSelect(m, s) : s.left > 0 && !err ? `${destText(s)} <button class="link" data-act="dest" data-id="${m.id}">${openDest.has(m.id) ? '접기' : '나누기'}</button>` : '<span class="dash">—</span>'}</td>
-      <td class="n num ${l ? 'lossv' : 'muted'}">${l ? won(l) : '—'}</td></tr>`;
+      <td class="n num ${l ? 'lossv' : 'muted'}">${STAFF ? (s.touched && !err ? ZW.wasteOf(s) + '개' : '—') : l ? won(l) : '—'}</td></tr>`;
     if (openDest.has(m.id) && !s.soldout && s.left > 0) {
       html += `<tr class="sub"><td></td><td colspan="5">${DEST.map(d => `${d.label} ${num(m.id, 'dest.' + d.key, s, 'class="sm"')}`).join(' &nbsp; ')} &nbsp; → 나머지 폐기</td></tr>`;
     }
@@ -170,9 +171,9 @@ function catTable(c) {
     return html;
   }).join('');
   const head = fresh
-    ? `<tr><th>메뉴</th><th class="n">만든</th><th class="n">남은</th><th class="c">품절</th><th>남은 것의 행방 / 품절 시각</th><th class="n">폐기 손실</th></tr>`
+    ? `<tr><th>메뉴</th><th class="n">만든</th><th class="n">남은</th><th class="c">품절</th><th>남은 것의 행방 / 품절 시각</th><th class="n">${STAFF ? '폐기' : '폐기 손실'}</th></tr>`
     : `<tr><th>메뉴</th><th class="n">판매</th><th class="n">어제</th></tr>`;
-  const foot = fresh ? `<tfoot><tr><td colspan="5">${c} 합계</td><td class="n num lossv">${won(lossSum)}</td></tr></tfoot>` : '';
+  const foot = fresh ? `<tfoot><tr><td colspan="5">${c} 합계</td><td class="n num lossv">${STAFF ? list.reduce((a, m) => a + (ZW.errorsOf(m, state[m.id]) ? 0 : ZW.wasteOf(state[m.id])), 0) + '개' : won(lossSum)}</td></tr></tfoot>` : '';
   const done = list.filter(m => state[m.id].touched).length;
   const prog = done === list.length ? '<span class="lossv" style="color:var(--accent)">✓</span>' : `<span class="num">${done}/${list.length}</span>`;
   return `<div class="cat-h"><h2>${c} <span class="small" style="font-weight:600">${prog}</span></h2><span class="muted small">${fresh ? '당일 생산품 — 만든 · 남은 · 품절' : '주문 때 만드는 메뉴 — 판매량만'}</span></div>
@@ -211,9 +212,9 @@ function side(t, errs, compact) {
   const left = menus.filter(m => !state[m.id].touched);
   const label = errs.length ? `고칠 곳 ${errs.length}개가 있어요` : left.length ? `저장 (${left.length}개 입력 안 함)` : '마감 저장';
   return `<aside class="side">
-    <div class="small muted">오늘 폐기 손실 · 원가 기준</div>
-    <div class="amt num">${won(t.lossWon)}</div>
-    <div class="kv"><span class="muted">폐기</span><b class="num">${t.wasted}개</b></div>
+    ${STAFF ? `<div class="small muted">오늘 폐기</div><div class="amt num">${t.wasted}개</div>`
+      : `<div class="small muted">오늘 폐기 손실 · 원가 기준</div><div class="amt num">${won(t.lossWon)}</div>
+    <div class="kv"><span class="muted">폐기</span><b class="num">${t.wasted}개</b></div>`}
     <div class="kv"><span class="muted">폐기율 (폐기 ÷ 만든)</span><b class="num">${(t.rate * 100).toFixed(1)}%</b></div>
     <div class="kv" style="display:block"><div style="display:flex;justify-content:space-between"><span class="muted">입력</span><b class="num">${t.done} / ${t.needed}</b></div>
       <div class="bar"><i style="width:${pct}%"></i></div>
