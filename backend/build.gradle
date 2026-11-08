@@ -55,4 +55,31 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+
+	// 조용한 시험 감독관에게 "붙은 사람도 이름을 불러줘"라고 요청한다
+	// 기본값은 실패만 찍기 때문에, CI log로는 몇 건이 돌았는지 알 수 없다
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+		// 실패하면 원인(예외 · 스택)을 줄이지 않고 전부 → CI log만 보고도 원인을 찾는다
+		// 속성은 '=' 로 넣는다 (띄어쓰기 방식은 Gradle 10에서 없어진다)
+		exceptionFormat = 'full'
+	}
+
+	// 시험장 뒤에 "기록원"을 한 명 세운다 (TestListener)
+	// 기록원은 네 가지 순간에 불린다: 묶음 시작 · 시험 시작 · 시험 끝 · 묶음 끝
+	// 앞의 셋은 할 일이 없어 빈 칸 {}으로 두고, 묶음 끝에만 합계를 적는다
+	addTestListener(new TestListener() {
+		void beforeSuite(TestDescriptor suite) {}
+		void beforeTest(TestDescriptor test) {}
+		void afterTest(TestDescriptor test, TestResult result) {}
+
+		void afterSuite(TestDescriptor suite, TestResult result) {
+			// suite.parent == null → 가장 바깥 묶음(= Test 작업 전체)일 때만 찍는다
+			// ─ 걸러내지 않으면 Test Class마다 합계가 찍혀버린다
+			if (suite.parent == null) {
+				println "TEST 결과: ${result.resultType} ─ 전체 ${result.testCount}건, " +
+						"통과 ${result.successfulTestCount} · 실패 ${result.failedTestCount} · 건너뜀 ${result.skippedTestCount}"
+			}
+		}
+	})
 }
