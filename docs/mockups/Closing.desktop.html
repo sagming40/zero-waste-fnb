@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마감 입력 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { font-size: 14px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px 40px; }
+  .dtop { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .dtop .wrap { display: flex; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+  .dtop h1 { font-size: 20px; margin: 0; letter-spacing: -0.02em; }
+  .dtop .store { font-size: 12px; color: var(--muted); }
+  .dtop .seg { margin: 0; width: 180px; }
+  .dtop .grow { flex: 1; }
+  .kbd { font-size: 12px; color: var(--muted); }
+  .kbd kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; font-family: inherit; background: var(--surface); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; margin-top: 16px; align-items: start; }
+  .grid.full { grid-template-columns: 1fr; }
+  .grid.nav { grid-template-columns: 200px minmax(0, 1fr) 280px; }
+  .banner { margin: 16px 0 0; }
+
+  /* 표 */
+  table.t { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+  .t th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); padding: 8px 10px; white-space: nowrap; }
+  .t td { padding: 6px 10px; border-top: 1px solid var(--line); vertical-align: middle; }
+  .t th.n, .t td.n { text-align: right; }
+  .t th.c, .t td.c { text-align: center; }
+  .t tr.untouched td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+  .t tr.sub td { border-top: 0; padding-top: 0; font-size: 13px; color: var(--muted); }
+  .t input[type=number] { width: 72px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; text-align: right; background: var(--bg); font-weight: 700; }
+  .t input[type=number].sm { width: 56px; }
+  .t input[type=number]:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  .t input.bad { border-color: var(--loss); color: var(--loss); }
+  .t input:disabled { opacity: .35; }
+  .t input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--warn); }
+  .t select { padding: 5px 6px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); font-size: 13px; }
+  .t .dash { color: var(--line); }
+  .t tfoot td { background: var(--surface-2); font-weight: 700; }
+  .sheetwrap { overflow-x: auto; border-radius: var(--radius); }
+  .sheet td, .sheet th { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+  .sheet input[type=number].sm { width: 50px; padding: 5px 6px; }
+  .cat-h { display: flex; justify-content: space-between; align-items: baseline; margin: 8px 0 8px; }
+  .cat-h h2 { font-size: 15px; margin: 0; }
+  .lossv { color: var(--loss); font-weight: 700; }
+  .badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 600; margin-left: 4px; }
+
+  /* 옆 요약 */
+  .side { position: sticky; top: 84px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .side .amt { font-size: 30px; font-weight: 800; color: var(--loss); letter-spacing: -0.02em; }
+  .side .kv { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line); }
+  .bar { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin: 6px 0 4px; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  .side ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+  .side .primary { margin-top: 14px; }
+
+  /* 분류 탭 */
+  .catnav { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 4px; }
+  .catnav button { text-align: left; border: 0; background: transparent; padding: 10px 12px; border-radius: 10px; display: flex; justify-content: space-between; font-weight: 600; color: var(--muted); }
+  .catnav button[aria-current="true"] { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--line); }
+  .catnav .cnt { font-weight: 400; font-size: 12px; }
+  .catnav .cnt.done { color: var(--accent); font-weight: 700; }
+
+  .closed-box { max-width: 480px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .closed-box select { width: 100%; margin-top: 8px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+  .variant-tag { position: fixed; bottom: 8px; right: 8px; z-index: 20; font-size: 11px; background: var(--text); color: var(--bg); padding: 2px 6px; border-radius: 6px; opacity: .6; }
+</style>
+</head>
+<body>
+<header class="dtop"><div class="wrap">
+  <div><div class="store">모래내 베이커리 &amp; 델리</div><h1>마감 입력</h1></div>
+  <div class="datebar">
+    <button class="iconbtn" data-act="day" aria-label="전날">‹</button>
+    <span class="datepill num">2026년 11월 8일 (일)</span>
+    <button class="iconbtn" data-act="day" aria-label="다음 날" style="opacity:.35">›</button>
+  </div>
+  <div class="seg" role="group" aria-label="영업 여부">
+    <button data-act="open" id="segOpen">영업</button>
+    <button data-act="closed" id="segClosed">휴무</button>
+  </div>
+  <div class="grow"></div>
+  <span class="kbd" id="kbd"><kbd>Tab</kbd> 옆 칸 · <kbd>Enter</kbd> 아래 칸</span>
+  <button class="ghost" data-act="yesterday" id="ybtn">↺ 어제 값 불러오기</button>
+</div></header>
+
+<div class="wrap">
+  <div id="banners"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<div class="variant-tag" id="vtag"></div>
+
+<script src="shared.js"></script>
+<script>
+const { params, won, MENUS, CATS, SOLDOUT_AT, DEST } = ZW;
+const variant = (params.get('v') || 'A').toUpperCase();
+const scenario = params.get('state') || 'entry';
+document.getElementById('vtag').remove();
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 표 + 옆 요약'], ['B', 'B 분류 탭'], ['C', 'C 스프레드시트']], variant],
+  ['상태', 'state', [['entry', '입력 중'], ['reentry', '저장한 날'], ['error', '오류'], ['closed', '휴무'], ['empty', '빈']], scenario],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+let state = ZW.initialState(scenario);
+let closed = scenario === 'closed';
+let curCat = '베이커리';            // 시안 B: 지금 보는 분류
+const openDest = new Set();
+const menus = scenario === 'empty' ? [] : MENUS;
+
+/* ── 상태 바꾸기 (휴대폰 시안과 같은 규칙) ── */
+function setField(id, field, v) {
+  const s = state[id];
+  v = Math.max(0, Math.floor(Number(v) || 0));
+  if (field.startsWith('dest.')) {
+    const k = field.slice(5);
+    const others = DEST.filter(d => d.key !== k).reduce((a, d) => a + s.dest[d.key], 0);
+    s.dest[k] = Math.min(v, Math.max(0, s.left - others));
+  } else {
+    s[field] = v;
+    if (field === 'left') clampDest(s);
+  }
+  s.touched = true;
+}
+function clampDest(s) {
+  let over = DEST.reduce((a, d) => a + s.dest[d.key], 0) - s.left;
+  for (const d of [...DEST].reverse()) { if (over <= 0) break; const cut = Math.min(over, s.dest[d.key]); s.dest[d.key] -= cut; over -= cut; }
+}
+function toggleSoldout(id) {
+  const s = state[id];
+  s.soldout = !s.soldout; s.touched = true;
+  if (s.soldout) { s.left = 0; clampDest(s); s.at = s.at || SOLDOUT_AT[1]; } else s.at = null;
+}
+const valOf = (s, f) => s.touched ? (f.startsWith('dest.') ? s.dest[f.slice(5)] : s[f]) : '';
+const num = (id, f, s, extra = '') => `<input type="number" min="0" inputmode="numeric" placeholder="0" value="${valOf(s, f)}" data-id="${id}" data-f="${f}" ${extra}>`;
+const rowLoss = (m, s) => (m.fresh && !ZW.errorsOf(m, s)) ? ZW.wasteOf(s) * m.cost : 0;
+const atSelect = (m, s) => `<select data-act="atsel" data-id="${m.id}" aria-label="${m.name} 품절 시각">${SOLDOUT_AT.map(t => `<option ${s.at === t ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+function destText(s) {
+  const p = [`<span class="lossv">폐기 ${ZW.wasteOf(s)}</span>`];
+  DEST.forEach(d => { if (s.dest[d.key]) p.push(`${d.label} ${s.dest[d.key]}`); });
+  return p.join(' · ');
+}
+
+/* ── 분류 하나의 표 (시안 A · B) ── */
+function catTable(c) {
+  const list = menus.filter(m => m.cat === c);
+  if (!list.length) return '';
+  const fresh = list[0].fresh;
+  let lossSum = 0;
+  const rows = list.map(m => {
+    const s = state[m.id], err = ZW.errorsOf(m, s);
+    const tag = m.isNew ? '<span class="badge">신메뉴</span>' : '';
+    const cls = s.touched ? '' : 'untouched';
+    if (!fresh) {
+      return `<tr class="${cls}"><td>${m.name}${tag}</td><td class="n">${num(m.id, 'sold', s)}</td><td class="n muted num">${m.y ? m.y.sold : '—'}</td></tr>`;
+    }
+    const l = rowLoss(m, s); lossSum += l;
+    let html = `<tr class="${cls}"><td>${m.name}${tag}</td>
+      <td class="n">${num(m.id, 'made', s)}</td>
+      <td class="n">${num(m.id, 'left', s, `class="${err ? 'bad' : ''}" ${s.soldout ? 'disabled' : ''}`)}</td>
+      <td class="c"><input type="checkbox" data-act="soldout" data-id="${m.id}" ${s.soldout ? 'checked' : ''} aria-label="${m.name} 품절"></td>
+      <td>${s.soldout ? atSelect(m, s) : s.left > 0 && !err ? `${destText(s)} <button class="link" data-act="dest" data-id="${m.id}">${openDest.has(m.id) ? '접기' : '나누기'}</button>` : '<span class="dash">—</span>'}</td>
+      <td class="n num ${l ? 'lossv' : 'muted'}">${l ? won(l) : '—'}</td></tr>`;
+    if (openDest.has(m.id) && !s.soldout && s.left > 0) {
+      html += `<tr class="sub"><td></td><td colspan="5">${DEST.map(d => `${d.label} ${num(m.id, 'dest.' + d.key, s, 'class="sm"')}`).join(' &nbsp; ')} &nbsp; → 나머지 폐기</td></tr>`;
+    }
+    if (err) html += `<tr class="sub"><td></td><td colspan="5" class="field-err">${err}</td></tr>`;
+    return html;
+  }).join('');
+  const head = fresh
+    ? `<tr><th>메뉴</th><th class="n">만든</th><th class="n">남은</th><th class="c">품절</th><th>남은 것의 행방 / 품절 시각</th><th class="n">폐기 손실</th></tr>`
+    : `<tr><th>메뉴</th><th class="n">판매</th><th class="n">어제</th></tr>`;
+  const foot = fresh ? `<tfoot><tr><td colspan="5">${c} 합계</td><td class="n num lossv">${won(lossSum)}</td></tr></tfoot>` : '';
+  const done = list.filter(m => state[m.id].touched).length;
+  const prog = done === list.length ? '<span class="lossv" style="color:var(--accent)">✓</span>' : `<span class="num">${done}/${list.length}</span>`;
+  return `<div class="cat-h"><h2>${c} <span class="small" style="font-weight:600">${prog}</span></h2><span class="muted small">${fresh ? '당일 생산품 — 만든 · 남은 · 품절' : '주문 때 만드는 메뉴 — 판매량만'}</span></div>
+    <table class="t">${head}<tbody>${rows}</tbody>${foot}</table>`;
+}
+
+/* ── 시안 C: 한 장 스프레드시트 ── */
+function sheet() {
+  const dash = '<td class="c dash">—</td>';
+  let tot = { loss: 0, waste: 0 };
+  const rows = menus.map(m => {
+    const s = state[m.id], err = ZW.errorsOf(m, s);
+    const cls = s.touched ? '' : 'untouched';
+    const head = `<td class="muted">${m.cat}</td><td>${m.name}${m.isNew ? '<span class="badge">신메뉴</span>' : ''}</td>`;
+    if (!m.fresh) return `<tr class="${cls}">${head}<td class="n">${num(m.id, 'sold', s, 'class="sm"')}</td>${dash.repeat(9)}</tr>`;
+    const w = err ? 0 : ZW.wasteOf(s), l = rowLoss(m, s);
+    tot.loss += l; tot.waste += w;
+    const dis = s.soldout ? 'disabled' : '';
+    return `<tr class="${cls}">${head}${dash}
+      <td class="n">${num(m.id, 'made', s, 'class="sm"')}</td>
+      <td class="n">${num(m.id, 'left', s, `class="sm ${err ? 'bad' : ''}" ${dis} title="${err || ''}"`)}</td>
+      <td class="c"><input type="checkbox" data-act="soldout" data-id="${m.id}" ${s.soldout ? 'checked' : ''} aria-label="${m.name} 품절"></td>
+      <td>${s.soldout ? atSelect(m, s) : '<span class="dash">—</span>'}</td>
+      ${DEST.map(d => `<td class="n">${num(m.id, 'dest.' + d.key, s, `class="sm" ${dis || (s.left ? '' : 'disabled')}`)}</td>`).join('')}
+      <td class="n num lossv">${s.touched && !err ? w : ''}</td>
+      <td class="n num ${l ? 'lossv' : 'muted'}">${l ? won(l) : '—'}</td></tr>`;
+  }).join('');
+  return `<div class="sheetwrap"><table class="t sheet"><thead><tr><th>분류</th><th>메뉴</th><th class="n">판매</th><th class="n">만든</th><th class="n">남은</th><th class="c">품절</th><th>시각</th>
+    ${DEST.map(d => `<th class="n">${d.label}</th>`).join('')}<th class="n">폐기</th><th class="n">손실</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr><td colspan="11">합계 (폐기 = 남은 − 할인 − 직원식 − 기부, 자동)</td><td class="n num lossv">${tot.waste}</td><td class="n num lossv">${won(tot.loss)}</td></tr></tfoot></table></div>`;
+}
+
+/* ── 옆 요약 ── */
+function side(t, errs, compact) {
+  const pct = t.needed ? Math.round(t.done / t.needed * 100) : 0;
+  const left = menus.filter(m => !state[m.id].touched);
+  const label = errs.length ? `고칠 곳 ${errs.length}개가 있어요` : left.length ? `저장 (${left.length}개 입력 안 함)` : '마감 저장';
+  return `<aside class="side">
+    <div class="small muted">오늘 폐기 손실 · 원가 기준</div>
+    <div class="amt num">${won(t.lossWon)}</div>
+    <div class="kv"><span class="muted">폐기</span><b class="num">${t.wasted}개</b></div>
+    <div class="kv"><span class="muted">폐기율 (폐기 ÷ 만든)</span><b class="num">${(t.rate * 100).toFixed(1)}%</b></div>
+    <div class="kv" style="display:block"><div style="display:flex;justify-content:space-between"><span class="muted">입력</span><b class="num">${t.done} / ${t.needed}</b></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      ${left.length && !compact ? `<div class="small muted">아직: ${left.map(m => m.name).join(', ')}</div>` : ''}</div>
+    ${errs.length ? `<div class="kv" style="display:block"><span class="field-err">고칠 곳: ${errs.map(m => m.name).join(', ')}</span></div>` : ''}
+    <button class="primary" data-act="save" ${errs.length ? 'disabled' : ''}>${label}</button>
+    <div class="small muted" style="margin-top:8px;text-align:center"><kbd style="font-family:inherit">Ctrl</kbd> + <kbd style="font-family:inherit">S</kbd> 로도 저장</div>
+  </aside>`;
+}
+
+/* ── 그리기 ── */
+function render() {
+  // 다시 그려도 커서가 있던 칸을 잃지 않게
+  const a = document.activeElement;
+  const keep = a && a.dataset && a.dataset.id && a.dataset.f ? `[data-id="${a.dataset.id}"][data-f="${a.dataset.f}"]` : null;
+
+  document.getElementById('segOpen').setAttribute('aria-pressed', !closed);
+  document.getElementById('segClosed').setAttribute('aria-pressed', closed);
+  const hideTools = closed || !menus.length;
+  document.getElementById('ybtn').style.visibility = hideTools ? 'hidden' : '';
+  document.getElementById('kbd').style.visibility = hideTools ? 'hidden' : '';
+
+  const t = ZW.totals(state, menus);
+  const errs = menus.filter(m => ZW.errorsOf(m, state[m.id]));
+  let b = '';
+  if (scenario === 'reentry') b += `<div class="banner warn"><b>이미 저장한 날이에요</b>21:42에 김직원 님이 휴대폰에서 저장했어요. 다시 저장하면 이날 마감 전체가 지금 값으로 바뀌어요.</div>`;
+  document.getElementById('banners').innerHTML = b;
+
+  const grid = document.getElementById('grid');
+  grid.className = 'grid';
+  if (!menus.length) {
+    grid.className = 'grid full';
+    grid.innerHTML = `<div class="empty"><div class="big">🥐</div><p><b>아직 메뉴가 없어요</b><br>메뉴를 등록하면 여기서 매일 마감을 입력해요.</p><button class="primary" data-act="noop">메뉴 등록하기</button></div>`;
+  } else if (closed) {
+    grid.className = 'grid full';
+    grid.innerHTML = `<div class="closed-box"><b>오늘은 휴무로 저장해요</b><p class="muted small" style="margin:6px 0 0">판매 0인 날과 구분돼서 예측 계산에서 빠져요.</p>
+      <select aria-label="휴무 사유"><option>정기 휴무</option><option>임시 휴무</option><option>공사 · 행사</option><option>기타</option></select>
+      <button class="primary" data-act="save" style="margin-top:14px">휴무로 저장</button></div>`;
+  } else if (variant === 'B') {
+    grid.className = 'grid nav';
+    const nav = CATS.filter(c => menus.some(m => m.cat === c)).map(c => {
+      const list = menus.filter(m => m.cat === c), done = list.filter(m => state[m.id].touched).length;
+      return `<button data-act="cat" data-v="${c}" aria-current="${c === curCat}"><span>${c}</span><span class="cnt num ${done === list.length ? 'done' : ''}">${done === list.length ? '✓' : `${done}/${list.length}`}</span></button>`;
+    }).join('');
+    const i = CATS.indexOf(curCat), next = CATS[i + 1];
+    grid.innerHTML = `<nav class="catnav">${nav}</nav><div>${catTable(curCat)}
+      ${next ? `<button class="ghost" data-act="cat" data-v="${next}">다음: ${next} →</button>` : ''}</div>${side(t, errs, true)}`;
+  } else if (variant === 'C') {
+    grid.innerHTML = `<div>${sheet()}</div>${side(t, errs, false)}`;
+    grid.className = 'grid';
+    grid.style.gridTemplateColumns = 'minmax(0,1fr) 240px';
+  } else {
+    grid.innerHTML = `<div>${CATS.map(catTable).join('')}</div>${side(t, errs, false)}`;
+  }
+  if (variant !== 'C') grid.style.gridTemplateColumns = '';
+
+  if (keep) { const el = document.querySelector(keep); if (el && !el.disabled) { el.focus(); el.select && el.select(); } }
+}
+
+/* ── 이벤트 ── */
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('button, input[type=checkbox]');
+  if (!el) return;
+  const id = el.dataset.id;
+  switch (el.dataset.act) {
+    case 'soldout': toggleSoldout(id); break;
+    case 'dest': openDest.has(id) ? openDest.delete(id) : openDest.add(id); break;
+    case 'open': closed = false; break;
+    case 'closed': closed = true; break;
+    case 'cat': curCat = el.dataset.v; break;
+    case 'day': ZW.toast('날짜 바꾸기 (목업에서는 안 움직여요)'); return;
+    case 'noop': ZW.toast('메뉴 등록 화면으로 (목업)'); return;
+    case 'yesterday': {
+      let filled = 0, kept = 0;
+      menus.forEach(m => { if (state[m.id].touched) { kept++; return; } if (!m.y) return; state[m.id] = ZW.fromYesterday(m); filled++; });
+      ZW.toast(`${filled}개를 어제 값으로 채웠어요 · 이미 입력한 ${kept}개는 그대로`);
+      break;
+    }
+    case 'save': return save();
+    default: return;
+  }
+  render();
+});
+function save() {
+  if (closed) return ZW.toast('휴무로 저장했어요 (목업)');
+  if (menus.some(m => ZW.errorsOf(m, state[m.id]))) return ZW.toast('고칠 곳을 먼저 고쳐 주세요');
+  const left = menus.filter(m => !state[m.id].touched);
+  if (left.length && !confirm(`입력 안 한 메뉴 ${left.length}개(${left.map(m => m.name).join(', ')})는 "오늘 0개"로 저장돼요. 저장할까요?`)) return;
+  ZW.toast(scenario === 'reentry' ? '이날 마감을 새 값으로 바꿨어요 (목업)' : '마감을 저장했어요 (목업)');
+}
+document.addEventListener('change', (e) => {
+  const el = e.target;
+  if (el.dataset.act === 'atsel') { state[el.dataset.id].at = el.value; return render(); }
+  if (el.dataset.f && el.dataset.id) { setField(el.dataset.id, el.dataset.f, el.value); setTimeout(render, 0); } // 포커스가 옮겨 간 뒤 다시 그린다
+});
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); document.activeElement.blur(); setTimeout(save, 0); return; }
+  const el = e.target;
+  if (e.key === 'Enter' && el.matches('input[type=number]')) {
+    // 아래 칸: 같은 항목(data-f)의 다음 입력 칸으로
+    e.preventDefault();
+    const all = [...document.querySelectorAll(`input[data-f="${el.dataset.f}"]:not(:disabled)`)];
+    const next = all[all.indexOf(el) + (e.shiftKey ? -1 : 1)];
+    if (next) next.focus(); else el.blur();
+  }
+});
+render();
+</script>
+</body>
+</html>

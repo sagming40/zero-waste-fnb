@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>컬러 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 20px 16px 60px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 8px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  section { border-top: 1px solid var(--line); padding: 24px 0; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .info { flex: 1 1 300px; max-width: 420px; }
+  .info h2 { margin: 0; font-size: 20px; }
+  .info p { margin: 4px 0 14px; color: var(--muted); font-size: 14px; }
+  .mode { font-size: 12px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+  .sw { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .sw div { border-radius: 10px; height: 54px; padding: 6px; font-size: 11px; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid rgb(127 127 127 / .25); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 4px; }
+  td { padding: 4px 0; border-bottom: 1px solid var(--line); }
+  td.r { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--accent); font-weight: 700; }
+  .meh { color: var(--warn); font-weight: 700; }
+  .no { color: var(--loss); font-weight: 700; }
+  .frames { display: flex; gap: 16px; flex-wrap: wrap; }
+  .fr .cap { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .fr .box { width: 293px; height: 633px; overflow: hidden; border-radius: 24px; border: 1px solid var(--line); }
+  .fr iframe { width: 390px; height: 844px; border: 0; transform: scale(.75); transform-origin: 0 0; display: block; }
+</style>
+</head>
+<body>
+<h1>컬러 시안 비교</h1>
+<div class="muted small">마감 입력 화면(시안 A · 카드, 입력 중)에 입혀 본 것. 대비율은 WCAG 기준 — 본문 4.5 이상, 큰 글 3 이상.</div>
+<div class="ctl">
+  <label>화면 <select id="v"><option value="A">A · 카드</option><option value="B">B · 표</option><option value="C">C · 한 품목씩</option></select></label>
+  <label>상태 <select id="st"><option value="entry">입력 중</option><option value="error">입력 오류</option><option value="reentry">이미 저장한 날</option></select></label>
+</div>
+<div id="list"></div>
+<script src="shared.js"></script>
+<script>
+const SW = [['bg', '바탕'], ['surface', '카드'], ['text', '글'], ['muted', '보조 글'], ['accent', '주 색'], ['accent-soft', '주 색 옅게'], ['loss', '손실'], ['loss-soft', '손실 옅게']];
+const PAIRS = [
+  ['본문 글 / 바탕', 'text', 'bg', 4.5],
+  ['보조 글 / 카드', 'muted', 'surface', 4.5],
+  ['버튼 글 / 주 색', 'accent-ink', 'accent', 4.5],
+  ['주 색 글 / 옅은 주 색', 'accent', 'accent-soft', 4.5],
+  ['손실 숫자 / 카드', 'loss', 'surface', 3],
+  ['손실 글 / 옅은 손실', 'loss', 'loss-soft', 4.5],
+  ['경고 글 / 옅은 경고', 'warn', 'warn-soft', 4.5],
+];
+const vSel = document.getElementById('v'), stSel = document.getElementById('st');
+vSel.value = (ZW.params.get('v') || 'A').toUpperCase();
+stSel.value = ZW.params.get('state') || 'entry';
+
+function swatches(t) {
+  return `<div class="sw">${SW.map(([k, l]) => {
+    const fg = ZW.contrast(t[k], '#ffffff') > ZW.contrast(t[k], '#111111') ? '#fff' : '#111';
+    return `<div style="background:${t[k]};color:${fg}"><b>${l}</b>${t[k]}</div>`;
+  }).join('')}</div>`;
+}
+function checks(t) {
+  return `<table>${PAIRS.map(([l, a, b, min]) => {
+    const r = ZW.contrast(t[a], t[b]);
+    const cls = r >= min ? 'ok' : r >= 3 ? 'meh' : 'no';
+    const mark = r >= min ? '통과' : r >= 3 ? '큰 글만' : '부족';
+    return `<tr><td>${l}</td><td class="r">${r.toFixed(1)}</td><td class="r ${cls}">${mark}</td></tr>`;
+  }).join('')}</table>`;
+}
+function draw() {
+  // file:// 로 열면 Chrome이 주소 바꾸기를 SecurityError로 막는다 — 막혀도 화면은 그리게
+  try { history.replaceState(null, '', `?v=${vSel.value}&state=${stSel.value}${ZW.params.get('dark') ? '&dark=' + ZW.params.get('dark') : ''}`); } catch (e) { /* file:// */ }
+  document.getElementById('list').innerHTML = Object.entries(ZW.PALETTES).map(([k, p]) => `
+    <section>
+      <div class="info"><h2>${k} · ${p.name}</h2><p>${p.desc}</p>
+        <div class="mode">밝게</div>${swatches(p.light)}${checks(p.light)}
+        <div class="mode">어둡게</div>${swatches(p.dark)}${checks(p.dark)}
+      </div>
+      <div class="frames">
+        ${[0, 1].map(d => `<div class="fr"><div class="cap">${d ? '어둡게' : '밝게'}</div><div class="box">
+          <iframe title="${p.name} ${d ? '어둡게' : '밝게'}" src="Closing.mobile.html?v=${vSel.value}&state=${stSel.value}&palette=${k}&dark=${d}" loading="lazy"></iframe></div></div>`).join('')}
+      </div>
+    </section>`).join('');
+}
+vSel.onchange = draw; stSel.onchange = draw;
+draw();
+</script>
+</body>
+</html>

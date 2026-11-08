@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마감 입력 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; max-width: calc(100vw - 32px); }
+</style>
+</head>
+<body>
+<h1>마감 입력 — 시안 비교</h1>
+<div class="muted small">휴대폰(390 × 844) 기준. 안쪽은 실제로 눌러 볼 수 있다. 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st">
+    <option value="entry">입력 중</option>
+    <option value="reentry">이미 저장한 날</option>
+    <option value="error">입력 오류</option>
+    <option value="closed">휴무</option>
+    <option value="empty">메뉴 없음</option>
+  </select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="shared.js"></script>
+<script>
+const V = [
+  { v: 'A', t: 'A · 카드', d: '메뉴마다 카드 한 장. 스테퍼(− 숫자 +)와 숫자 직접 입력, 품절 · 행방은 카드 안에서 펼친다.' },
+  { v: 'B', t: 'B · 표', d: '한 줄에 한 메뉴, 숫자 칸만. 한 화면에 가장 많이 보이고 키보드로 빠르게 넘긴다. 행방은 줄 아래 한 줄.' },
+  { v: 'C', t: 'C · 한 품목씩', d: '큰 버튼으로 한 메뉴씩 넘기고 마지막에 요약. 실수는 적지만 13개면 13번 넘긴다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 표 + 옆 요약', d: '분류마다 표 하나, 오른쪽에 손실 · 진행 · 저장이 붙어 다닌다. 행방은 줄 아래로 펼친다. 휴대폰 A · B와 같은 순서라 기기를 바꿔도 낯설지 않다.' },
+  { v: 'B', t: 'B · 분류 탭', d: '왼쪽에서 분류를 고르고 한 분류씩 입력. 분류마다 n/m 진행이 보인다. 메뉴가 많아져도 한 화면이 짧다.' },
+  { v: 'C', t: 'C · 한 장 스프레드시트', d: '모든 메뉴 · 모든 칸(행방까지)을 한 표에. Enter로 아래 칸, Tab으로 옆 칸 — 엑셀처럼 키보드만으로 끝낸다. 칸이 많아 처음엔 낯설다.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'entry';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  // file:// 로 열면 Chrome이 주소 바꾸기를 SecurityError로 막는다 — 막혀도 화면은 그리게
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    // 1280 × 800 화면을 줄여서 세로로 쌓는다
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Closing.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;max-width:none;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = V.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Closing.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

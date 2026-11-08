@@ -1,0 +1,163 @@
+/* ZeroWaste F&B 목업 공용 스타일 — 값의 단일 출처는 DESIGN.md(채택 뒤), 여기는 시안용 */
+:root {
+  --bg: #f6f5f1;
+  --surface: #ffffff;
+  --surface-2: #efede7;
+  --text: #1c1b19;
+  --muted: #6b6860;
+  --line: #e2dfd7;
+  --accent: #2f6b4f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3efe8;
+  --loss: #b4442c;
+  --loss-soft: #f8e6e1;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  --radius: 14px;
+  --font: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #141413;
+  --surface: #1f1e1c;
+  --surface-2: #2a2926;
+  --text: #ecebe6;
+  --muted: #9a978f;
+  --line: #36342f;
+  --accent: #5fae86;
+  --accent-ink: #0f1a14;
+  --accent-soft: #1f3329;
+  --loss: #e9846a;
+  --loss-soft: #3a231d;
+  --warn: #e0b04f;
+  --warn-soft: #3a2f17;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+input, select { font: inherit; color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* 휴대폰 화면 한 장 */
+.phone {
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 머리 */
+.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.top .store { font-size: 13px; color: var(--muted); }
+.top .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.top h1 { font-size: 20px; margin: 2px 0 0; letter-spacing: -0.02em; }
+.datebar { display: flex; align-items: center; gap: 4px; }
+.iconbtn {
+  width: 32px; height: 32px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface);
+  display: inline-grid; place-items: center; font-size: 16px;
+}
+.datepill {
+  padding: 6px 10px; border-radius: 10px; background: var(--surface);
+  border: 1px solid var(--line); font-weight: 600; font-size: 14px;
+}
+
+/* 영업 / 휴무 */
+.seg { display: flex; background: var(--surface-2); border-radius: 12px; padding: 3px; margin-top: 10px; }
+.seg button {
+  flex: 1; border: 0; background: transparent; padding: 8px; border-radius: 9px; font-weight: 600; color: var(--muted);
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+
+.tools { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 8px; }
+.ghost {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 7px 12px; font-size: 14px; font-weight: 600;
+}
+.progress { font-size: 13px; color: var(--muted); }
+
+/* 알림 띠 */
+.banner { margin: 12px 16px 0; padding: 10px 12px; border-radius: 12px; font-size: 14px; }
+.banner.warn { background: var(--warn-soft); color: var(--warn); }
+.banner.err { background: var(--loss-soft); color: var(--loss); }
+.banner.info { background: var(--accent-soft); color: var(--accent); }
+.banner b { display: block; margin-bottom: 2px; }
+
+main { flex: 1; padding: 4px 16px 140px; }
+
+.cat { margin: 18px 0 8px; font-size: 13px; font-weight: 700; color: var(--muted); display: flex; justify-content: space-between; }
+
+/* 스테퍼 */
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.stepper button { width: 36px; height: 36px; border: 0; background: transparent; font-size: 18px; }
+.stepper button:disabled { opacity: .3; cursor: default; }
+.stepper .v { min-width: 34px; text-align: center; font-weight: 700; }
+.stepper.bad { border-color: var(--loss); }
+.stepper.locked { opacity: .45; }
+
+.chip {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 10px; font-size: 13px; font-weight: 600;
+}
+.chip[aria-pressed="true"] { background: var(--warn-soft); border-color: transparent; color: var(--warn); }
+
+.field-err { color: var(--loss); font-size: 13px; margin-top: 4px; }
+
+/* 아래 고정 바 */
+.bottom {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  display: flex; justify-content: center;
+  pointer-events: none;
+}
+.bottom .inner {
+  pointer-events: auto;
+  width: 100%; max-width: 430px;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding: 10px 16px 16px;
+}
+.loss-line { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.loss-line .amt { font-size: 22px; font-weight: 800; color: var(--loss); letter-spacing: -0.02em; }
+.primary {
+  width: 100%; border: 0; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700;
+  background: var(--accent); color: var(--accent-ink);
+}
+.primary:disabled { opacity: .45; cursor: default; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%);
+  background: var(--text); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px;
+  opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 10;
+}
+.toast.on { opacity: 1; }
+
+/* 시안 전환 단추 (목업 전용) */
+.switcher {
+  position: fixed; top: 8px; right: 8px; z-index: 30;
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-end;
+  font-size: 11px; opacity: .85;
+}
+.switcher .grp { display: flex; gap: 2px; background: var(--text); border-radius: 8px; padding: 2px; }
+.switcher .lab { color: var(--bg); opacity: .6; padding: 2px 4px; }
+.switcher a { color: var(--bg); text-decoration: none; padding: 2px 6px; border-radius: 6px; }
+.switcher a[aria-current="true"] { background: var(--bg); color: var(--text); font-weight: 700; }
+
+.empty { text-align: center; padding: 60px 16px; color: var(--muted); }
+.empty .big { font-size: 40px; }
+.empty .primary { width: auto; padding: 12px 20px; margin-top: 12px; }

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마감 입력 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* ── 시안 A: 카드 ── */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; }
+  .card.untouched { border-style: dashed; }
+  .card .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card .name { font-weight: 700; }
+  .card .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .card .lbl { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .card .bev { display: flex; align-items: center; justify-content: space-between; }
+  .sub { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 13px; }
+  .sub .row { display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .sub .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .link { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0; font-size: 13px; }
+  .dest-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: center; margin-top: 8px; }
+  .waste-n { color: var(--loss); font-weight: 700; }
+  .stepper input.v { width: 44px; border: 0; background: transparent; text-align: center; font-weight: 700; padding: 0; }
+  .stepper input.v:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* ── 시안 B: 표 ── */
+  .tbl { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .tr { display: grid; grid-template-columns: 1fr 60px 60px 44px; gap: 6px; align-items: center; padding: 8px 10px; border-top: 1px solid var(--line); }
+  .tr:first-child { border-top: 0; }
+  .tr.th { font-size: 12px; color: var(--muted); padding-top: 6px; padding-bottom: 6px; background: var(--surface-2); }
+  .tr.th > :not(:first-child) { text-align: center; }
+  .tr .nm { font-weight: 600; font-size: 14px; }
+  .tr .nm .muted { font-weight: 400; }
+  .tr input[type=number] { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 6px 4px; text-align: center; background: var(--bg); font-weight: 700; }
+  .tr input.bad { border-color: var(--loss); color: var(--loss); }
+  .tr input:disabled { opacity: .4; }
+  .tr .span2 { grid-column: 2 / 4; }
+  .tr .ck { display: grid; place-items: center; }
+  .tr .ck input { width: 20px; height: 20px; accent-color: var(--warn); }
+  .tr.empty-row .nm::after { content: ' ·'; color: var(--loss); }
+  .tsub { grid-column: 1 / -1; font-size: 12px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tsub select { font-size: 12px; padding: 2px 4px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); }
+
+  /* ── 시안 C: 한 품목씩 ── */
+  .wiz { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 20px 16px; margin-top: 16px; }
+  .wiz .k { font-size: 13px; color: var(--muted); }
+  .wiz h2 { font-size: 26px; margin: 2px 0 16px; letter-spacing: -0.02em; }
+  .wiz .big { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--line); }
+  .wiz .big .lbl { font-weight: 600; }
+  .wiz .stepper button { width: 52px; height: 52px; font-size: 24px; }
+  .wiz .stepper input.v { width: 60px; font-size: 22px; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .dots button { width: 10px; height: 10px; border-radius: 50%; border: 0; background: var(--line); padding: 0; }
+  .dots button.done { background: var(--accent); }
+  .dots button.cur { outline: 2px solid var(--text); outline-offset: 2px; }
+  .wiznav { display: flex; gap: 8px; margin-top: 14px; }
+  .wiznav button { flex: 1; }
+  .sumlist .r { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .sumlist .r:first-child { border-top: 0; }
+
+  .closed-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
+  .closed-box select { width: 100%; margin-top: 8px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+  .variant-tag { position: fixed; top: 8px; right: 8px; z-index: 20; font-size: 11px; background: var(--text); color: var(--bg); padding: 2px 6px; border-radius: 6px; opacity: .6; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="top">
+    <div class="row">
+      <div>
+        <div class="store">모래내 베이커리 &amp; 델리</div>
+        <h1>오늘 마감</h1>
+      </div>
+      <div class="datebar">
+        <button class="iconbtn" data-act="prevday" aria-label="전날">‹</button>
+        <span class="datepill num">11월 8일 (일)</span>
+        <button class="iconbtn" data-act="nextday" aria-label="다음 날" disabled style="opacity:.35">›</button>
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="영업 여부">
+      <button data-act="open" id="segOpen">영업</button>
+      <button data-act="closed" id="segClosed">휴무</button>
+    </div>
+    <div class="tools" id="tools">
+      <button class="ghost" data-act="yesterday">↺ 어제 값 불러오기</button>
+      <span class="progress num" id="progress"></span>
+    </div>
+  </header>
+
+  <div id="banners"></div>
+  <main id="main"></main>
+</div>
+
+<div class="bottom"><div class="inner" id="bottom"></div></div>
+<div class="variant-tag" id="vtag"></div>
+
+<script src="shared.js"></script>
+<script>
+const { params, won, MENUS, CATS, SOLDOUT_AT, DEST } = ZW;
+const variant = (params.get('v') || 'A').toUpperCase();
+const scenario = params.get('state') || 'entry';
+document.getElementById('vtag').remove();
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 카드'], ['B', 'B 표'], ['C', 'C 한 품목씩']], variant],
+  ['상태', 'state', [['entry', '입력 중'], ['reentry', '저장한 날'], ['error', '오류'], ['closed', '휴무'], ['empty', '빈']], scenario],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:150px');
+
+let state = ZW.initialState(scenario);
+let closed = scenario === 'closed';
+let wizIdx = 0;            // 시안 C: 지금 보는 품목 (MENUS.length = 요약)
+const openDest = new Set(); // 행방 나누기를 펼친 품목
+const menus = scenario === 'empty' ? [] : MENUS;
+
+/* ── 공용 부품 ── */
+function stepper(id, field, value, opts = {}) {
+  const cls = ['stepper', opts.bad ? 'bad' : '', opts.locked ? 'locked' : ''].join(' ');
+  const dis = opts.locked ? 'disabled' : '';
+  return `<span class="${cls}">
+    <button data-step="-1" data-id="${id}" data-f="${field}" ${dis || (value <= 0 ? 'disabled' : '')} aria-label="빼기">−</button>
+    <input class="v num" inputmode="numeric" value="${value}" data-id="${id}" data-f="${field}" ${dis} aria-label="${field}">
+    <button data-step="1" data-id="${id}" data-f="${field}" ${dis} aria-label="더하기">+</button>
+  </span>`;
+}
+function setField(id, field, v) {
+  const s = state[id];
+  v = Math.max(0, Math.floor(Number(v) || 0));
+  if (field.startsWith('dest.')) {
+    const k = field.slice(5);
+    const others = DEST.filter(d => d.key !== k).reduce((a, d) => a + s.dest[d.key], 0);
+    s.dest[k] = Math.min(v, Math.max(0, s.left - others)); // 행방 합계가 남은 수량을 넘지 않게
+  } else {
+    s[field] = v;
+    if (field === 'left') clampDest(s);
+  }
+  s.touched = true;
+}
+function clampDest(s) {
+  let over = DEST.reduce((a, d) => a + s.dest[d.key], 0) - s.left;
+  for (const d of [...DEST].reverse()) { if (over <= 0) break; const cut = Math.min(over, s.dest[d.key]); s.dest[d.key] -= cut; over -= cut; }
+}
+function destSummary(s) {
+  const parts = [`<span class="waste-n">폐기 ${ZW.wasteOf(s)}</span>`];
+  DEST.forEach(d => { if (s.dest[d.key]) parts.push(`${d.label} ${s.dest[d.key]}`); });
+  return parts.join(' · ');
+}
+function toggleSoldout(id) {
+  const s = state[id];
+  s.soldout = !s.soldout; s.touched = true;
+  if (s.soldout) { s.left = 0; clampDest(s); s.at = s.at || SOLDOUT_AT[1]; } else { s.at = null; }
+}
+function soldoutAtChips(m, s) {
+  return `<div class="sub"><div class="row"><span class="muted">언제 다 팔렸어요?</span></div>
+    <div class="chips">${SOLDOUT_AT.map(t => `<button class="chip" data-act="at" data-id="${m.id}" data-v="${t}" aria-pressed="${s.at === t}">${t}</button>`).join('')}</div></div>`;
+}
+function destBlock(m, s) {
+  if (!(s.left > 0)) return '';
+  const open = openDest.has(m.id);
+  let html = `<div class="sub"><div class="row"><span>남은 ${s.left}개 → ${destSummary(s)}</span>
+    <button class="link" data-act="dest" data-id="${m.id}">${open ? '접기' : '행방 나누기'}</button></div>`;
+  if (open) {
+    html += `<div class="dest-grid">${DEST.map(d => `<span>${d.label}</span>${stepper(m.id, 'dest.' + d.key, s.dest[d.key])}`).join('')}
+      <span class="muted small">나머지는 폐기</span><span class="waste-n num">${ZW.wasteOf(s)}개</span></div>`;
+  }
+  return html + '</div>';
+}
+function grouped(fn) {
+  return CATS.map(c => {
+    const list = menus.filter(m => m.cat === c);
+    if (!list.length) return '';
+    const label = list[0].fresh ? '만든 · 남은 · 품절' : '판매량';
+    return `<div class="cat"><span>${c}</span><span>${label}</span></div>` + fn(list);
+  }).join('');
+}
+
+/* ── 시안 A: 카드 ── */
+function renderA() {
+  return grouped(list => list.map(m => {
+    const s = state[m.id];
+    const err = ZW.errorsOf(m, s);
+    const tag = m.isNew ? ' <span class="chip" style="padding:1px 6px;font-size:11px">신메뉴</span>' : '';
+    if (!m.fresh) {
+      return `<div class="card ${s.touched ? '' : 'untouched'}"><div class="bev">
+        <span class="name">${m.name}${tag}</span>${stepper(m.id, 'sold', s.sold)}</div></div>`;
+    }
+    return `<div class="card ${s.touched ? '' : 'untouched'}">
+      <div class="head"><span class="name">${m.name}${tag}</span>
+        <button class="chip" data-act="soldout" data-id="${m.id}" aria-pressed="${s.soldout}">${s.soldout ? '품절됨' : '품절?'}</button></div>
+      <div class="grid2">
+        <div><div class="lbl">만든 수량</div>${stepper(m.id, 'made', s.made)}</div>
+        <div><div class="lbl">남은 수량</div>${stepper(m.id, 'left', s.left, { bad: !!err, locked: s.soldout })}</div>
+      </div>
+      ${err ? `<div class="field-err">${err}</div>` : ''}
+      ${s.soldout ? soldoutAtChips(m, s) : destBlock(m, s)}
+    </div>`;
+  }).join(''));
+}
+
+/* ── 시안 B: 표 ── */
+function renderB() {
+  return grouped(list => {
+    const fresh = list[0].fresh;
+    const head = fresh
+      ? `<div class="tr th"><span>메뉴</span><span>만든</span><span>남은</span><span>품절</span></div>`
+      : `<div class="tr th"><span>메뉴</span><span class="span2">판매</span><span></span></div>`;
+    return `<div class="tbl">${head}${list.map(m => {
+      const s = state[m.id];
+      if (!fresh) {
+        return `<div class="tr ${s.touched ? '' : 'empty-row'}"><span class="nm">${m.name}${m.isNew ? ' <span class="muted small">신메뉴</span>' : ''}</span>
+          <span class="span2"><input type="number" min="0" inputmode="numeric" value="${s.touched ? s.sold : ''}" placeholder="0" data-id="${m.id}" data-f="sold"></span><span></span></div>`;
+      }
+      const err = ZW.errorsOf(m, s);
+      let sub = '';
+      if (s.soldout) {
+        sub = `<div class="tsub">품절 시각 <select data-act="atsel" data-id="${m.id}">${SOLDOUT_AT.map(t => `<option ${s.at === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`;
+      } else if (s.left > 0) {
+        sub = `<div class="tsub">→ ${destSummary(s)} <button class="link" data-act="dest" data-id="${m.id}">${openDest.has(m.id) ? '접기' : '나누기'}</button></div>`;
+        if (openDest.has(m.id)) {
+          sub += `<div class="tsub">${DEST.map(d => `${d.label} <input type="number" min="0" style="width:52px" value="${s.dest[d.key]}" data-id="${m.id}" data-f="dest.${d.key}">`).join(' ')}</div>`;
+        }
+      }
+      if (err) sub += `<div class="tsub field-err">${err}</div>`;
+      return `<div class="tr ${s.touched ? '' : 'empty-row'}"><span class="nm">${m.name}</span>
+        <input type="number" min="0" inputmode="numeric" value="${s.touched ? s.made : ''}" placeholder="0" data-id="${m.id}" data-f="made">
+        <input type="number" min="0" inputmode="numeric" value="${s.touched ? s.left : ''}" placeholder="0" data-id="${m.id}" data-f="left" class="${err ? 'bad' : ''}" ${s.soldout ? 'disabled' : ''}>
+        <span class="ck"><input type="checkbox" ${s.soldout ? 'checked' : ''} data-act="soldoutck" data-id="${m.id}" aria-label="${m.name} 품절"></span>
+        ${sub}</div>`;
+    }).join('')}</div>`;
+  });
+}
+
+/* ── 시안 C: 한 품목씩 ── */
+function renderC() {
+  const n = menus.length;
+  const dots = `<div class="dots">${menus.map((m, i) => `<button class="${state[m.id].touched ? 'done' : ''} ${i === wizIdx ? 'cur' : ''}" data-act="jump" data-v="${i}" aria-label="${m.name}"></button>`).join('')}
+    <button class="${wizIdx === n ? 'cur' : ''}" data-act="jump" data-v="${n}" aria-label="요약" style="border-radius:3px"></button></div>`;
+  if (wizIdx >= n) {
+    return `<div class="wiz"><div class="k">마지막 확인</div><h2>오늘 마감 요약</h2><div class="sumlist">${menus.map((m, i) => {
+      const s = state[m.id];
+      const v = !s.touched ? '<span class="muted">입력 안 함</span>'
+        : m.fresh ? `만든 ${s.made} · 남은 ${s.left}${s.soldout ? ' · 품절 ' + s.at : ''}` : `판매 ${s.sold}`;
+      const err = ZW.errorsOf(m, s);
+      return `<div class="r"><button class="link" data-act="jump" data-v="${i}">${m.name}</button><span class="num ${err ? 'waste-n' : ''}">${v}</span></div>`;
+    }).join('')}</div></div>${dots}`;
+  }
+  const m = menus[wizIdx], s = state[m.id], err = ZW.errorsOf(m, s);
+  let body;
+  if (!m.fresh) {
+    body = `<div class="big"><span class="lbl">판매량</span>${stepper(m.id, 'sold', s.sold)}</div>`;
+  } else {
+    body = `<div class="big"><span class="lbl">만든 수량</span>${stepper(m.id, 'made', s.made)}</div>
+      <div class="big"><span class="lbl">남은 수량</span>${stepper(m.id, 'left', s.left, { bad: !!err, locked: s.soldout })}</div>
+      ${err ? `<div class="field-err">${err}</div>` : ''}
+      <div class="big"><span class="lbl">다 팔렸어요</span><button class="chip" data-act="soldout" data-id="${m.id}" aria-pressed="${s.soldout}">${s.soldout ? '품절됨' : '품절?'}</button></div>
+      ${s.soldout ? soldoutAtChips(m, s) : destBlock(m, s)}`;
+  }
+  return `<div class="wiz"><div class="k num">${m.cat} · ${wizIdx + 1} / ${n}${m.isNew ? ' · 신메뉴' : ''}</div><h2>${m.name}</h2>${body}
+    <div class="wiznav"><button class="ghost" data-act="wprev" ${wizIdx === 0 ? 'disabled' : ''}>이전</button>
+    <button class="ghost" data-act="wnext" style="background:var(--accent-soft);color:var(--accent);border-color:transparent">${s.touched ? '다음' : '건너뛰기'}</button></div></div>${dots}`;
+}
+
+/* ── 그리기 ── */
+function render() {
+  // 다시 그려도 커서가 있던 칸을 잃지 않게
+  const a = document.activeElement;
+  const keep = a && a.dataset && a.dataset.id && a.dataset.f && a.tagName === 'INPUT' ? `input[data-id="${a.dataset.id}"][data-f="${a.dataset.f}"]` : null;
+  draw();
+  if (keep) { const el = document.querySelector(keep); if (el && !el.disabled) { el.focus(); el.select(); } }
+}
+function draw() {
+  document.getElementById('segOpen').setAttribute('aria-pressed', !closed);
+  document.getElementById('segClosed').setAttribute('aria-pressed', closed);
+  document.getElementById('tools').style.display = closed || !menus.length ? 'none' : '';
+
+  const t = ZW.totals(state, menus);
+  const errs = menus.filter(m => ZW.errorsOf(m, state[m.id]));
+  document.getElementById('progress').textContent = `${t.needed}개 중 ${t.done}개 입력`;
+
+  // 알림 띠
+  let b = '';
+  if (scenario === 'reentry') b += `<div class="banner warn"><b>이미 저장한 날이에요</b>21:42에 김직원 님이 저장했어요. 다시 저장하면 이날 마감 전체가 지금 값으로 바뀌어요.</div>`;
+  if (errs.length && !closed) b += `<div class="banner err"><b>고칠 곳 ${errs.length}개</b>${errs.map(m => m.name).join(', ')}</div>`;
+  document.getElementById('banners').innerHTML = b;
+
+  const main = document.getElementById('main');
+  if (!menus.length) {
+    main.innerHTML = `<div class="empty"><div class="big">🥐</div><p><b>아직 메뉴가 없어요</b><br>메뉴를 등록하면 여기서 매일 마감을 입력해요.</p><button class="primary" data-act="noop">메뉴 등록하기</button></div>`;
+  } else if (closed) {
+    main.innerHTML = `<div class="closed-box"><b>오늘은 휴무로 저장해요</b>
+      <p class="muted small" style="margin:6px 0 0">판매 0인 날과 구분돼서 예측 계산에서 빠져요.</p>
+      <select aria-label="휴무 사유"><option>정기 휴무</option><option>임시 휴무</option><option>공사 · 행사</option><option>기타</option></select></div>`;
+  } else {
+    main.innerHTML = variant === 'B' ? renderB() : variant === 'C' ? renderC() : renderA();
+  }
+
+  // 아래 바
+  const bottom = document.getElementById('bottom');
+  if (!menus.length) { bottom.innerHTML = ''; return; }
+  if (closed) { bottom.innerHTML = `<button class="primary" data-act="save">휴무로 저장</button>`; return; }
+  const left = t.needed - t.done;
+  const label = errs.length ? `고칠 곳 ${errs.length}개가 있어요` : left ? `저장 (${left}개 입력 안 함)` : '마감 저장';
+  bottom.innerHTML = `<div class="loss-line"><span><span class="small muted">오늘 폐기 손실 · 원가 기준</span><br>
+      <span class="amt num">${won(t.lossWon)}</span></span>
+    <span class="small muted num" style="text-align:right">폐기 ${t.wasted}개<br>폐기율 ${(t.rate * 100).toFixed(1)}%</span></div>
+    <button class="primary" data-act="save" ${errs.length ? 'disabled' : ''}>${label}</button>`;
+}
+
+/* ── 이벤트 ── */
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('button, input[type=checkbox]');
+  if (!el) return;
+  const id = el.dataset.id;
+  if (el.dataset.step) {
+    const f = el.dataset.f;
+    const cur = f.startsWith('dest.') ? state[id].dest[f.slice(5)] : state[id][f];
+    setField(id, f, cur + Number(el.dataset.step));
+    return render();
+  }
+  switch (el.dataset.act) {
+    case 'soldout': toggleSoldout(id); break;
+    case 'soldoutck': toggleSoldout(id); break;
+    case 'at': state[id].at = el.dataset.v; break;
+    case 'dest': openDest.has(id) ? openDest.delete(id) : openDest.add(id); break;
+    case 'open': closed = false; break;
+    case 'closed': closed = true; break;
+    case 'jump': wizIdx = Number(el.dataset.v); break;
+    case 'wprev': wizIdx = Math.max(0, wizIdx - 1); break;
+    case 'wnext': wizIdx = Math.min(menus.length, wizIdx + 1); break;
+    case 'prevday': case 'nextday': ZW.toast('날짜 바꾸기 (목업에서는 안 움직여요)'); return;
+    case 'noop': ZW.toast('메뉴 등록 화면으로 (목업)'); return;
+    case 'yesterday': {
+      let filled = 0, kept = 0;
+      menus.forEach(m => {
+        if (state[m.id].touched) { kept++; return; }
+        if (!m.y) return;
+        state[m.id] = ZW.fromYesterday(m); filled++;
+      });
+      ZW.toast(`${filled}개를 어제 값으로 채웠어요 · 이미 입력한 ${kept}개는 그대로`);
+      break;
+    }
+    case 'save': {
+      if (closed) { ZW.toast('휴무로 저장했어요 (목업)'); return; }
+      const left = menus.filter(m => !state[m.id].touched);
+      if (left.length && !confirm(`입력 안 한 메뉴 ${left.length}개(${left.map(m => m.name).join(', ')})는 "오늘 0개"로 저장돼요. 저장할까요?`)) return;
+      ZW.toast(scenario === 'reentry' ? '이날 마감을 새 값으로 바꿨어요 (목업)' : '마감을 저장했어요 (목업)');
+      return;
+    }
+    default: return;
+  }
+  render();
+});
+document.addEventListener('change', (e) => {
+  const el = e.target;
+  if (el.dataset.act === 'atsel') { state[el.dataset.id].at = el.value; return render(); }
+  if (el.dataset.f && el.dataset.id) { setField(el.dataset.id, el.dataset.f, el.value); setTimeout(render, 0); } // 포커스가 다음 칸으로 옮겨 간 뒤 다시 그린다
+});
+render();
+</script>
+</body>
+</html>

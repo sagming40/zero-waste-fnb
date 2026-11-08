@@ -60,7 +60,9 @@
 | [docs/decisions/](docs/decisions/README.md) | 결정 하나 = 파일 하나 |
 | [docs/archive/](docs/archive/README.md) | 옛 문서(v0 README · 빈 트러블슈팅 · FE 메모). 고치지 않는다 |
 | [COMMIT_CONVENTION.md](COMMIT_CONVENTION.md) | 커밋 메시지 형식. 딥 태스크 커밋은 문제 → 분석 → 해결 → 수치 |
-| 아직 없음 | `DESIGN.md` · `mockups/`(M1), `SERVER.md`(첫 배포) |
+| [docs/DESIGN.md](docs/DESIGN.md) | 화면 목록 · 화면별 규칙 · 색 · 서체 확정 값 |
+| [docs/mockups/](docs/mockups/README.md) | 화면 시안 · 비교 보드 · 채택 표시. 시안을 고르면 값은 DESIGN으로 |
+| 아직 없음 | `SERVER.md`(첫 배포) |
 
 ## 환경
 

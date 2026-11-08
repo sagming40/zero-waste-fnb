@@ -164,7 +164,7 @@ $OutputEncoding           = $utf8   # PowerShell → 다른 프로그램(git 등
 | 기기 | 경로 | 상태 (확인한 날) |
 |---|---|---|
 | 노트북 | `C:\_dev\zero-waste-fnb` | 8.1 전부 ✅ (2026-11-08): JDK 25.0.5, Docker Desktop 4.97.0 · 엔진 29.9.2, GitHub CLI 2.103.3, 프로필 UTF-8(`chcp` 65001), 확장 다시 설치(`redhat.java` 1.58.0 · Java 팩 0.31.2 · Spring Boot 팩 0.2.2, Oracle 없음), `./gradlew test` 2건 통과. 로컬 PostgreSQL 18 서비스 있음 |
-| 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15 (2026-11-07). ⚠️ 8.1의 ② 프로필 UTF-8 · ③ Spring Boot 팩 · Oracle 확장 여부 · 설정 두 개 · GitHub CLI는 아직 |
+| 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15 (2026-11-07). 8.1 ② ③ ✅ (2026-11-08): GitHub CLI 2.103.3(`gh auth status` sagming40), 프로필 UTF-8(`chcp` 65001), `redhat.java` 1.58.0 · Java 팩 0.31.2 · Spring Boot 팩 0.2.2, Oracle 없음, 설정 두 개(automatic · Null 분석) |
 | 회사 PC | — | 처음 클론할 때 8.1을 처음부터 |
 
 - 로컬 DB는 compose의 PostgreSQL을 쓴다. 기기에 깔린 PostgreSQL 18 서비스와 포트가 겹치지 않게 compose 쪽 포트를 5433으로 연다
