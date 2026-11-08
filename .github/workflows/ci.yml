@@ -46,3 +46,37 @@ jobs:
         with:
           name: test-report
           path: backend/build/reports/tests/test
+
+  # 🅰️ frontend 담당 ─ backend job과 다른 컴퓨터에서 동시에 돈다
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend  # 모든 run 명령은 frontend/ 안에서
+
+    steps:
+      # 1. repo 받아 오기
+      - uses: actions/checkout@v5
+
+      # 2. pnpm 설치 ─ frontend/package.json의 packageManager(pnpm@12.15.0)와 동일 버전
+      #    cache: 받은 패키지를 다음 실행에 재사용한다 (잠금 파일이 바뀌면 새로 받는다)
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: frontend/package.json
+          cache: true
+          cache_dependency_path: frontend/pnpm-lock.yaml
+
+      # 3. Node 24 ─ 집 · 노트북 · 회사 PC와 같은 줄 (ARCHITECTURE 8.2)
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # 4. 잠금 파일 그대로만 설치 ─ 어긋나면 여기서 실패
+      - run: pnpm install --frozen-lockfile
+
+      # 5. Test (Vitest, 한 번 돌고 끝)
+      - run: pnpm test --watch=false
+
+      # 6. 운영용 Build가 되는지 ─ TypeError · TemplateError는 여기서 잡힌다
+      - run: pnpm build
