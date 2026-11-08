@@ -51,7 +51,7 @@
 
 | 파일 | 적는 것 |
 |---|---|
-| [README.md](README.md) | 처음 보는 사람용 소개 · 딥 태스크 결과 표 · 실행 방법(M0 뒤) |
+| [README.md](README.md) | 처음 보는 사람용 소개 · 딥 태스크 결과 표 · 실행 방법("시작하기") |
 | [docs/PLAN.md](docs/PLAN.md) | 목표 · 단계 · 완료 기준 · 진행 현황 · 딥 태스크 목록 |
 | [docs/DEVLOG.md](docs/DEVLOG.md) | 겪은 일 · 막힌 일 · 배운 것. 딥 태스크는 블록 제목에 `🧩n`, 프런트 메모도 여기 |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | 개요 · 기능 F · N · 외부 데이터 · 데모 데이터 한계 |

@@ -58,6 +58,7 @@ F01 ~ F06 · F08 · F19, N02 · N03 · N04 · N05(헬스 부분). 외부 API는 
 
 - 딥 태스크: 🧩2 트랜잭션(마감 다시 입력 = 통째로 바꿈), 🧩6 RLS
 - `DATA_MODEL.md`의 컬럼은 이 단계의 마이그레이션으로 옮겨 간다
+- 첫 엔티티 전에 `backend/lombok.config`(`lombok.addLombokGeneratedAnnotation = true`, ARCHITECTURE 2절 Lombok 규칙) — M0 점검에서 미룸(아직 Lombok을 쓰는 코드가 없다)
 - 결정할 것: 오류 응답 형식(안: RFC 9457), OpenAPI → TypeScript 타입 생성 여부, `store_member` · `store_invitation`의 RLS
 
 **완료 기준**: 남의 매장 · 비로그인 · 직원 권한 실패 테스트 통과(앱 역할로 접속한 Testcontainers에서), 같은 날 마감을 두 번 입력해도 줄 수가 같다, 휴대폰에서 로그인 → 마감 입력 → 오늘 손실 원화를 본다.

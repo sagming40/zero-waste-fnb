@@ -14,6 +14,36 @@
 
 ---
 
+## 2026-11-08 (2) · M0 닫기 점검 (노트북)
+
+**1. 문서 ↔ 코드 대조** (PLAN M0 · ARCHITECTURE 2 · 8절 · decisions 0002 ~ 0005)
+
+| 항목 | 결과 | 근거 |
+|---|---|---|
+| M0 의존성(Web · JPA · PostgreSQL · Flyway · Actuator · Validation · Testcontainers · Modulith test만 · Lombok) | 구현됨 | `backend/build.gradle` |
+| Boot 4.1.2 · Java 25 toolchain · Gradle 9.8.2 · `com.sagming.zwfnb` | 구현됨 | `build.gradle`, wrapper |
+| 옛 코드 삭제 + 태그 `v0-express` | 구현됨 | `git ls-files` |
+| `.gitattributes` 줄바꿈, `gradlew` 실행 권한 | 구현됨 | 인덱스 모드 `100755` |
+| `bin/` · `build/` · `.gradle` 무시 | 구현됨 | `git check-ignore` → `backend/.gitignore` |
+| Testcontainers `postgres:18` 고정 | 구현됨 | `TestcontainersConfiguration` |
+| compose 5433 · 공용 `application.yml`(DB 정보 없음 · OSIV 끔 · `ddl-auto: validate`) · `application-local.yml` | 구현됨 | 설정 파일 |
+| Modulith 검사 테스트(0005) | 구현됨 | `ModularityTests`, 위반 실습 빨간불 |
+| CI | 구현됨 | Actions 최근 3회 success |
+| `lombok.config`(ARCHITECTURE 2절) | 일부러 미룸 → M2 | Lombok을 쓰는 코드가 아직 없다. PLAN M2에 "첫 엔티티 전에" |
+| Flyway V1 · DB 계정 둘 · 프런트 뼈대 | 일부러 미룸 | PLAN에 M2 · M1로 이미 있음 |
+
+**2. 전체 검증**
+- `./gradlew clean build --warning-mode all` → BUILD SUCCESSFUL 51s, **전체 2건 통과 2**, 폐기 경고 0, `zwfnb-0.0.1-SNAPSHOT.jar` 56MB
+- README "시작하기"를 노트북에서 그대로: compose `ps` → `healthy`(5433) → `bootRun`(local) `Started ZwfnbApplication in 8.819 seconds`, PostgreSQL 18.6, Flyway가 노트북 DB에 `flyway_schema_history`를 처음 만듦(0 migrations, "No migrations found" WARN은 V1 전이라 정상), actuator 엔드포인트 1개 → `curl.exe /actuator/health` → `{"groups":["liveness","readiness"],"status":"UP"}`
+
+**3. 문서끼리** — CLAUDE.md 문서 지도의 "실행 방법(M0 뒤)", PLAN 진행 현황 "뼈대 남음"을 고침
+
+**4. 안전 점검** — 레포의 비밀번호는 개발 DB `zwfnb` 두 곳뿐(compose · `application-local.yml`, ARCHITECTURE 8.2대로 내 PC 전용). git 역사 전체에 `ghp_` · `gho_` · `AKIA` · 개인 키 없음. 의존성 경고는 Gradle 기본 도구가 없어 Dependabot(첫 배포)으로. 남의 데이터 · 비로그인 테스트는 M2(인증 · RLS)부터
+
+*(계획에 없던 작업)* `.vscode/extensions.json` — 다른 기기에서 레포를 열면 두 팩을 추천하고 Oracle 확장은 원치 않음으로(ARCHITECTURE 8.1 ③)
+
+---
+
 ## 2026-11-08 (1) · Modulith 검사 테스트 (노트북)
 
 **한 일**

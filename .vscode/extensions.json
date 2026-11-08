@@ -1,0 +1,12 @@
+{
+	// 이 레포를 열면 VS Code가 "추천 확장을 설치할래?"라고 묻는다 (ARCHITECTURE 8.1 ③)
+	// 팩 두 개만 적는다 ─ 필요한 부품(redhat.java · 디버그 · 테스트 · Gradle ...)은 팩이 끌어온다
+	"recommendations": [
+		"vscjava.vscode-java-pack",
+		"vmware.vscode-boot-dev-pack"
+	],
+	// "이 레포에선 쓰지 마" ─ Red Hat 언어 서버와 겹쳐서 오류가 두 번 뜨고 알림이 계속 뜬다
+	"unwantedRecommendations": [
+		"oracle.oracle-java"
+	]
+}
