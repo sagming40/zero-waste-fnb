@@ -11,7 +11,7 @@
 
 ## 작업 방식 — 전역 작업 방식과 다르게
 
-> **이유**: 이 레포는 Spring · JPA · 프런트(후보 Angular · Tailwind · spartan) **전부 처음 쓰는 스택**이다. 내가 직접 쳐 봐야 손에 남는다. 그래서 전역 기본값(자동)을 뒤집어 **타이핑 학습 모드를 기본값**으로 한다 (2026-11-07 사용자 지시).
+> **이유**: 이 레포는 Spring · JPA · 프런트(Angular · Tailwind · spartan, [0013](docs/decisions/0013-frontend-angular.md)) **전부 처음 쓰는 스택**이다. 내가 직접 쳐 봐야 손에 남는다. 그래서 전역 기본값(자동)을 뒤집어 **타이핑 학습 모드를 기본값**으로 한다 (2026-11-07 사용자 지시).
 
 **기본: 타이핑 학습 모드**
 - Claude는 **코드 · 설정 파일에 쓰지 않는다.** 한 줄짜리 수정도 마찬가지다. 대상: `src/` · `build.gradle` · `application.yml` · `package.json` · `angular.json` · 마이그레이션 SQL · compose 파일 · 스크립트.

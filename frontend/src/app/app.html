@@ -1,0 +1,30 @@
+<!-- 가운데 좁은 칸 하나. max-w-md: 휴대폰 폭 정도로 묶는다 -->
+<main class="mx-auto max-w-md p-6">
+  <h1 class="text-2xl font-bold tracking-tight">ZeroWaste F&amp;B</h1>
+  <p class="mt-1 text-sm text-muted">프런트 뼈대 — 백엔드와 연결 확인</p>
+
+  <!-- 카드: 색은 전부 styles.css에 등록한 E 올리브 이름표 -->
+  <section class="mt-6 rounded-2xl border border-line bg-surface p-5">
+    <h2 class="font-semibold">서버 상태</h2>
+
+    <!-- aria-live: 글자가 바뀌면 화면 읽기 프로그램이 읽어 준다 -->
+    <p class="mt-1 text-sm" aria-live="polite">
+      @switch (health()) {
+        @case ('idle') { <span class="text-muted">아직 확인 안 함</span> }
+        @case ('loading') { <span class="text-muted">확인 중…</span> }
+        @case ('up') { <span class="font-semibold text-accent">정상 (UP)</span> }
+        @case ('down') { <span class="font-semibold text-loss">연결 안 됨</span> }
+      }
+    </p>
+
+    <!-- 확인 중엔 잠가서 두 번 누르기를 막는다 -->
+    <button
+      type="button"
+      class="mt-4 w-full rounded-xl bg-accent px-4 py-3 font-bold text-accent-ink disabled:opacity-50"
+      [disabled]="health() === 'loading'"
+      (click)="checkHealth()"
+    >
+      서버 상태 확인
+    </button>
+  </section>
+</main>

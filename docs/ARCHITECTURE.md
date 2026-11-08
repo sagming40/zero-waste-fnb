@@ -16,13 +16,14 @@
 | 테스트 | JUnit 5 + Testcontainers(진짜 PostgreSQL) | H2 같은 가짜 DB는 RLS · 윈도 함수 · `ON CONFLICT`가 다르게 돈다 |
 | API 문서 | springdoc-openapi | 엔드포인트 목록의 원본. Spring REST Docs는 정확하지만 손이 많이 간다 |
 | 배치 | 앱 안 `@Scheduled(cron = …, zone = "Asia/Seoul")` | Spring Batch는 대형 배치용이라 과하다 |
-| 프런트 | **M1에서 정한다.** 후보 Angular 21+ · TypeScript · Tailwind · spartan/ui, 맞수 Thymeleaf + htmx | 화면을 그려 보고 상호작용이 얼마나 많은지 본 뒤. 패키지 관리자는 어느 쪽이든 **pnpm** |
+| 프런트 | Angular SPA + TypeScript(signals) + Tailwind 4 + spartan/ui, 패키지 관리자 **pnpm**. SSR 없음 | [0013](decisions/0013-frontend-angular.md) |
+| 움직임 | Angular 내장 `animate.enter` / `animate.leave` + GSAP(소개 · 리포트만, 지연 로딩) | [0014](decisions/0014-motion-gsap.md) |
 | 운영 | 컨테이너 + Caddy, 이미지 GHCR, 백업 R2 — PlayLedger 틀 재사용 | [0012](decisions/0012-ops-reuse-playledger.md) |
 | 주소 | `zwfnb.sagming.com` (Cloudflare DNS만 · 회색 구름, HTTPS는 Caddy) | 레포 이름과 이어지고 휴대폰으로 치기 쉽다 |
 
 ## 2. 레포 · 코드 구조
 
-**한 레포, 세 폴더**: `backend/`(Gradle) · `frontend/`(pnpm) · `infra/`(compose · Caddy · 운영 스크립트). 기능 하나를 앞뒤로 고치면 커밋 하나로 끝난다. M1에서 Thymeleaf로 가면 `frontend/`만 빠진다.
+**한 레포, 세 폴더**: `backend/`(Gradle) · `frontend/`(pnpm) · `infra/`(compose · Caddy · 운영 스크립트). 기능 하나를 앞뒤로 고치면 커밋 하나로 끝난다.
 
 **백엔드 패키지** — 기능별, 각 폴더 안에 controller · service · repository:
 
@@ -111,6 +112,7 @@ PlayLedger · cbt-journal에서 검증된 틀을 가져온다 — [0012](decisio
 | JDK 25 (Temurin 권장) | `java -version` | `build.gradle` toolchain이 25를 요구한다 |
 | Docker Desktop | `docker version` → `Server:` 부분이 나와야 함 | 앱을 켜야 엔진이 뜬다. `Client:`만 나오고 `failed to connect ... dockerDesktopLinuxEngine`이면 앱이 꺼진 것 |
 | Git | `git --version` | |
+| Node.js 24 LTS · pnpm | `node -v` · `pnpm -v` | 프런트(Angular 22). 처음 받으면 `frontend/`에서 `pnpm install` |
 | GitHub CLI | `gh --version` | `winget install --id GitHub.cli` → 터미널 새로 열기 → `gh auth login`(GitHub.com · HTTPS · Git 인증 Yes · 웹 브라우저) → `gh auth status` |
 
 Gradle은 설치하지 않는다 — 레포의 wrapper(`gradlew`)가 받아 온다.
@@ -157,7 +159,7 @@ $OutputEncoding           = $utf8   # PowerShell → 다른 프로그램(git 등
   4. "Null annotation types have been detected" 알림 → **Enable** (Spring 7의 JSpecify `@Nullable`을 읽어 null 위험을 편집기에서 노란 줄로. 빌드 · CI와는 상관없고, 설정은 git에 안 들어가는 `.vscode/`에 저장된다)
 - `build.gradle`(Groovy)에는 이모지를 쓰지 않는다 — 🧑‍🏫처럼 보이지 않는 접착 문자(ZWJ)로 붙인 이모지를 Gradle 확장 파서가 거부한다
 
-**④ 확인** — README "시작하기"를 그대로 따라간다: 개발 DB `healthy` → `bootRun`(local) → `/actuator/health` `UP` → `backend/`에서 `.\gradlew test --rerun` → 마지막 줄 `전체 n건, 통과 n`(CI와 같은 건수).
+**④ 확인** — README "시작하기"를 그대로 따라간다: 개발 DB `healthy` → `bootRun`(local) → `/actuator/health` `UP` → `backend/`에서 `.\gradlew test --rerun` → 마지막 줄 `전체 n건, 통과 n`(CI와 같은 건수) → `frontend/`에서 `pnpm install` · `pnpm test --watch=false` → `pnpm start` 화면의 "서버 상태 확인"이 정상 (UP).
 
 ### 8.2 기기별 상태
 

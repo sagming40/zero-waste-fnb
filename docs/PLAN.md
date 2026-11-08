@@ -49,9 +49,10 @@ M2 ~ M5는 REQUIREMENTS의 M 기능을 네 묶음으로 끊은 것이다 — **�
 - 마감 입력 · 오늘 손실 · 재고 · 입고 · 예측 · 리포트 화면 목업 시안을 그려 비교 → `DESIGN.md` · `mockups/`
   - [x] 컬러: 8개 비교 → **E 올리브** 채택, 밝게 · 어둡게 대비 4.5 이상 (2026-11-08, DESIGN 2절)
   - [x] 마감 입력: 휴대폰 3 · 데스크톱 3 비교 → **휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약** 채택 (2026-11-08, DESIGN 3절)
-  - [ ] 오늘 손실 · 재고 · 입고 · 예측 · 리포트
-- **프런트 결정**: 후보 Angular 21+ · TypeScript · Tailwind · spartan/ui, 맞수 Thymeleaf + htmx. 화면의 상호작용 양을 보고 고른다 → decisions. Tailwind 버전 · 차트 라이브러리도 여기서
-- 프런트 뼈대(pnpm)
+  - [ ] 오늘 손실 · 재고 · 입고 · 예측 · 리포트, 소개(랜딩, F27 — 연출은 [0014](decisions/0014-motion-gsap.md)) · 로그인
+- [x] **프런트 결정**: Angular 22 · TypeScript · Tailwind 4 · spartan/ui (2026-11-08, [0013](decisions/0013-frontend-angular.md)) — 마감 입력 시안이 근거. 차트 라이브러리는 리포트 시안 때
+- [x] 프런트 뼈대(pnpm): `frontend/`, E 올리브 토큰을 Tailwind 테마로, 버튼 하나, 개발 서버 프록시(`/api` · `/actuator`)로 백엔드 health를 화면에 표시 — Vitest 4건 통과 (2026-11-08)
+- [ ] CI에 프런트(pnpm 테스트 · 빌드) 더하기
 
 **완료 기준**: 시안 채택(mockups/README에 채택 표시와 날짜), 프런트 결정 파일, 프런트 화면에 버튼 하나.
 

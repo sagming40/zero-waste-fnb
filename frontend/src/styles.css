@@ -1,0 +1,72 @@
+/* ── Tailwind 불러오기 ──
+   Tailwind 기계를 켠다. 이 한 줄이 기본 스타일 초기화 + 모든 유틸리티 클래스를 가져온다 */
+@import "tailwindcss";
+
+/* ── 색 값 (DESIGN 2절, E 올리브) ──
+   페인트 통에 라벨을 붙여 두는 자리. 화면은 통 이름(변수)만 알고, 통 안 색은 여기서만 바꾼다 */
+:root {
+  --bg: #f5f4ee;
+  --surface: #ffffff;
+  --surface-2: #ebe9df;
+  --fg: #1e1f17;            /* DESIGN의 "글"(text). text-text가 어색해서 fg로 */
+  --muted: #67685a;
+  --line: #dedccf;
+  --accent: #5a6b1f;
+  --accent-ink: #ffffff;
+  --accent-soft: #ecefdc;
+  --loss: #a8321f;
+  --loss-soft: #f7e3dd;
+  --warn: #8a5a00;
+  --warn-soft: #fbf0d9;
+  color-scheme: light;
+}
+
+/* 기기가 어두운 모드면 통 안의 색만 갈아 끼운다 — 라벨(변수 이름)은 그대로 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131410;
+    --surface: #1d1e18;
+    --surface-2: #282a21;
+    --fg: #ebebe2;
+    --muted: #9b9c8c;
+    --line: #34362b;
+    --accent: #b5c46a;
+    --accent-ink: #1a1f08;
+    --accent-soft: #2a3018;
+    --loss: #ec8a72;
+    --loss-soft: #3a221b;
+    --warn: #e0b04f;
+    --warn-soft: #3a2f17;
+    color-scheme: dark;
+  }
+}
+
+/* ── Tailwind에 이름표 등록 ──
+   --color-이름 을 등록하면 bg-이름 · text-이름 · border-이름 클래스가 생긴다.
+   inline: 값을 복사하지 말고 "위 통을 가리켜라" — 그래야 어두운 모드가 따라온다 */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-loss: var(--loss);
+  --color-loss-soft: var(--loss-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  /* 서체: Pretendard가 있으면 그것, 없으면 기기 기본 한글 서체 (DESIGN 5절, 확정은 나중) */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+/* ── 페이지 바탕 ──
+   @layer base: Tailwind의 "기본값 층". 유틸리티 클래스가 언제든 이걸 덮어쓸 수 있다 */
+@layer base {
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+  }
+}

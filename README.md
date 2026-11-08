@@ -7,6 +7,8 @@
   <img src="https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white" alt="Java"/>
   <img src="https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot"/>
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white" alt="Angular"/>
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/>
   <img src="https://img.shields.io/badge/status-redesign-orange" alt="Status"/>
   <a href="https://github.com/sagming40/zero-waste-fnb/actions/workflows/ci.yml"><img src="https://github.com/sagming40/zero-waste-fnb/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
 </p>
@@ -22,7 +24,7 @@
 | **대상** | 베이커리 카페 + 델리 메뉴(샐러드 · 샌드위치 · 도시락) — 당일 만들어 당일 버리는 품목과 유통기한 짧은 재료 |
 | **하는 일** | 마감 기록 → 내일 **생산 권장 · 발주 권장** → 폐기 손실(원) · 폐기율 · 탄소 감축량 |
 | **지표** | 돈(매일) + 탄소(월간 · 누적). "버린 돈을 줄이면 탄소도 같이 줄어든다" |
-| **기술** | Java 25 · Spring Boot 4 · PostgreSQL 18(RLS · 윈도 함수) · Flyway · Testcontainers. 프런트는 화면 설계 단계에서 결정 |
+| **기술** | Java 25 · Spring Boot 4 · PostgreSQL 18(RLS · 윈도 함수) · Flyway · Testcontainers / Angular 22 · TypeScript · Tailwind 4 · spartan/ui · GSAP(연출) |
 | **성격** | 프런트 · 백엔드 · DB · 서버 · 배포 · 운영까지 혼자 설계 · 구현하는 자기계발 프로젝트 |
 
 ## 🎯 문제 정의
@@ -68,12 +70,13 @@
 | [REQUIREMENTS](docs/REQUIREMENTS.md) | 개요 · 기능 · 외부 데이터 · 한계 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 코드 구조 · 흐름 · 인증 · 운영 · 개발 환경 |
 | [DATA_MODEL](docs/DATA_MODEL.md) | 테이블 · 관계 · 매장 격리 · 재고 규칙 |
+| [DESIGN](docs/DESIGN.md) · [mockups/](docs/mockups/README.md) | 화면 규칙 · 색 · 움직임, 화면 시안 |
 | [decisions/](docs/decisions/README.md) | 왜 이렇게 정했나 |
 | [DEVLOG](docs/DEVLOG.md) | 개발 일지 |
 
 ## 🚀 시작하기
 
-**준비물**: JDK 25, Docker(Windows · macOS는 Docker Desktop). Gradle은 레포의 wrapper(`gradlew`)가 받아 오므로 따로 설치하지 않습니다.
+**준비물**: JDK 25, Docker(Windows · macOS는 Docker Desktop), 프런트는 Node.js 24 + pnpm. Gradle은 레포의 wrapper(`gradlew`)가 받아 오므로 따로 설치하지 않습니다.
 명령은 PowerShell 기준이며 macOS · Linux는 `.\gradlew` 대신 `./gradlew`입니다. 새 기기 세팅 순서와 기기별 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
 
 **1. 개발 DB 켜기** (레포 루트에서) — PostgreSQL 18이 `localhost:5433`에 뜹니다(5432는 PC에 설치된 PostgreSQL과 겹치지 않게 비워 둠).
@@ -101,6 +104,16 @@ docker compose -f infra/compose.local.yaml ps      # STATUS가 healthy면 준비
 ```
 
 같은 테스트가 push · PR마다 [GitHub Actions](.github/workflows/ci.yml)에서 돕니다.
+
+**4. 프런트** (`frontend/`에서) — 처음 한 번 `pnpm install`. 개발 서버는 `/api` · `/actuator`를 2번의 백엔드(8080)로 넘겨 줍니다([proxy.conf.json](frontend/proxy.conf.json)).
+
+```powershell
+pnpm install                # 처음 한 번
+pnpm start                  # http://localhost:4200 → "서버 상태 확인" 버튼 → 정상 (UP)
+pnpm test --watch=false     # Vitest, 한 번 돌고 끝
+```
+
+화면 시안은 서버 없이 `start docs\mockups\Closing.html`(레포 루트에서).
 
 ## 📖 참고문헌
 
