@@ -7,7 +7,7 @@
 
 - **지금 단계**: M1 화면 설계 — M0 ✅ 2026-11-08
 - **진행 중**: 컬러(E 올리브) · 마감 입력(휴대폰 A + 데스크톱 A) 채택 — [DESIGN](DESIGN.md), [mockups/](mockups/README.md). 프런트는 Angular([0013](decisions/0013-frontend-angular.md))
-- **다음에 할 일**: 오늘 손실 · 재고 · 입고 · 예측 · 리포트 · 소개 · 로그인 시안 (CI는 백엔드 · 프런트 두 job 초록불, `36e7ce8`)
+- **다음에 할 일**: 재고 · 입고 · 예측 · 리포트 · 소개 · 로그인 시안 (오늘 손실 채택 — DESIGN 7절) (CI는 백엔드 · 프런트 두 job 초록불, `36e7ce8`)
 - **프런트 켜기**: `frontend/`에서 `pnpm start` → `http://localhost:4200` (백엔드가 켜져 있어야 "정상 (UP)")
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` (README "시작하기")
 - **목업 보기**: `start docs\mockups\Closing.html` · `start docs\mockups\Loss.html` (서버 없이)

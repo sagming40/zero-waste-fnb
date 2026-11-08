@@ -32,6 +32,8 @@
   .say em { font-style: normal; color: var(--accent); }
   .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
   .pill { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); margin-top: 8px; }
+  .insight { font-size: 14px; margin-top: 10px; }
+  .insight b { color: var(--loss); }
   .daytabs { display: flex; gap: 4px; overflow-x: auto; margin-top: 4px; }
 </style>
 </head>
@@ -54,7 +56,7 @@ const variant = (ZW.params.get('v') || 'A').toUpperCase();
 let sel = L.week.length - 1; // 시안 B: 고른 날 (기본 오늘)
 
 ZW.switcher([
-  ['시안', 'v', [['A', 'A 숫자 먼저'], ['B', 'B 주간 먼저'], ['C', 'C 문장']], variant],
+  ['시안', 'v', [['A', 'A 숫자 먼저 (채택)'], ['B', 'B 주간 먼저'], ['C', 'C 문장']], variant],
   ['상태', 'state', [['normal', '마감 후'], ['before', '마감 전'], ['missing', '빠진 날'], ['closed', '휴무'], ['empty', '처음']], L.state],
   ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
 ], 'top:auto;bottom:8px');
@@ -89,38 +91,55 @@ function todayHero() {
   if (t.closed) return `<div class="card hero"><div class="k">오늘</div><div class="amt" style="color:var(--muted)">휴무</div><div class="sub">휴무일은 손실 · 폐기율 계산에서 제외돼요.</div></div>`;
   return `<div class="card hero"><div class="k">오늘 폐기 손실 · 원가 기준</div><div class="amt num">${won(t.loss)}</div>
     ${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}
+    <div class="insight">${insight(L.TODAY_LINES, t.loss)}</div>
     <div class="stats"><div><div class="v num">${t.wasted}개</div><div class="l">메뉴 폐기</div></div>
       <div><div class="v num">${L.pct(t.rate)}</div><div class="l">폐기율</div></div>
       <div><div class="v num" style="color:var(--accent)">${won(L.SAVED.reduce((a, s) => a + s.value, 0))}</div><div class="l">절약</div></div></div></div>`;
 }
 
-/* ── 시안 A: 숫자 먼저 ── */
+// 한 줄 요약: 손실이 가장 큰 한 가지 (채택 안에서 C의 문장을 한 줄만 가져옴)
+function insight(lines, total) {
+  if (!lines.length || !total) return '';
+  const top = lines[0];
+  return `<b>${top.name}</b>${/[가-힣]$/.test(top.name) && (top.name.charCodeAt(top.name.length - 1) - 0xac00) % 28 ? '이' : '가'} 손실의 <b class="num">${Math.round(top.loss / total * 100)}%</b>예요.`;
+}
+
+/* ── 시안 A: 숫자 먼저 (채택) — 막대를 누르면 그 아래에 그날이 열린다 ── */
 function renderA() {
   const t = L.today;
+  const todayIdx = L.week.length - 1;
   let h = todayHero();
   if (t.loss != null) h += linesCard(L.TODAY_LINES) + savedCard();
-  h += weekCard();
+  h += weekCard({ selectable: true, selected: sel });
+  if (sel !== todayIdx) h += dayDetail(sel, true);
   if (t.loss != null) h += `<a class="ghost cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 고치기</a>`;
   return h;
 }
 
 /* ── 시안 B: 주간 먼저, 막대를 눌러 그날 보기 ── */
 function renderB() {
-  const x = L.week[sel];
   let h = `<div class="card"><h2>이번 주 손실<span class="muted">막대를 누르면 그날</span></h2>
     <div class="amt num" style="font-size:28px;font-weight:800;color:var(--loss)">${won(L.weekSum)}</div>
     ${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}
     <div style="margin-top:10px">${L.bars({ ghost: true, selectable: true, selected: sel, height: 160 })}</div>
     ${L.week.some(w => w.missing) ? `<div class="note">⚠ 수요일 마감이 비어 합계에서 제외됐어요</div>` : ''}</div>`;
+  return h + dayDetail(sel, false);
+}
+
+// 고른 날의 숫자 · 내역 (A는 닫기 단추를 붙인다)
+function dayDetail(i, closable) {
+  const x = L.week[i];
+  const close = closable ? `<button class="link" data-act="today" style="font-size:12px">닫기</button>` : '<span class="muted">원가 기준</span>';
+  let h = '';
   if (x.loss == null) {
-    h += `<div class="card"><h2>${x.d} ${x.date}</h2><div class="sub">${x.closed ? '휴무' : x.pending ? '아직 마감 전이에요.' : '마감을 입력하지 않은 날이에요.'}</div>
+    h += `<div class="card"><h2>${x.d} ${x.date}${close}</h2><div class="sub">${x.closed ? '휴무' : x.pending ? '아직 마감 전이에요.' : '마감을 입력하지 않은 날이에요.'}</div>
       ${x.closed ? '' : `<a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">마감 입력하기</a>`}</div>`;
   } else {
-    h += `<div class="card"><h2>${x.d} ${x.date}${x.today ? ' · 오늘' : ''}<span class="muted">원가 기준</span></h2>
+    h += `<div class="card"><h2>${x.d} ${x.date}${x.today ? ' · 오늘' : ''}${close}</h2>
       <div class="num" style="font-size:24px;font-weight:800;color:var(--loss)">${won(x.loss)}</div>
       ${L.delta(x.loss, x.lastWeek, '지난주 ' + x.d + '요일보다')}
       <div class="stats"><div><div class="v num">${x.wasted}개</div><div class="l">메뉴 폐기</div></div><div><div class="v num">${L.pct(x.rate)}</div><div class="l">폐기율</div></div><div><div class="v num">${L.linesFor(sel).filter(l => l.kind === 'ingredient').length}건</div><div class="l">재료 폐기</div></div></div></div>`;
-    h += linesCard(L.linesFor(sel), '그날 낭비된 것');
+    h += linesCard(L.linesFor(i), x.d + '요일에 낭비된 것');
   }
   return h;
 }
@@ -157,7 +176,8 @@ function render() {
 }
 document.addEventListener('click', (e) => {
   const d = e.target.closest('[data-day]');
-  if (d) { sel = Number(d.dataset.day); render(); }
+  if (d) { sel = Number(d.dataset.day); render(); return; }
+  if (e.target.closest('[data-act="today"]')) { sel = L.week.length - 1; render(); }
 });
 render();
 </script>
