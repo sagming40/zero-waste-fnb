@@ -39,7 +39,7 @@ M2 ~ M5는 REQUIREMENTS의 M 기능을 네 묶음으로 끊은 것이다 — **�
 - [x] compose(`infra/compose.local.yaml`, PostgreSQL 18 · 5433) + `application.yml`(공용) · `application-local.yml`(DB 접속) (2026-11-07, `82018a9`). Flyway `V1`은 빈 파일로 만들지 않고 M2 첫 테이블 때 만든다 — 빈 V1을 나중에 채우면 체크섬이 바뀐다
 - [x] `/actuator/health` → `{"status":"UP"}` (bootRun local, 2026-11-07)
 - [x] Modulith 검사 테스트 — 위반을 일부러 넣어 빨간불까지 확인 (2026-11-08, `f130c17`)
-- [ ] CI: GitHub Actions에서 `./gradlew test`
+- [x] CI: GitHub Actions에서 `./gradlew test` — 첫 실행 초록불, 1m 26s (2026-11-08, `6fde811`)
 - [ ] COMMIT_CONVENTION · README의 실행 방법을 실제 명령으로
 
 **완료 기준**: `./gradlew test`가 Testcontainers 위에서 통과(건수를 DEVLOG에), `/actuator/health`가 200, CI 초록불. DB 계정 둘(소유자 · 앱)은 RLS와 함께 M2에서 나눈다 — 지금 나누면 Testcontainers 쪽도 같이 바꿔야 한다. 프런트 뼈대는 M1에서 프런트를 정한 뒤로 미룬다.

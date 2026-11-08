@@ -6,7 +6,7 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: CI(GitHub Actions) → 실행 방법 문서 → M0 닫기 점검
+- **다음에 할 일**: 실행 방법 문서(COMMIT_CONVENTION · README) → M0 닫기 점검
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
   - 노트북: `git pull`, `oracle.oracle-java` 끄기, Docker Desktop 켜서 엔진 확인
@@ -19,6 +19,9 @@
 **한 일**
 - `ModularityTests`: `ApplicationModules.of(ZwfnbApplication.class).verify()`. 스프링 컨텍스트 · Docker 없이 돈다. 기능 폴더가 없어 모듈 0개로 통과(1건, 3.12s) — `f130c17`
 - **일부러 위반해서 빨간불 확인**(커밋 안 함): `menu.MenuPeek`가 `store.internal.StoreSecret`을 부르게 하자 `BUILD FAILED`, 모듈 2개(`store` · `menu`)를 찾고 `Module 'menu' depends on non-exposed type com.sagming.zwfnb.store.internal.StoreSecret within module 'store'!`. 컴파일은 통과한다 — 막는 건 이 테스트뿐. 실습 파일을 지우고 다시 통과(5s)
+- **CI**: `.github/workflows/ci.yml` — push(main) · PR마다 ubuntu-latest + Temurin 25 + setup-gradle에서 `./gradlew test`, 실패 때만 리포트 artifact. 첫 실행(`6fde811`) 초록불, 작업 1m 26s 중 `gradlew test` 1m 3s(Testcontainers 포함), artifact 단계는 skipped. 러너 JDK 25.0.5. 테스트 건수는 미확인 — Gradle은 통과한 테스트 건수를 로그에 찍지 않는다(`gh run view --log`로 봄). 리포트는 실패 때만 올리게 해 둬서 지금은 볼 길이 없다
+- 노트북에 GitHub CLI 설치(winget, 2.103.3) + `gh auth login`(HTTPS, git 인증 연동)
+- 검수에서 잡은 것: `upload-artifact@4`(v 빠짐) — GitHub는 시작 전에 `uses:` 액션을 전부 받아서, 실패 때만 도는 단계라도 매번 작업이 시작도 못 한다
 
 **막힌 것**
 - 실습 파일을 `com/sagming/store/internal`(zwfnb 빠진 폴더)에 만들었는데 **Gradle 빌드는 통과**했다. 원인: `javac`는 `package` 선언으로 클래스 위치를 정하고 폴더가 틀려도 컴파일한다. VS Code(Java 확장)만 "declared package does not match the expected package"로 잡았다. 배운 것: 폴더 · 패키지 불일치는 빌드가 안 잡아 주니 Problems 창을 본다(설정 오타 때와 같은 교훈)
