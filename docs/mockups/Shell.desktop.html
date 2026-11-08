@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>앱 이동 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  html, body { height: 100%; font-size: 14px; }
+  .app { height: 100vh; display: grid; }
+  .app.side { grid-template-columns: 232px 1fr; }
+  .app.top { grid-template-rows: auto 1fr; }
+  .content { min-height: 0; overflow: auto; }
+  .content iframe { width: 100%; height: 100%; border: 0; display: block; }
+  /* 왼쪽 메뉴 */
+  aside { border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; padding: 14px 10px; gap: 2px; overflow: auto; }
+  .brand { font-weight: 800; font-size: 16px; padding: 4px 10px 12px; }
+  .storepick { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px 10px; margin-bottom: 12px; font-size: 13px; }
+  .storepick small { display: block; color: var(--muted); font-size: 11px; }
+  .grp { font-size: 11px; font-weight: 700; color: var(--muted); padding: 12px 10px 4px; }
+  .item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; color: var(--text); }
+  .item:hover { background: var(--surface-2); }
+  .item[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+  .item .st { margin-left: auto; font-size: 10px; color: var(--muted); }
+  .cta { display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; border: 0; border-radius: 10px; padding: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 700; margin-bottom: 6px; }
+  .me { margin-top: auto; font-size: 12px; color: var(--muted); padding: 10px; border-top: 1px solid var(--line); }
+  /* 위쪽 메뉴 */
+  header.topnav { display: flex; align-items: center; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  header.topnav .brand { padding: 0 12px 0 0; }
+  .tn { position: relative; }
+  .tn > button { border: 0; background: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; color: var(--text); }
+  .tn > button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+  .tn .dd { display: none; position: absolute; top: 100%; left: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px; min-width: 160px; z-index: 5; box-shadow: 0 6px 16px rgb(0 0 0 / .12); }
+  .tn:hover .dd, .tn:focus-within .dd { display: block; }
+  header.topnav .grow { flex: 1; }
+  header.topnav .storepick { width: auto; margin: 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="shared.js"></script>
+<script src="nav-data.js"></script>
+<script>
+const P = ZW.params;
+const variant = (P.get('v') || 'A').toUpperCase();
+const role = P.get('role') === 'staff' ? 'staff' : 'owner';
+const time = P.get('time') === 'before' ? 'before' : 'after';
+const common = `embed=1&palette=${ZW.paletteKey}&dark=${ZW.dark ? 1 : 0}`;
+let cur = P.get('screen') || (role === 'owner' ? 'today' : 'closing');
+
+ZW.switcher([
+  ['이동', 'v', [['A', 'A 왼쪽 메뉴'], ['B', 'B 위쪽 메뉴']], variant],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], role],
+  ['때', 'time', [['before', '마감 전'], ['after', '마감 후']], time],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+const visible = NAV.SCREENS.filter(s => role === 'owner' || s.staff);
+const groups = [...new Set(visible.map(s => s.group))];
+
+function screenHtml(id) {
+  if (id === 'today') return `<iframe title="오늘" src="${NAV.srcFor('today', 'desktop', `v=A&state=${time === 'before' ? 'before' : 'normal'}&${common}`)}"></iframe>`;
+  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'desktop', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&${common}`)}"></iframe>`;
+  return NAV.placeholder(id);
+}
+const storePick = `<button class="storepick">모래내 베이커리 &amp; 델리 ▾<small>${role === 'owner' ? '점주' : '직원'} · 매장 2곳</small></button>`;
+
+function render() {
+  const app = document.getElementById('app');
+  if (variant === 'B') {
+    app.className = 'app top';
+    const menus = groups.map(g => {
+      const items = visible.filter(s => s.group === g);
+      const on = items.some(s => s.id === cur);
+      if (items.length === 1) return `<div class="tn"><button data-go="${items[0].id}" aria-current="${on ? 'page' : 'false'}">${items[0].label}</button></div>`;
+      return `<div class="tn"><button aria-current="${on ? 'page' : 'false'}">${g} ▾</button><div class="dd">${items.map(s =>
+        `<button class="item" data-go="${s.id}" aria-current="${s.id === cur ? 'page' : 'false'}">${NAV.icon(s.id, 18)}${s.label}</button>`).join('')}</div></div>`;
+    }).join('');
+    app.innerHTML = `<header class="topnav"><span class="brand">ZeroWaste F&amp;B</span>${menus}<span class="grow"></span>${storePick}</header><div class="content">${screenHtml(cur)}</div>`;
+    return;
+  }
+  app.className = 'app side';
+  const nav = groups.map(g => `<div class="grp">${g}</div>${visible.filter(s => s.group === g).map(s =>
+    `<button class="item" data-go="${s.id}" aria-current="${s.id === cur ? 'page' : 'false'}">${NAV.icon(s.id, 18)}${s.label}${s.src ? '' : `<span class="st">${s.stage}</span>`}</button>`).join('')}`).join('');
+  const cta = time === 'before' && cur !== 'closing' ? `<button class="cta" data-go="closing">${NAV.icon('closing', 18)} 오늘 마감 입력</button>` : '';
+  app.innerHTML = `<aside aria-label="주 메뉴"><div class="brand">ZeroWaste F&amp;B</div>${storePick}${cta}${nav}
+    <div class="me">${role === 'owner' ? '김점주' : '박직원'} · 로그아웃</div></aside><div class="content">${screenHtml(cur)}</div>`;
+}
+document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) { cur = g.dataset.go; render(); } });
+render();
+</script>
+</body>
+</html>

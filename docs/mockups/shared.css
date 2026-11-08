@@ -147,6 +147,8 @@ main { flex: 1; padding: 4px 16px 140px; }
 }
 .toast.on { opacity: 1; }
 
+.link { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0; font-size: 13px; }
+
 /* 시안 전환 단추 (목업 전용) */
 .switcher {
   position: fixed; top: 8px; right: 8px; z-index: 30;

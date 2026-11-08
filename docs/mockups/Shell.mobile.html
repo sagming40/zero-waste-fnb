@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>앱 이동 (휴대폰) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  html, body { height: 100%; }
+  .app { max-width: 430px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: var(--bg); }
+  .content { flex: 1; min-height: 0; overflow: auto; position: relative; }
+  .content iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .tabbar { display: flex; border-top: 1px solid var(--line); background: var(--surface); padding: 4px 4px 10px; }
+  .tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font-size: 11px; color: var(--muted); }
+  .tabbar button[aria-current="page"] { color: var(--accent); font-weight: 700; }
+  .tabbar .center { flex: 0 0 72px; }
+  .tabbar .center span.fab { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; margin-top: -22px; box-shadow: 0 4px 12px rgb(0 0 0 / .18); }
+  .tabbar .center[aria-current="page"] span.fab { outline: 3px solid var(--accent-soft); }
+  .subnav { display: flex; gap: 4px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; overflow-x: auto; }
+  .subnav button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: 13px; white-space: nowrap; }
+  .subnav button[aria-current="page"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+  .list a, .list button { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px; border: 0; border-bottom: 1px solid var(--line); background: var(--surface); text-decoration: none; color: var(--text); font-size: 15px; }
+  .list .muted { margin-left: auto; font-size: 12px; }
+  .back { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .back button { border: 0; background: none; color: var(--accent); font-weight: 700; font-size: 15px; padding: 4px; }
+  .hub { padding: 16px; }
+  .hub .hello { font-size: 13px; color: var(--muted); }
+  .hub h1 { font-size: 22px; margin: 2px 0 14px; }
+  .hub .big { display: flex; align-items: center; gap: 12px; width: 100%; border: 0; border-radius: 16px; padding: 18px; background: var(--accent); color: var(--accent-ink); font-size: 17px; font-weight: 800; margin-bottom: 12px; }
+  .hub .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hub .grid button { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 16px 12px; text-align: left; display: flex; flex-direction: column; gap: 8px; font-weight: 700; }
+  .hub .grid .sub { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .hub .loss { border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .hub .loss b { color: var(--loss); font-size: 24px; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script src="shared.js"></script>
+<script src="nav-data.js"></script>
+<script>
+const P = ZW.params;
+const variant = (P.get('v') || 'A').toUpperCase();
+const role = P.get('role') === 'staff' ? 'staff' : 'owner';
+const time = P.get('time') === 'before' ? 'before' : 'after';
+const common = `embed=1&palette=${ZW.paletteKey}&dark=${ZW.dark ? 1 : 0}`;
+
+// 이동 시안마다 아래 탭 구성 (점주 / 직원)
+const TABS = {
+  A: { owner: ['today', 'closing', 'stockGroup', 'report', 'more'], staff: ['closing', 'receive', 'waste', 'more'] },
+  B: { owner: ['today', 'stockGroup', '+closing', 'report', 'more'], staff: ['receive', '+closing', 'waste', 'more'] },
+  C: { owner: [], staff: [] }, // 탭 없음 — 홈에서 들어간다
+};
+const LABEL = { stockGroup: '재고', more: '더보기' };
+const ICON = { stockGroup: 'stock', more: 'more' };
+const STOCK_SUB = role === 'owner' ? ['stock', 'receive', 'waste', 'count'] : ['receive', 'waste'];
+
+// 첫 화면: 점주 = 오늘(마감 전이면 오늘 화면이 "마감 입력" 버튼을 띄운다), 직원 = 마감
+let cur = P.get('screen') || (variant === 'C' ? 'hub' : role === 'owner' ? 'today' : 'closing');
+let stockSub = STOCK_SUB[0];
+
+ZW.switcher([
+  ['이동', 'v', [['A', 'A 아래 탭'], ['B', 'B 가운데 마감'], ['C', 'C 홈에서 들어가기']], variant],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], role],
+  ['때', 'time', [['before', '마감 전'], ['after', '마감 후']], time],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:96px');
+
+function screenHtml(id) {
+  if (id === 'today') return `<iframe title="오늘" src="${NAV.srcFor('today', 'mobile', `v=A&state=${time === 'before' ? 'before' : 'normal'}&${common}`)}"></iframe>`;
+  if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'mobile', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&${common}`)}"></iframe>`;
+  if (id === 'stockGroup') {
+    return `<div class="subnav">${STOCK_SUB.map(s => `<button data-sub="${s}" aria-current="${s === stockSub ? 'page' : 'false'}">${NAV.byId[s].label}</button>`).join('')}</div>${NAV.placeholder(stockSub)}`;
+  }
+  if (id === 'more') {
+    const items = role === 'owner'
+      ? [['forecast', '내일 권장', 'M4 — 그 전엔 오늘 화면에 자리만'], ['settings', '메뉴 · 레시피', ''], ['store', '매장 · 직원', '']]
+      : [];
+    return `<div class="list">${items.map(([k, l, s]) => `<button data-go="${k}">${NAV.icon(k)}<span>${l}</span><span class="muted">${s}</span></button>`).join('')}
+      <button>${NAV.icon('store')}<span>매장 바꾸기</span><span class="muted">모래내 베이커리 &amp; 델리</span></button>
+      <button><span style="width:22px"></span><span>로그아웃</span></button></div>`;
+  }
+  return NAV.placeholder(id);
+}
+
+function hub() {
+  const S = NAV.byId;
+  if (role === 'staff') {
+    return `<div class="hub"><div class="hello">모래내 베이커리 &amp; 델리 · 직원</div><h1>무엇을 할까요?</h1>
+      <button class="big" data-go="closing">${NAV.icon('closing', 26)} 마감 입력</button>
+      <div class="grid">${['receive', 'waste'].map(k => `<button data-go="${k}">${NAV.icon(k)}${S[k].label}</button>`).join('')}</div></div>`;
+  }
+  const top = time === 'before'
+    ? `<button class="big" data-go="closing">${NAV.icon('closing', 26)} 오늘 마감 입력</button>`
+    : `<div class="loss"><div class="sub muted" style="font-size:13px">오늘 폐기 손실</div><b class="num">₩22,800</b>
+        <div style="font-size:13px;margin-top:4px">지난 일요일보다 ₩6,700 덜 낭비</div>
+        <button class="link" data-go="today" style="margin-top:8px">자세히 →</button></div>`;
+  return `<div class="hub"><div class="hello">모래내 베이커리 &amp; 델리 · 11월 8일 (일)</div><h1>오늘</h1>${top}
+    <div class="grid">${['forecast', 'stock', 'receive', 'waste', 'count', 'report', 'settings', 'store'].map(k =>
+      `<button data-go="${k}">${NAV.icon(k)}<span>${S[k].label}<div class="sub">${S[k].stage}</div></span></button>`).join('')}
+      ${time === 'after' ? `<button data-go="closing">${NAV.icon('closing')}<span>마감 고치기</span></button>` : `<button data-go="today">${NAV.icon('today')}<span>이번 주 손실</span></button>`}</div></div>`;
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (variant === 'C') {
+    if (cur === 'hub') { app.innerHTML = `<div class="content">${hub()}</div>`; return; }
+    app.innerHTML = `<div class="back"><button data-go="hub">‹ 홈</button><b>${NAV.byId[cur] ? NAV.byId[cur].label : ''}</b></div><div class="content">${screenHtml(cur)}</div>`;
+    return;
+  }
+  const tabs = TABS[variant][role];
+  const bar = tabs.map(t => {
+    const center = t.startsWith('+');
+    const id = center ? t.slice(1) : t;
+    const label = LABEL[id] || NAV.byId[id].label;
+    const ic = NAV.icon(ICON[id] || id, center ? 26 : 22);
+    const on = cur === id || (id === 'stockGroup' && STOCK_SUB.includes(cur));
+    return `<button class="${center ? 'center' : ''}" data-go="${id}" aria-current="${on ? 'page' : 'false'}">${center ? `<span class="fab">${ic}</span>` : ic}<span>${label}</span></button>`;
+  }).join('');
+  const shown = STOCK_SUB.includes(cur) && variant !== 'C' && tabs.includes('stockGroup') ? 'stockGroup' : cur;
+  if (shown === 'stockGroup' && STOCK_SUB.includes(cur)) stockSub = cur;
+  const backTo = ['forecast', 'settings', 'store'].includes(cur) ? `<div class="back"><button data-go="more">‹ 더보기</button><b>${NAV.byId[cur].label}</b></div>` : '';
+  app.innerHTML = `${backTo}<div class="content">${screenHtml(shown)}</div><nav class="tabbar" aria-label="주 메뉴">${bar}</nav>`;
+}
+
+document.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]');
+  if (g) { cur = g.dataset.go; render(); return; }
+  const s = e.target.closest('[data-sub]');
+  if (s) { stockSub = s.dataset.sub; cur = 'stockGroup'; render(); }
+});
+render();
+</script>
+</body>
+</html>

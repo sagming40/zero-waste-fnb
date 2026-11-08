@@ -156,6 +156,7 @@
 
   // 화면 파일 오른쪽 아래의 시안 전환 단추 — 주소 파라미터만 바꿔 다시 연다 (file:// 에서도 된다)
   function switcher(items, style = '') {
+    if (params.get('embed') === '1') return; // 다른 시안 안에 끼워 보일 때는 숨긴다
     const box = document.createElement('div');
     box.className = 'switcher';
     box.style.cssText = style;
