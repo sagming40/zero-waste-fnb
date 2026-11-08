@@ -88,13 +88,20 @@ GitHub Desktop을 쓰는 경우, Summary 칸과 Description 칸이 UI에 따로 
 
 ---
 
-## 예시 (v0 첫 커밋, 2026-07-12)
+## 예시 (재설계 뒤 실제 커밋 `82018a9`, 2026-11-07)
 
 ```
-chore: 프로젝트 초기 세팅 (DB 스키마, 더미 시딩 스크립트)
+chore: 개발용 PostgreSQL compose와 application.yml 설정
 
-- users/menus/ingredients/recipes_bom/daily_menu_sales/daily_waste/predictions 7개 테이블 스키마 작성
-- 베이커리&카페 컨셉, 6개월치 현실적 더미 데이터 생성 스크립트(seed_dummy.py) 추가
-  (요일 가중치 + 랜덤 노이즈, 정기·예외 휴무 결측, 신메뉴 콜드스타트 케이스 포함)
-- DB 접속정보는 .env로 분리, .gitignore로 커밋 제외 처리
+- infra/compose.local.yaml: postgres:18, 5433→5432(5432는 PC의 PostgreSQL 서비스),
+  볼륨은 /var/lib/postgresql(18부터 바뀐 위치), pg_isready healthcheck, name: zwfnb
+- application.properties → application.yml (공용: OSIV 끔, ddl-auto=validate, DB 정보 없음)
+- application-local.yml: 개발 DB 접속 + Hibernate SQL 로그 (프로필 local)
+- 검증: compose ps healthy, 컨테이너 안 PostgreSQL 18.6, bootRun(local) 1.76s 기동 ·
+  Flyway 0 migrations, GET /actuator/health → {"status":"UP"},
+  ./gradlew test 1건 통과(프로필 없이 — Testcontainers @ServiceConnection)
 ```
+
+- 무엇을 바꿨는지는 파일 단위로, **왜**는 괄호로 짧게
+- 마지막 줄 `검증:`에는 실제로 본 값(테스트 건수 · 응답 · 걸린 시간)만 쓴다. 확인 못 한 것은 "미확인"이라고 쓴다
+- v0(Express) 시절 예시는 태그 `v0-express`의 이 파일에 남아 있다

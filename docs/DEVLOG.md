@@ -6,7 +6,7 @@
 ## 현재 상태
 
 - **지금 단계**: M0 재정비 + 뼈대 — 재설계 · 문서 재정비 끝
-- **다음에 할 일**: 실행 방법 문서(COMMIT_CONVENTION · README) → M0 닫기 점검
+- **다음에 할 일**: M0 닫기 점검(README "시작하기"를 노트북에서 처음부터 따라가기 포함)
 - **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"`
 - **기기별로 할 일**
   - 회사 PC: 처음 클론 + 환경 확인(ARCHITECTURE 8절)

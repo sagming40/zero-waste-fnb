@@ -8,6 +8,7 @@
   <img src="https://img.shields.io/badge/Spring_Boot-4-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot"/>
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/status-redesign-orange" alt="Status"/>
+  <a href="https://github.com/sagming40/zero-waste-fnb/actions/workflows/ci.yml"><img src="https://github.com/sagming40/zero-waste-fnb/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
 </p>
 
 > ⚠️ **재설계 중입니다.** 2026-07의 Express 버전(v0, 태그 `v0-express`)을 버리고 처음부터 다시 만들고 있습니다. 진행 상황은 [docs/PLAN.md](docs/PLAN.md).
@@ -72,7 +73,34 @@
 
 ## 🚀 시작하기
 
-M0(뼈대)가 끝나면 실제 명령으로 채웁니다.
+**준비물**: JDK 25, Docker(Windows · macOS는 Docker Desktop). Gradle은 레포의 wrapper(`gradlew`)가 받아 오므로 따로 설치하지 않습니다.
+명령은 PowerShell 기준이며 macOS · Linux는 `.\gradlew` 대신 `./gradlew`입니다. 기기별 설치 상태는 [ARCHITECTURE 8절](docs/ARCHITECTURE.md#8-개발-환경).
+
+**1. 개발 DB 켜기** (레포 루트에서) — PostgreSQL 18이 `localhost:5433`에 뜹니다(5432는 PC에 설치된 PostgreSQL과 겹치지 않게 비워 둠).
+
+```powershell
+docker compose -f infra/compose.local.yaml up -d
+docker compose -f infra/compose.local.yaml ps      # STATUS가 healthy면 준비 끝
+```
+
+끄기는 `down`(데이터는 볼륨에 남음), 데이터까지 지우려면 `down -v`.
+
+**2. 앱 실행** (`backend/`에서) — 프로필 `local`이 위 DB에 붙습니다. 프로필 없이 켜면 DB 정보가 없어 일부러 뜨지 않습니다.
+
+```powershell
+.\gradlew bootRun --args="--spring.profiles.active=local"
+```
+
+다른 터미널에서 `curl.exe http://localhost:8080/actuator/health`(Windows PowerShell의 `curl`은 다른 명령의 별명이라 `.exe`를 붙입니다) → `{"status":"UP"}`. 서버를 켜 둔 동안 Gradle이 `EXECUTING`에 머무는 것은 정상이며 `Ctrl + C`로 끕니다.
+
+**3. 테스트** (`backend/`에서) — Testcontainers가 테스트용 PostgreSQL 18을 따로 띄우므로 Docker 엔진만 켜져 있으면 되고, 1번의 개발 DB는 필요 없습니다.
+
+```powershell
+.\gradlew test             # 마지막 줄에 "TEST 결과: ... 전체 n건, 통과 n" 합계
+.\gradlew test --rerun     # 코드를 안 바꿨어도 다시 돌리기
+```
+
+같은 테스트가 push · PR마다 [GitHub Actions](.github/workflows/ci.yml)에서 돕니다.
 
 ## 📖 참고문헌
 
