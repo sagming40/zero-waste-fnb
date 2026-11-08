@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘 손실 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { font-size: 14px; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px 40px; }
+  .dtop { border-bottom: 1px solid var(--line); }
+  .dtop .wrap { display: flex; align-items: center; gap: 16px; padding-top: 14px; padding-bottom: 14px; }
+  .dtop h1 { font-size: 20px; margin: 0; }
+  .dtop .store { font-size: 12px; color: var(--muted); }
+  .grow { flex: 1; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .box h2 { font-size: 14px; margin: 0 0 10px; display: flex; justify-content: space-between; align-items: baseline; }
+  .box h2 .muted { font-weight: 400; font-size: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; }
+  .kpi .l { font-size: 12px; color: var(--muted); }
+  .kpi .v { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin: 2px 0 6px; }
+  .two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-top: 16px; }
+  table.t { width: 100%; border-collapse: collapse; }
+  .t th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  .t td { padding: 8px; border-bottom: 1px solid var(--line); }
+  .t .n { text-align: right; }
+  .t tfoot td { font-weight: 700; border-bottom: 0; }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 600; }
+  .tag.menu { background: var(--surface-2); color: var(--muted); }
+  .note { font-size: 12px; color: var(--warn); margin-top: 8px; }
+  .box .bars { max-height: 230px; }
+  .legend { font-size: 11px; color: var(--muted); display: flex; gap: 12px; margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+  .catrow { display: grid; grid-template-columns: 80px 1fr 80px; gap: 8px; align-items: center; padding: 6px 0; }
+  /* 시안 B */
+  .split { display: grid; grid-template-columns: 300px 1fr; gap: 16px; margin-top: 20px; align-items: start; }
+  .days button { display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; padding: 10px; border-radius: 10px; }
+  .days button[aria-current="true"] { background: var(--surface-2); }
+  .days .dd { font-weight: 700; }
+  .days .mini { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+  .days .mini i { display: block; height: 100%; background: var(--loss); opacity: .6; }
+  .days .v { font-weight: 700; color: var(--loss); }
+  .days .v.m { color: var(--muted); font-weight: 400; }
+</style>
+</head>
+<body>
+<header class="dtop"><div class="wrap">
+  <div><div class="store">모래내 베이커리 &amp; 델리</div><h1>오늘 손실</h1></div>
+  <span class="datepill num">2026년 11월 8일 (일)</span>
+  <div class="grow"></div>
+  <a class="ghost" href="Closing.desktop.html" style="text-decoration:none">마감 입력 · 고치기</a>
+</div></header>
+<div class="wrap" id="main"></div>
+<script src="shared.js"></script>
+<script src="loss-data.js"></script>
+<script>
+const { won } = ZW;
+const L = LOSS;
+const variant = (ZW.params.get('v') || 'A').toUpperCase();
+let sel = L.week.length - 1;
+
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 대시보드'], ['B', 'B 날짜 목록 + 상세']], variant],
+  ['상태', 'state', [['normal', '마감 후'], ['before', '마감 전'], ['missing', '빠진 날'], ['closed', '휴무'], ['empty', '처음']], L.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+function linesTable(lines) {
+  if (!lines.length) return '<p class="muted">버린 것이 없어요.</p>';
+  const sum = lines.reduce((a, l) => a + l.loss, 0);
+  return `<table class="t"><thead><tr><th>무엇</th><th>구분</th><th class="n">양</th><th>원인 · 행방</th><th class="n">손실</th><th class="n">비중</th></tr></thead><tbody>
+    ${lines.map(l => `<tr><td>${l.name}</td><td><span class="tag ${l.kind === 'menu' ? 'menu' : ''}">${l.kind === 'menu' ? l.cat : '재료'}</span></td><td class="n num">${l.qty}</td>
+      <td class="muted">${l.why}</td><td class="n num" style="color:var(--loss);font-weight:700">${won(l.loss)}</td><td class="n num muted">${Math.round(l.loss / sum * 100)}%</td></tr>`).join('')}
+    </tbody><tfoot><tr><td colspan="4">합계 (원가 기준)</td><td class="n num" style="color:var(--loss)">${won(sum)}</td><td></td></tr></tfoot></table>`;
+}
+function weekBox(extra = {}) {
+  const missing = L.week.filter(x => x.missing);
+  return `<div class="box"><h2>이번 주 요일별<span class="muted">월 ~ 일 · 원가 기준</span></h2>${L.bars({ ghost: true, height: 170, ...extra })}
+    <div class="legend"><span><i style="background:var(--loss)"></i>오늘</span><span><i style="border:1px dashed var(--muted)"></i>지난주 같은 요일</span><span><i style="border:1px dashed var(--warn)"></i>입력 안 함 · 마감 전</span></div>
+    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일(' + x.date + ')').join(', ')} 마감이 비어 합계 · 비교에서 뺐어요 — <a href="Closing.desktop.html">입력하기</a></div>` : ''}</div>`;
+}
+function byCategory(lines) {
+  const m = {};
+  lines.forEach(l => { const k = l.kind === 'menu' ? l.cat : '재료'; m[k] = (m[k] || 0) + l.loss; });
+  const max = Math.max(...Object.values(m), 1);
+  return `<div class="box"><h2>분류별<span class="muted">오늘</span></h2>${Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
+    `<div class="catrow"><span>${k}</span><div class="hbar"><i class="${k === '재료' ? 'ing' : ''}" style="width:${v / max * 100}%"></i></div><span class="num" style="text-align:right">${won(v)}</span></div>`).join('')}</div>`;
+}
+
+/* ── 시안 A: 대시보드 ── */
+function renderA() {
+  const t = L.today;
+  const saved = L.SAVED.reduce((a, s) => a + s.value, 0);
+  const todayV = t.loss != null ? `<div class="v num" style="color:var(--loss)">${won(t.loss)}</div>${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}`
+    : t.pending ? `<div class="v" style="color:var(--muted)">마감 전</div><a href="Closing.desktop.html">오늘 마감 입력하기 →</a>`
+    : `<div class="v" style="color:var(--muted)">휴무</div><span class="muted small">계산에서 빠져요</span>`;
+  let h = `<div class="kpis">
+    <div class="box kpi"><div class="l">오늘 폐기 손실 · 원가 기준</div>${todayV}</div>
+    <div class="box kpi"><div class="l">오늘 폐기율 (폐기 ÷ 만든)</div><div class="v num">${t.rate != null && t.loss != null ? L.pct(t.rate) : '—'}</div><span class="muted small">메뉴 폐기 ${t.loss != null ? t.wasted + '개' : '—'}</span></div>
+    <div class="box kpi"><div class="l">이번 주 손실</div><div class="v num">${won(L.weekSum)}</div>${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
+    <div class="box kpi"><div class="l">버리지 않고 구한 것 (오늘)</div><div class="v num" style="color:var(--accent)">${t.loss != null ? won(saved) : '—'}</div><span class="muted small">${t.loss != null ? '크루아상 2개 직원식' : ''}</span></div></div>`;
+  h += `<div class="two">${weekBox()}${t.loss != null ? byCategory(L.TODAY_LINES) : '<div class="box"><h2>분류별</h2><p class="muted">오늘 마감 뒤에 보여요.</p></div>'}</div>`;
+  if (t.loss != null) h += `<div class="box" style="margin-top:16px"><h2>오늘 버린 것<span class="muted">손실 큰 순</span></h2>${linesTable(L.TODAY_LINES)}</div>`;
+  return h;
+}
+
+/* ── 시안 B: 날짜 목록 + 상세 ── */
+function renderB() {
+  const max = Math.max(...L.week.map(x => x.loss || 0));
+  const list = L.week.map((x, i) => `<button data-day="${i}" aria-current="${i === sel}">
+    <span><span class="dd">${x.d}</span> <span class="muted small num">${x.date}</span></span>
+    <span class="mini">${x.loss != null ? `<i style="width:${x.loss / max * 100}%"></i>` : ''}</span>
+    <span class="v num ${x.loss == null ? 'm' : ''}">${x.loss != null ? won(x.loss) : x.closed ? '휴무' : x.pending ? '마감 전' : '입력 안 함'}</span></button>`).join('');
+  const x = L.week[sel];
+  let detail;
+  if (x.loss == null) {
+    detail = `<div class="box"><h2>${x.d}요일 ${x.date}</h2><p class="muted">${x.closed ? '휴무일이에요. 손실 · 폐기율 계산에서 빠져요.' : x.pending ? '아직 오늘 마감 전이에요.' : '이날 마감을 입력하지 않았어요. 합계 · 비교에서 빠져 있어요.'}</p>
+      ${x.closed ? '' : '<a class="primary" href="Closing.desktop.html" style="text-decoration:none;display:inline-block;width:auto;padding:10px 16px">마감 입력하기</a>'}</div>`;
+  } else {
+    const lines = L.linesFor(sel);
+    detail = `<div class="box"><h2>${x.d}요일 ${x.date}${x.today ? ' · 오늘' : ''}<span class="muted">원가 기준</span></h2>
+      <div style="display:flex;gap:32px;align-items:baseline;flex-wrap:wrap">
+        <div><div class="muted small">폐기 손실</div><div class="num" style="font-size:30px;font-weight:800;color:var(--loss)">${won(x.loss)}</div>${L.delta(x.loss, x.lastWeek, '지난주 ' + x.d + '요일보다')}</div>
+        <div><div class="muted small">폐기율</div><div class="num" style="font-size:22px;font-weight:700">${L.pct(x.rate)}</div></div>
+        <div><div class="muted small">메뉴 폐기</div><div class="num" style="font-size:22px;font-weight:700">${x.wasted}개</div></div></div></div>
+      <div class="box" style="margin-top:16px"><h2>버린 것</h2>${linesTable(lines)}</div>`;
+  }
+  return `<div class="split"><div class="box days"><h2>이번 주<span class="muted num">${won(L.weekSum)}</span></h2>${list}
+      <div style="margin-top:8px">${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}</div>
+      ${L.week.some(w => w.missing) ? '<div class="note">⚠ 빠진 날은 합계에서 뺐어요</div>' : ''}</div><div>${detail}</div></div>`;
+}
+
+function render() {
+  const main = document.getElementById('main');
+  if (L.empty) {
+    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 버린 돈이 보여요.</p>
+      <a class="primary" href="Closing.desktop.html" style="text-decoration:none;display:inline-block;width:auto">첫 마감 입력하기</a></div>`;
+    return;
+  }
+  main.innerHTML = variant === 'B' ? renderB() : renderA();
+}
+document.addEventListener('click', (e) => { const d = e.target.closest('[data-day]'); if (d) { sel = Number(d.dataset.day); render(); } });
+render();
+</script>
+</body>
+</html>

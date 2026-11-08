@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘 손실 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  main { padding-bottom: 40px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-top: 12px; }
+  .card h2 { font-size: 14px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .card h2 .muted { font-weight: 400; font-size: 12px; }
+  .hero .k { font-size: 13px; color: var(--muted); }
+  .hero .amt { font-size: 36px; font-weight: 800; color: var(--loss); letter-spacing: -0.03em; margin: 2px 0 8px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .stats div { background: var(--surface-2); border-radius: 10px; padding: 8px; }
+  .stats .v { font-weight: 800; font-size: 16px; }
+  .stats .l { font-size: 11px; color: var(--muted); }
+  .line { padding: 8px 0; border-top: 1px solid var(--line); }
+  .line:first-of-type { border-top: 0; }
+  .line .r { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .line .why { font-size: 12px; color: var(--muted); }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 600; margin-left: 4px; }
+  .ghost-legend { font-size: 11px; color: var(--muted); display: flex; gap: 12px; margin-top: 6px; }
+  .ghost-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+  .cta { display: block; text-align: center; margin-top: 12px; }
+  .note { font-size: 12px; color: var(--warn); margin-top: 6px; }
+  /* 시안 C: 문장 카드 */
+  .say { font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; }
+  .say b { color: var(--loss); }
+  .say em { font-style: normal; color: var(--accent); }
+  .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .pill { display: inline-block; font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); margin-top: 8px; }
+  .daytabs { display: flex; gap: 4px; overflow-x: auto; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="top">
+    <div class="row">
+      <div><div class="store">모래내 베이커리 &amp; 델리</div><h1 id="title">오늘 손실</h1></div>
+      <span class="datepill num">11월 8일 (일)</span>
+    </div>
+  </header>
+  <main id="main"></main>
+</div>
+<script src="shared.js"></script>
+<script src="loss-data.js"></script>
+<script>
+const { won } = ZW;
+const L = LOSS;
+const variant = (ZW.params.get('v') || 'A').toUpperCase();
+let sel = L.week.length - 1; // 시안 B: 고른 날 (기본 오늘)
+
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 숫자 먼저'], ['B', 'B 주간 먼저'], ['C', 'C 문장']], variant],
+  ['상태', 'state', [['normal', '마감 후'], ['before', '마감 전'], ['missing', '빠진 날'], ['closed', '휴무'], ['empty', '처음']], L.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+/* ── 공용 조각 ── */
+function linesCard(lines, title = '무엇을 버렸나') {
+  if (!lines.length) return '';
+  const max = Math.max(...lines.map(l => l.loss));
+  return `<div class="card"><h2>${title}<span class="muted">손실 큰 순</span></h2>${lines.map(l => `
+    <div class="line"><div class="r"><span>${l.name}${l.kind === 'ingredient' ? '<span class="tag">재료</span>' : ''} <span class="muted small">${l.qty}</span></span><b class="num" style="color:var(--loss)">${won(l.loss)}</b></div>
+    <div class="why">${l.why}</div><div class="hbar"><i class="${l.kind === 'ingredient' ? 'ing' : ''}" style="width:${l.loss / max * 100}%"></i></div></div>`).join('')}</div>`;
+}
+function savedCard() {
+  return `<div class="card"><h2>버리지 않고 구한 것<span class="muted">손실에서 빠짐</span></h2>${L.SAVED.map(s => `
+    <div class="line"><div class="r"><span>${s.name} <span class="muted small">${s.qty} · ${s.how}</span></span><b class="num" style="color:var(--accent)">${won(s.value)}</b></div></div>`).join('')}</div>`;
+}
+function weekCard(opts = {}) {
+  const missing = L.week.filter(x => x.missing);
+  return `<div class="card"><h2>이번 주<span class="muted">월 ~ 일</span></h2>
+    ${L.bars({ ghost: true, ...opts })}
+    <div class="ghost-legend"><span><i style="background:var(--loss)"></i>오늘</span><span><i style="border:1px dashed var(--muted)"></i>지난주 같은 요일</span></div>
+    <div class="line" style="margin-top:8px"><div class="r"><span class="muted">이번 주 손실</span><b class="num">${won(L.weekSum)}</b></div>
+      <div style="margin-top:4px">${L.delta(L.weekSum, L.lastWeekSum, '지난주 같은 요일보다')}</div></div>
+    <div class="line"><div class="r"><span class="muted">평균 폐기율</span><b class="num">${L.pct(L.weekRate)}</b></div></div>
+    ${missing.length ? `<div class="note">⚠ ${missing.map(x => x.d + '요일').join(', ')} 마감을 입력하지 않아 합계와 비교에서 뺐어요 <a href="Closing.mobile.html">입력하기</a></div>` : ''}
+  </div>`;
+}
+function todayHero() {
+  const t = L.today;
+  if (t.pending) return `<div class="card hero"><div class="k">오늘 폐기 손실</div><div class="amt" style="color:var(--muted)">마감 전</div>
+    <div class="sub">마감을 입력하면 오늘 버린 돈이 여기 보여요.</div><a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 입력하기</a></div>`;
+  if (t.closed) return `<div class="card hero"><div class="k">오늘</div><div class="amt" style="color:var(--muted)">휴무</div><div class="sub">휴무일은 손실 · 폐기율 계산에서 빠져요.</div></div>`;
+  return `<div class="card hero"><div class="k">오늘 폐기 손실 · 원가 기준</div><div class="amt num">${won(t.loss)}</div>
+    ${L.delta(t.loss, t.lastWeek, '지난 일요일보다')}
+    <div class="stats"><div><div class="v num">${t.wasted}개</div><div class="l">메뉴 폐기</div></div>
+      <div><div class="v num">${L.pct(t.rate)}</div><div class="l">폐기율</div></div>
+      <div><div class="v num" style="color:var(--accent)">${won(L.SAVED.reduce((a, s) => a + s.value, 0))}</div><div class="l">구한 것</div></div></div></div>`;
+}
+
+/* ── 시안 A: 숫자 먼저 ── */
+function renderA() {
+  const t = L.today;
+  let h = todayHero();
+  if (t.loss != null) h += linesCard(L.TODAY_LINES) + savedCard();
+  h += weekCard();
+  if (t.loss != null) h += `<a class="ghost cta" href="Closing.mobile.html" style="text-decoration:none">오늘 마감 고치기</a>`;
+  return h;
+}
+
+/* ── 시안 B: 주간 먼저, 막대를 눌러 그날 보기 ── */
+function renderB() {
+  const x = L.week[sel];
+  let h = `<div class="card"><h2>이번 주 손실<span class="muted">막대를 누르면 그날</span></h2>
+    <div class="amt num" style="font-size:28px;font-weight:800;color:var(--loss)">${won(L.weekSum)}</div>
+    ${L.delta(L.weekSum, L.lastWeekSum, '지난주보다')}
+    <div style="margin-top:10px">${L.bars({ ghost: true, selectable: true, selected: sel, height: 160 })}</div>
+    ${L.week.some(w => w.missing) ? `<div class="note">⚠ 수요일 마감이 비어 합계에서 뺐어요</div>` : ''}</div>`;
+  if (x.loss == null) {
+    h += `<div class="card"><h2>${x.d} ${x.date}</h2><div class="sub">${x.closed ? '휴무' : x.pending ? '아직 마감 전이에요.' : '마감을 입력하지 않은 날이에요.'}</div>
+      ${x.closed ? '' : `<a class="primary cta" href="Closing.mobile.html" style="text-decoration:none">마감 입력하기</a>`}</div>`;
+  } else {
+    h += `<div class="card"><h2>${x.d} ${x.date}${x.today ? ' · 오늘' : ''}<span class="muted">원가 기준</span></h2>
+      <div class="num" style="font-size:24px;font-weight:800;color:var(--loss)">${won(x.loss)}</div>
+      ${L.delta(x.loss, x.lastWeek, '지난주 ' + x.d + '요일보다')}
+      <div class="stats"><div><div class="v num">${x.wasted}개</div><div class="l">메뉴 폐기</div></div><div><div class="v num">${L.pct(x.rate)}</div><div class="l">폐기율</div></div><div><div class="v num">${L.linesFor(sel).filter(l => l.kind === 'ingredient').length}건</div><div class="l">재료 폐기</div></div></div></div>`;
+    h += linesCard(L.linesFor(sel), '그날 버린 것');
+  }
+  return h;
+}
+
+/* ── 시안 C: 문장으로 ── */
+function renderC() {
+  const t = L.today;
+  const lines = L.TODAY_LINES;
+  let h = '';
+  if (t.pending) return todayHero() + weekCard();
+  if (t.closed) return todayHero() + weekCard();
+  const top = lines[0], share = Math.round(top.loss / t.loss * 100);
+  const diff = t.lastWeek - t.loss;
+  h += `<div class="card"><div class="say">오늘은 <b class="num">${won(t.loss)}</b>어치를 버렸어요.</div>
+    <div class="sub">원가 기준 · 메뉴 ${t.wasted}개 + 재료 ${lines.filter(l => l.kind === 'ingredient').length}건 · 폐기율 ${L.pct(t.rate)}</div></div>`;
+  h += `<div class="card"><div class="say">${diff >= 0 ? `지난 일요일보다 <em class="num">${won(diff)}</em> 덜 버렸어요.` : `지난 일요일보다 <b class="num">${won(-diff)}</b> 더 버렸어요.`}</div>
+    <div class="sub">이번 주 합계 ${won(L.weekSum)} · 지난주 같은 요일까지 ${won(L.lastWeekSum)}</div>${L.bars({ ghost: true, height: 110 })}</div>`;
+  h += `<div class="card"><div class="say"><b>${top.name}</b>가 오늘 손실의 <b class="num">${share}%</b>예요.</div>
+    <div class="sub">${top.qty} 남아서 버렸어요 (${top.why}). 원가가 높은 메뉴라 하나만 줄여도 크게 줄어요.</div>
+    <span class="pill">내일 권장 생산량은 예측 기능(M4)이 생기면 여기에</span></div>`;
+  h += `<div class="card"><div class="say">크루아상 2개는 <em>직원식</em>으로 구했어요.</div><div class="sub">구한 것 ${won(2200)} — 손실에서 빠져요.</div></div>`;
+  h += linesCard(lines, '자세히');
+  return h;
+}
+
+function render() {
+  const main = document.getElementById('main');
+  if (L.empty) {
+    main.innerHTML = `<div class="empty"><div class="big">🧾</div><p><b>아직 기록이 없어요</b><br>첫 마감을 입력하면 여기에 버린 돈이 보여요.</p>
+      <a class="primary" href="Closing.mobile.html" style="text-decoration:none;display:inline-block">첫 마감 입력하기</a></div>`;
+    return;
+  }
+  main.innerHTML = variant === 'B' ? renderB() : variant === 'C' ? renderC() : renderA();
+}
+document.addEventListener('click', (e) => {
+  const d = e.target.closest('[data-day]');
+  if (d) { sel = Number(d.dataset.day); render(); }
+});
+render();
+</script>
+</body>
+</html>

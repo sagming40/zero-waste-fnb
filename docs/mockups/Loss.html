@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오늘 손실 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>오늘 손실 — 시안 비교</h1>
+<div class="muted small">F19 오늘 · 이번 주 폐기 손실(원가 기준) · 폐기율. 안쪽은 눌러 볼 수 있다(B는 막대 · 날짜를 누르면 그날). 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st">
+    <option value="normal">마감 후</option><option value="before">오늘 마감 전</option><option value="missing">빠진 날(수)</option>
+    <option value="closed">오늘 휴무</option><option value="empty">처음(기록 없음)</option>
+  </select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="shared.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 숫자 먼저', d: '오늘 손실이 맨 위에 크게, 그 아래 무엇을 버렸나 · 구한 것 · 이번 주. 마감 저장 직후 "얼마 버렸지?"에 바로 답한다.' },
+  { v: 'B', t: 'B · 주간 먼저', d: '이번 주 막대가 위, 막대를 누르면 그날 내역. 흐름은 잘 보이지만 오늘 숫자가 한 단계 아래로 내려간다.' },
+  { v: 'C', t: 'C · 문장', d: '"오늘은 ₩22,800어치를 버렸어요" 같은 문장 카드. 읽기 쉽고 다음 행동을 말해 주지만 숫자 비교는 덜 빠르다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 대시보드', d: '위에 숫자 네 개(오늘 · 폐기율 · 이번 주 · 구한 것), 가운데 요일 막대 + 분류별, 아래 오늘 버린 것 표.' },
+  { v: 'B', t: 'B · 날짜 목록 + 상세', d: '왼쪽 요일 목록(미니 막대), 오른쪽 고른 날의 숫자와 표. 지난 날을 하나씩 들여다보기 좋다.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'normal';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  // file:// 로 열면 Chrome이 주소 바꾸기를 SecurityError로 막는다 — 막혀도 화면은 그리게
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Loss.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Loss.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>
