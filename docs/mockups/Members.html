@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매장 · 직원 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>매장 · 직원 — 시안 비교</h1>
+<div class="muted small">F02 매장 정보(주소 바꾸기) · F03 직원 초대 · 내보내기. 점주만 보는 설정 화면. 안쪽 단추를 눌러 상태를 오갈 수 있다. 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="shared.js"></script>
+<script src="members.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 한 화면 (채택)', d: '매장 카드 아래 사람 카드. 초대 링크는 사람 카드 안에서 펼친다. 둘 다 짧아서 스크롤 한 번이면 끝난다.' },
+  { v: 'B', t: 'B · 탭 + 시트', d: '매장 / 사람 탭, 초대 링크는 아래 시트. 한 번에 하나만 보지만 매장 정보는 거의 안 바뀌어 탭 하나가 늘 비어 보인다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 한 줄', d: '휴대폰 A를 폭 720에 그대로. 만들 것이 가장 적다.' },
+  { v: 'B', t: 'B · 두 칸 + 표 (채택)', d: '왼쪽 매장, 오른쪽 사람 표(역할 · 함께한 날 · 최근 입력). 직원이 많아지면 표가 낫다.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+st.innerHTML = MEM.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'main';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Members.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Members.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

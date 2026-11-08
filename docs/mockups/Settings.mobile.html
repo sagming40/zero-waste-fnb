@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메뉴 · 레시피 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="settings.css">
+</head>
+<body>
+<div class="phone" id="root"></div>
+<script src="shared.js"></script>
+<script src="settings.js"></script>
+<script>
+// 시안 A: 목록 → 상세 화면으로 넘어감 / B: 목록 위로 아래 시트가 올라옴
+const S = SET;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 상세 화면 (채택)'], ['B', 'B 아래 시트']], S.variant],
+  ['상태', 'state', S.STATES, S.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const [kind, item] = S.detailFor(S.state);
+const tab = S.tabOf(S.state);
+const detailHtml = kind === 'ing' ? S.ingDetail(item) : kind === 'menu' ? S.menuDetail(item) : kind === 'new' ? S.menuDetail(item, { isNew: true, adding: true }) : '';
+const title = kind === 'new' ? '새 메뉴' : item ? item.name : '';
+const listView = () => `<header class="top">
+    <div class="store">모래내 베이커리 &amp; 델리 · 더보기</div><h1>메뉴 · 레시피</h1>
+    <div class="listtools"><div class="seg">
+      <button type="button" data-tab="menu" aria-pressed="${tab === 'menu'}">메뉴</button>
+      <button type="button" data-tab="ing" aria-pressed="${tab === 'ing'}">식자재</button></div>
+      <button class="addbtn" type="button" data-go="newmenu">+ ${tab === 'ing' ? '식자재' : '메뉴'}</button></div>
+  </header>
+  <main class="set">${S.state === 'empty' ? S.empty() : tab === 'ing' ? S.ingList(kind === 'ing' ? item.id : null) : S.menuList(kind === 'menu' ? item.id : null)}</main>`;
+const root = document.getElementById('root');
+if (!kind) root.innerHTML = listView();
+else if (S.variant === 'B') {
+  root.innerHTML = listView() + `<div class="scrim" data-go="${tab === 'ing' ? 'ingredients' : 'menus'}"></div>
+    <section class="sheet" role="dialog" aria-label="${title}"><div class="grab"></div>
+    <div class="sh"><h2>${title}</h2><button class="iconbtn" type="button" data-go="${tab === 'ing' ? 'ingredients' : 'menus'}" aria-label="닫기">${S.ICON.x}</button></div>
+    <div class="sb">${detailHtml}</div></section>`;
+} else {
+  root.innerHTML = `<header class="top">
+    <button class="back" type="button" data-go="${tab === 'ing' ? 'ingredients' : 'menus'}">${S.ICON.back}${tab === 'ing' ? '식자재' : '메뉴'}</button>
+    <h1>${title}</h1></header><main class="set" style="padding-top:16px">${detailHtml}</main>`;
+}
+S.wire(document);
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매장 · 직원 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="members.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="shared.js"></script>
+<script src="members.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만. 시안 A: 휴대폰 A를 한 줄로(폭 720) / B: 왼쪽 매장 · 오른쪽 사람 표
+const M = MEM;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 줄'], ['B', 'B 두 칸 + 표 (채택)']], M.variant],
+  ['상태', 'state', M.STATES, M.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const s = M.state;
+const head = '<div class="small muted">설정</div><h1>매장 · 직원</h1>';
+const modal = (body) => `<div class="scrim" data-go="main"></div><section class="sheet" role="dialog" style="top:50%;bottom:auto;transform:translate(-50%,-50%);border-radius:18px;max-width:440px;padding:20px">${body}</section>`;
+let html;
+if (M.variant === 'B') {
+  const staffRows = s === 'alone' ? '' : `
+    <tr><td class="who"><span class="av">서</span><span><b>서지우</b><br><span class="small muted">jiwoo@example.com</span></span></td><td><span class="pill staff">직원</span></td><td class="small muted">11월 3일</td><td class="small muted">어제 마감 입력</td><td><button class="ghost sm" data-go="remove">내보내기</button></td></tr>
+    <tr><td class="who"><span class="av">김</span><span><b>김하늘</b><br><span class="small muted">haneul@example.com</span></span></td><td><span class="pill staff">직원</span></td><td class="small muted">11월 6일</td><td class="small muted">오늘 입고 입력</td><td><button class="ghost sm" data-go="remove">내보내기</button></td></tr>
+    <tr><td class="who"><span class="av ghostav">↗</span><span>초대 링크<br><span class="small muted">11월 8일 만듦 · 11월 15일(일)까지</span></span></td><td><span class="pill staff">대기</span></td><td></td><td class="small muted">아직 사용하지 않음</td><td><button class="link" data-cancel>취소</button></td></tr>`;
+  const peopleCard = `<section class="card"><h2 class="row-between"><span>사람</span><button type="button" class="primary inline" data-go="invite">+ 직원 초대</button></h2>
+    ${s === 'invite' ? `<div class="card inline-panel" style="padding:12px">${M.inviteBox()}</div>` : ''}
+    <table class="people"><thead><tr><th>이름</th><th>역할</th><th>함께한 날</th><th>최근</th><th></th></tr></thead><tbody>
+    <tr><td class="who"><span class="av own">한</span><span><b>한도윤</b> <span class="small muted">나</span><br><span class="small muted">doyun@example.com</span></span></td><td><span class="pill">점주</span></td><td class="small muted">11월 1일</td><td></td><td></td></tr>
+    ${staffRows}</tbody></table>
+    ${s === 'alone' ? '<div class="uses small">아직 직원이 없어요. 혼자 하는 매장이면 그대로 사용해도 돼요.</div>' : ''}</section>`;
+  html = `<div class="dmem">${head}<div class="two">${M.storeCard()}${peopleCard}</div></div>`;
+} else {
+  let people = M.people();
+  if (s === 'invite') people = people.replace('</h2>', `</h2><div class="card inline-panel" style="padding:12px">${M.inviteBox()}</div>`);
+  html = `<div class="dmem one">${head}${M.storeCard()}${people}</div>`;
+}
+if (s === 'remove') html += modal(M.removeBox());
+document.getElementById('root').innerHTML = html;
+M.wire(document);
+</script>
+</body>
+</html>

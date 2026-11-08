@@ -59,7 +59,7 @@
   function signupForm(opts = {}) {
     return `
       ${field('name', '이름', 'text', { ac: 'name', ph: '가게에서 부르는 이름', hint: '동료에게 보여요' })}
-      ${field('email', '이메일', 'email', { ac: 'username', ph: 'name@example.com', hint: '로그인에 써요' })}
+      ${field('email', '이메일', 'email', { ac: 'username', ph: 'name@example.com', hint: '로그인에 사용해요' })}
       ${field('pw', '비밀번호', 'password', { ac: 'new-password', hint: '8자 이상' })}
       <label class="check"><input type="checkbox"> <span><button type="button" class="link">이용 약관</button> · <button type="button" class="link">개인정보 처리</button>에 동의해요</span></label>
       <button class="primary" type="submit">${opts.cta || '가입하기'}</button>`;
@@ -115,7 +115,7 @@
       const i = b.previousElementSibling; const on = i.type === 'password';
       i.type = on ? 'text' : 'password'; b.textContent = on ? '숨기기' : '보기';
     });
-    root.querySelectorAll('[data-forgot]').forEach((b) => b.onclick = () => ZW.toast('M2: 메일을 보내지 않아서 사장님이 직원 비밀번호를 다시 정해 줘요'));
+    root.querySelectorAll('[data-forgot]').forEach((b) => b.onclick = () => ZW.toast('비밀번호 찾기는 메일 발송이 생기면 열어요 (DESIGN 9.4)'));
     root.querySelectorAll('[data-next]').forEach((b) => b.onclick = () => go('signup'));
     root.querySelectorAll('[data-accept]').forEach((b) => b.onclick = () => ZW.toast('들어갔어요 → 마감 화면'));
     root.querySelectorAll('.demo').forEach((b) => b.onclick = () => ZW.toast('데모 매장(읽기 전용)으로 → 오늘'));

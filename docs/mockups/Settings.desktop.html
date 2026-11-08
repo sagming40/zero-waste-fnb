@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메뉴 · 레시피 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="settings.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="shared.js"></script>
+<script src="settings.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만 그린다 — Closing.desktop · Loss.desktop과 같다.
+// 시안 A: 왼쪽 목록 + 오른쪽 상세 / B: 표에서 바로 고치고, 줄을 펼치면 레시피
+const S = SET;
+const { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 목록 + 상세 (채택)'], ['B', 'B 표']], S.variant],
+  ['상태', 'state', S.STATES, S.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const [kind, item] = S.detailFor(S.state);
+const tab = S.tabOf(S.state);
+const head = `<header class="dhead"><div><div class="small muted">설정</div><h1>메뉴 · 레시피</h1></div>
+  <div style="display:flex;gap:8px;align-items:center"><div class="seg">
+    <button type="button" data-tab="menu" aria-pressed="${tab === 'menu'}">메뉴</button>
+    <button type="button" data-tab="ing" aria-pressed="${tab === 'ing'}">식자재</button></div>
+    <button class="addbtn" type="button" data-go="newmenu">+ ${tab === 'ing' ? '식자재' : '메뉴'}</button></div></header>`;
+
+function viewA() {
+  const list = S.state === 'empty' ? S.empty() : tab === 'ing' ? S.ingList(kind === 'ing' ? item.id : null) : S.menuList(kind === 'menu' ? item.id : (S.state === 'menus' ? 'croissant' : null));
+  // 목록만 보는 상태에서도 오른쪽이 비지 않게 첫 줄(크루아상 · 밀가루)을 연다
+  let k = kind, it = item;
+  if (!k && S.state === 'menus') { k = 'menu'; it = S.MENUS.find((m) => m.id === 'croissant'); }
+  if (!k && S.state === 'ingredients') { k = 'ing'; it = S.ING[0]; }
+  const right = k === 'ing' ? `<h2>${it.name}</h2>${S.ingDetail(it)}` : k === 'menu' ? `<h2>${it.name}</h2>${S.menuDetail(it)}`
+    : k === 'new' ? `<h2>새 메뉴</h2>${S.menuDetail(it, { isNew: true, adding: true })}` : '<div class="empty">왼쪽에서 메뉴를 고르면 여기서 고쳐요</div>';
+  return `<div class="dset">${head}<div class="dbody"><div class="dlist">${list}</div><div class="ddetail">${right}</div></div></div>`;
+}
+
+function viewB() {
+  if (S.state === 'empty') return `<div class="dset">${head}<div class="tablewrap" style="max-width:520px;margin:0 auto">${S.empty()}</div></div>`;
+  if (tab === 'ing') {
+    const rows = S.ING.filter((i) => !i.stopped).map((i) => {
+      const open = kind === 'ing' && item.id === i.id;
+      const n = S.MENUS.filter((m) => !m.stopped && m.recipe.some(([id]) => id === i.id)).length;
+      return `<tr class="${open ? 'open' : ''}"><td><button class="caret" data-ing="${i.id}">${open ? '▾' : '▸'}</button></td>
+        <td><input value="${i.name}"></td><td style="width:70px"><select ${n ? 'disabled title="레시피에서 사용 중이라 바꿀 수 없음"' : ''}><option>${i.unit}</option></select></td>
+        <td class="n" style="width:110px"><input value="${i.pack ? i.pack[0].toLocaleString('ko-KR') : ''}" placeholder="가격"></td>
+        <td class="n" style="width:90px"><input value="${i.pack ? i.pack[1].toLocaleString('ko-KR') : ''}" placeholder="양"></td>
+        <td class="n small muted" style="width:110px">${i.pack ? (i.pack[0] / i.pack[1] < 10 ? (i.pack[0] / i.pack[1]).toFixed(1) : Math.round(i.pack[0] / i.pack[1])) + '원/' + i.unit : '<span class="tag warn">단가 없음</span>'}</td>
+        <td><select>${i.c ? '' : '<option>분류 없음</option>'}<option>${i.c ? i.c : ''}</option></select></td>
+        <td class="n">${n}</td></tr>
+        ${open ? `<tr class="exp"><td colspan="8"><div style="max-width:560px">${S.ingDetail(i)}</div></td></tr>` : ''}`;
+    }).join('');
+    return `<div class="dset">${head}<div class="tablewrap"><table class="st"><thead><tr><th></th><th>식자재</th><th>단위</th><th class="n">가격(원)</th><th class="n">양</th><th class="n">1단위당</th><th>탄소 분류</th><th class="n">메뉴</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }
+  const openId = kind === 'menu' ? item.id : null;
+  const newRow = kind === 'new' ? `<tr class="open"><td><button class="caret">▾</button></td><td><input value="${item.name}"></td><td><select><option>음료</option></select></td><td><select><option>주문 때</option></select></td><td class="n"><input value="5,800"></td><td class="n">—</td><td class="n">—</td></tr>
+    <tr class="exp"><td colspan="7"><div style="max-width:620px">${S.menuDetail(item, { isNew: true, adding: true })}</div></td></tr>` : '';
+  const rows = ZW.CATS.map((cat) => {
+    const ms = S.MENUS.filter((m) => !m.stopped && m.cat === cat);
+    return `<tr class="cat"><td colspan="7">${cat} · ${ms.length}</td></tr>` + ms.map((m) => {
+      const c = S.costOf(m), open = m.id === openId;
+      return `<tr class="${open ? 'open' : ''}"><td><button class="caret" data-menu="${m.id}">${open ? '▾' : '▸'}</button></td>
+        <td><input value="${m.name}"></td>
+        <td style="width:110px"><select>${ZW.CATS.map((k) => `<option ${k === m.cat ? 'selected' : ''}>${k}</option>`).join('')}</select></td>
+        <td style="width:110px"><select><option ${m.fresh ? 'selected' : ''}>미리 만듦</option><option ${m.fresh ? '' : 'selected'}>주문 때</option></select></td>
+        <td class="n" style="width:110px"><input value="${m.price.toLocaleString('ko-KR')}"></td>
+        <td class="n num" style="width:110px">${m.recipe.length ? won(c.cost) + (c.missing ? ' + ?' : '') : '<span class="tag">레시피 없음</span>'}</td>
+        <td class="n num" style="width:80px">${m.recipe.length && !c.missing ? Math.round(c.rate * 100) + '%' : '—'}</td></tr>
+        ${open ? `<tr class="exp"><td colspan="7"><div style="max-width:620px">${S.menuDetail(m)}</div></td></tr>` : ''}`;
+    }).join('');
+  }).join('');
+  return `<div class="dset">${head}<div class="tablewrap"><table class="st"><thead><tr><th style="width:32px"></th><th>메뉴</th><th>분류</th><th>만드는 방식</th><th class="n">판매가</th><th class="n">1개 원가</th><th class="n">원가율</th></tr></thead><tbody>${newRow}${rows}</tbody></table>
+    <p class="small muted">칸을 눌러 바로 고치고 Tab · Enter로 다음 칸 — 마감 입력 표(DESIGN 3절)와 같은 키보드 규칙. ▸를 누르면 레시피</p></div></div>`;
+}
+document.getElementById('root').innerHTML = S.variant === 'B' ? viewB() : viewA();
+S.wire(document);
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+/* 첫 매장 등록 · 매장 고르기 · 시작 체크리스트 (Store.*.html). auth.css 위에 얹는다 */
+.center { text-align: center; align-self: center; }
+.wide { width: 100%; padding: 12px; }
+.results { display: flex; flex-direction: column; gap: 6px; }
+.res, .picked, .storecard {
+  display: flex; align-items: center; gap: 10px; text-align: left; width: 100%;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.res:hover, .storecard:hover { border-color: var(--accent); }
+.picked { border-color: var(--accent); background: var(--accent-soft); }
+.pinic { color: var(--accent); display: grid; }
+.uses { display: flex; gap: 8px; align-items: flex-start; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.uses.warn-soft { background: var(--warn-soft); color: var(--warn); }
+
+.steps { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--muted); }
+.steps li { flex: 1; display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 3px solid var(--line); }
+.steps li.done, .steps li.cur { border-color: var(--accent); color: var(--text); font-weight: 600; }
+.steps li span { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: var(--surface-2); }
+.steps li.done span, .steps li.cur span { background: var(--accent); color: var(--accent-ink); }
+
+.sum { display: grid; grid-template-columns: 80px 1fr; gap: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-size: 14px; }
+.sum .k { color: var(--muted); }
+
+.stores { display: flex; flex-direction: column; gap: 8px; }
+.storecard { padding: 12px; }
+.storecard.last { border-color: var(--accent); }
+.sic { width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 800; flex: none; }
+.pill.staff { background: var(--surface-2); color: var(--muted); }
+
+.welcome .bar { height: 6px; background: var(--surface-2); border-radius: 99px; margin-top: 10px; overflow: hidden; }
+.welcome .bar i { display: block; height: 100%; background: var(--accent); }
+.todo { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.todo li { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.todo li:first-child { border-top: 0; }
+.todo .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid var(--line); color: var(--muted); }
+.todo li.done .dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.todo li.done b { color: var(--muted); text-decoration: line-through; }
+.todo li.cur .dot { border-color: var(--accent); color: var(--accent); }
+.primary.inline { width: auto; padding: 9px 16px; font-size: 14px; margin-top: 8px; }
+
+/* 데스크톱 왼쪽: 처음 시작 단계 */
+.journey { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-direction: column; gap: 14px; }
+.journey li { display: flex; gap: 12px; align-items: center; opacity: .6; }
+.journey li.on { opacity: 1; font-weight: 700; }
+.journey li.ok { opacity: .85; }
+.journey .n { width: 28px; height: 28px; border-radius: 50%; border: 2px solid currentColor; display: grid; place-items: center; font-size: 13px; }
+.journey li.ok .n { background: rgb(255 255 255 / .2); border-color: transparent; }
+
+/* 시안 C: 질문형 제목 + 처음 시작 진행 막대 */
+.journey-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.journey-bar i { height: 4px; border-radius: 99px; background: var(--surface-2); }
+.journey-bar i.ok { background: var(--accent); }
+.journey-bar i.on { background: linear-gradient(90deg, var(--accent) 50%, var(--surface-2) 50%); }
+.q { display: flex; flex-direction: column; gap: 10px; transition: opacity .2s; }
+.q .h { font-size: 20px; }
+.q.dim { opacity: .4; }
+.lab.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

@@ -30,8 +30,8 @@
     { id: 'waste', label: '재료 폐기', group: '재고', f: 'F09', staff: true, stage: 'M3', mock: '시안 전' },
     { id: 'count', label: '실사', group: '재고', f: 'F12', staff: false, stage: 'M3', mock: '시안 전' },
     { id: 'report', label: '리포트', group: '리포트', f: 'F20 · F18', staff: false, stage: 'M4 · M5', mock: '시안 전' },
-    { id: 'settings', label: '메뉴 · 레시피', group: '설정', f: 'F04 · F05 · F06', staff: false, stage: 'M2', mock: '시안 전' },
-    { id: 'store', label: '매장 · 직원', group: '설정', f: 'F02 · F03', staff: false, stage: 'M2', mock: '시안 전' },
+    { id: 'settings', label: '메뉴 · 레시피', group: '설정', f: 'F04 · F05 · F06', staff: false, stage: 'M2', mock: '채택', src: 'Settings' },
+    { id: 'store', label: '매장 · 직원', group: '설정', f: 'F02 · F03', staff: false, stage: 'M2', mock: '채택', src: 'Members' },
   ];
   const byId = Object.fromEntries(SCREENS.map((s) => [s.id, s]));
 

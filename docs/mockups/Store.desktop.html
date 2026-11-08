@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>첫 매장 등록 · 매장 고르기 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="store.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="shared.js"></script>
+<script src="auth.js"></script>
+<script src="store.js"></script>
+<script>
+const S = STORE;
+// 데스크톱은 로그인(DESIGN 9절, 데스크톱 B)과 같은 틀: 왼쪽 주 색 · 오른쪽 입력.
+// 왼쪽은 소개 대신 "처음 시작" 단계를 보여 준다. 매장 고르기 · 매장 없음은 단계 없이.
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 화면'], ['B', 'B 3단계'], ['C', 'C 한 화면 + 질문형 (채택)']], S.variant],
+  ['상태', 'state', S.STATES, S.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const onboarding = !['pick', 'none'].includes(S.state);
+const at = S.state === 'start' ? 2 : 1; // 0 가입 · 1 매장 등록 · 2 메뉴 준비 · 3 첫 마감
+const J = ['가입', '매장 등록', '메뉴 · 레시피 준비', '첫 마감 입력'];
+const side = onboarding
+  ? `<div><h2>오늘 마감부터<br>낭비된 돈이 보여요</h2>
+      <ol class="journey">${J.map((t, i) => `<li class="${i < at ? 'ok' : i === at ? 'on' : ''}"><span class="n">${i < at ? '✓' : i + 1}</span>${t}</li>`).join('')}</ol></div>`
+  : `<div><h2>${S.state === 'pick' ? '어느 매장을<br>볼까요?' : '매장에<br>들어가 볼까요?'}</h2><p>한 계정으로 여러 매장에 속할 수 있어요. 매장마다 점주 · 직원이 따로예요.</p></div>`;
+document.getElementById('root').innerHTML = `<div class="auth-split">
+  <section class="side">${AUTH.brand()}${side}<div class="small" style="opacity:.7">서지우 · jiwoo@example.com · <u>로그아웃</u></div></section>
+  <section class="form"><form class="authbox" novalidate>${S.body(S.state, S.variant)}</form></section></div>`;
+S.wire(document);
+</script>
+</body>
+</html>

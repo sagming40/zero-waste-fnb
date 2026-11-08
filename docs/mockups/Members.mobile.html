@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매장 · 직원 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="members.css">
+</head>
+<body>
+<div class="phone" id="root"></div>
+<script src="shared.js"></script>
+<script src="members.js"></script>
+<script>
+// 시안 A: 한 화면에 매장 → 사람, 초대 링크는 사람 카드 안에서 펼침 / B: 매장 · 사람 탭, 초대는 아래 시트
+// 내보내기 확인은 둘 다 아래 시트(되돌릴 수 없는 일은 따로 묻는다)
+const M = MEM;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 화면 (채택)'], ['B', 'B 탭 + 시트']], M.variant],
+  ['상태', 'state', M.STATES, M.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const s = M.state;
+const sheet = (title, body) => `<div class="scrim" data-go="main"></div><section class="sheet" role="dialog" aria-label="${title}"><div class="grab"></div>${title ? `<h2>${title}</h2>` : ''}${body}</section>`;
+let html;
+if (M.variant === 'B') {
+  // 탭은 ?tab=store|people. 없으면 상태에 맞는 쪽(주소 상태 → 매장, 나머지 → 사람)
+  const tab = ZW.params.get('tab') || (['address', 'noaddr'].includes(s) ? 'store' : 'people');
+  const tabLink = (t) => { const p = new URLSearchParams(location.search); p.set('tab', t); if (t === 'people' && ['address', 'noaddr'].includes(s)) p.set('state', 'main'); return '?' + p; };
+  html = `<header class="top"><div class="store">모래내 베이커리 &amp; 델리 · 더보기</div><h1>매장 · 직원</h1>
+    <div class="seg"><button type="button" aria-pressed="${tab === 'store'}" onclick="location.search='${tabLink('store')}'">매장</button><button type="button" aria-pressed="${tab === 'people'}" onclick="location.search='${tabLink('people')}'">사람</button></div></header>
+    <main class="mem">${tab === 'store' ? M.storeCard() : M.people()}</main>`;
+  if (s === 'invite') html += sheet('직원 초대', M.inviteBox());
+} else {
+  let people = M.people();
+  if (s === 'invite') people = people.replace('</h2>', `</h2><div class="card inline-panel" style="padding:12px">${M.inviteBox()}</div>`);
+  html = `<header class="top"><div class="store">모래내 베이커리 &amp; 델리 · 더보기</div><h1>매장 · 직원</h1></header>
+    <main class="mem">${M.storeCard()}${people}</main>`;
+}
+if (s === 'remove') html += sheet('', M.removeBox());
+document.getElementById('root').innerHTML = html;
+M.wire(document);
+</script>
+</body>
+</html>

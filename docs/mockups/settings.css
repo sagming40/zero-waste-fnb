@@ -1,0 +1,95 @@
+/* 메뉴 · 식자재 · 레시피 (Settings.*.html). auth.css(.fld · .inp · .row-between) 위에 얹는다 */
+.grow { flex: 1; min-width: 0; }
+.center { text-align: center; }
+.wide { width: 100%; padding: 12px; }
+.row {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 6px;
+}
+.row.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.row.off { opacity: .6; }
+.tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--surface-2); color: var(--muted); margin-left: 6px; white-space: nowrap; }
+.tag.fresh { background: var(--accent-soft); color: var(--accent); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); margin-left: 0; }
+.warn-t { color: var(--warn); }
+.colhead { display: flex; justify-content: space-between; margin: 14px 2px 0; }
+.offlist { margin-top: 16px; }
+.offlist summary { cursor: pointer; padding: 6px 2px; }
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+.fld .lab.row-between { display: flex; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.users .chip { cursor: pointer; }
+.users { display: flex; flex-wrap: wrap; gap: 6px; }
+.form .seg { margin-top: 0; }
+.seg.sm button { padding: 5px; font-size: 13px; }
+.seg.locked { opacity: .55; }
+.seg button:disabled { cursor: not-allowed; }
+.lockline { display: flex; gap: 6px; align-items: flex-start; }
+.lockline svg { flex: none; margin-top: 2px; }
+.inp .muted { padding-right: 8px; }
+.inp.sel { padding: 0 8px; }
+.inp.sel select { flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; padding: 12px 0; outline: none; font-size: 15px; }
+
+.recipe { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.rline { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.qty input { width: 56px; border: 0; background: transparent; text-align: right; padding: 6px 4px; outline: none; }
+.qty .u { font-size: 12px; color: var(--muted); padding-right: 8px; min-width: 22px; }
+.rc { width: 64px; text-align: right; }
+.iconbtn.sm { width: 28px; height: 28px; border: 0; background: transparent; color: var(--muted); }
+.addline { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 12px; text-align: left; }
+.adding { padding: 10px; display: flex; flex-direction: column; gap: 4px; background: var(--surface-2); }
+.adding .inp input { padding: 9px 0; font-size: 15px; }
+.newing { background: var(--surface); border: 1px dashed var(--accent); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.inline-price { display: flex; align-items: center; gap: 6px; }
+.inline-price .inp { flex: 1; min-width: 0; }
+.inline-price .inp input { width: 100%; }
+.inline-price input { padding: 9px 0 !important; font-size: 15px !important; }
+.costbox { background: var(--surface-2); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.costbox b { font-size: 16px; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.primary.inline { width: auto; padding: 9px 16px; font-size: 14px; }
+.uses { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+
+/* 휴대폰 */
+.top .back { display: inline-flex; align-items: center; gap: 2px; border: 0; background: none; color: var(--muted); padding: 0; font-size: 13px; }
+.listtools { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.listtools .seg { flex: 1; margin-top: 0; }
+.addbtn { border: 0; border-radius: 10px; background: var(--accent); color: var(--accent-ink); font-weight: 700; padding: 9px 12px; white-space: nowrap; }
+main.set { padding: 4px 16px 40px; }
+/* B: 아래 시트 */
+.scrim { position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 20; }
+.sheet { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 430px; height: 88vh; z-index: 21;
+  background: var(--bg); border-radius: 18px 18px 0 0; display: flex; flex-direction: column; box-shadow: 0 -8px 24px rgb(0 0 0 / .15); }
+.sheet .grab { width: 40px; height: 4px; border-radius: 99px; background: var(--line); margin: 8px auto 0; }
+.sheet .sh { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 10px; border-bottom: 1px solid var(--line); }
+.sheet .sh h2 { font-size: 17px; margin: 0; }
+.sheet .sb { overflow: auto; padding: 14px 16px 24px; }
+
+/* 데스크톱 */
+.dset { height: 100vh; display: flex; flex-direction: column; }
+.dhead { padding: 18px 24px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.dhead h1 { margin: 2px 0 0; font-size: 22px; letter-spacing: -0.02em; }
+.dhead .seg { width: 240px; margin-top: 0; }
+.dbody { flex: 1; min-height: 0; display: grid; grid-template-columns: 400px 1fr; }
+.dlist { overflow: auto; padding: 4px 16px 24px; border-right: 1px solid var(--line); }
+.ddetail { overflow: auto; padding: 20px 32px 32px; }
+.ddetail .form { max-width: 560px; }
+.ddetail h2 { margin: 0 0 14px; font-size: 18px; }
+/* 데스크톱 B: 표 */
+.tablewrap { overflow: auto; padding: 0 24px 24px; }
+table.st { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+table.st th { position: sticky; top: 0; background: var(--bg); text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+table.st td { padding: 6px 8px; border-bottom: 1px solid var(--line); background: var(--surface); }
+table.st td.n, table.st th.n { text-align: right; }
+table.st tr.cat td { background: var(--surface-2); font-weight: 700; font-size: 12px; color: var(--muted); }
+table.st tr.open > td { background: var(--accent-soft); }
+table.st tr.exp td { background: var(--bg); padding: 12px 16px 16px 40px; }
+table.st input, table.st select { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 5px 6px; width: 100%; outline: none; }
+table.st input:hover, table.st select:hover { border-color: var(--line); }
+table.st input:focus { border-color: var(--accent); background: var(--surface); }
+table.st td.n input { text-align: right; }
+.caret { border: 0; background: none; color: var(--muted); width: 24px; }
+.exp .recipe { max-width: 620px; }
