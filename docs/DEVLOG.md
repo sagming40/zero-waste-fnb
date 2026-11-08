@@ -19,7 +19,13 @@
 **한 일**
 - `ModularityTests`: `ApplicationModules.of(ZwfnbApplication.class).verify()`. 스프링 컨텍스트 · Docker 없이 돈다. 기능 폴더가 없어 모듈 0개로 통과(1건, 3.12s) — `f130c17`
 - **일부러 위반해서 빨간불 확인**(커밋 안 함): `menu.MenuPeek`가 `store.internal.StoreSecret`을 부르게 하자 `BUILD FAILED`, 모듈 2개(`store` · `menu`)를 찾고 `Module 'menu' depends on non-exposed type com.sagming.zwfnb.store.internal.StoreSecret within module 'store'!`. 컴파일은 통과한다 — 막는 건 이 테스트뿐. 실습 파일을 지우고 다시 통과(5s)
-- **CI**: `.github/workflows/ci.yml` — push(main) · PR마다 ubuntu-latest + Temurin 25 + setup-gradle에서 `./gradlew test`, 실패 때만 리포트 artifact. 첫 실행(`6fde811`) 초록불, 작업 1m 26s 중 `gradlew test` 1m 3s(Testcontainers 포함), artifact 단계는 skipped. 러너 JDK 25.0.5. 테스트 건수는 미확인 — Gradle은 통과한 테스트 건수를 로그에 찍지 않는다(`gh run view --log`로 봄). 리포트는 실패 때만 올리게 해 둬서 지금은 볼 길이 없다
+- **CI**: `.github/workflows/ci.yml` — push(main) · PR마다 ubuntu-latest + Temurin 25 + setup-gradle에서 `./gradlew test`, 실패 때만 리포트 artifact. 첫 실행(`6fde811`) 초록불, 작업 1m 26s 중 `gradlew test` 1m 3s(Testcontainers 포함), artifact 단계는 skipped. 러너 JDK 25.0.5
+- **테스트 건수 출력**: Gradle은 통과한 테스트를 로그에 찍지 않아 첫 CI에선 건수를 못 봤다. `testLogging`(passed · skipped · failed) + `addTestListener`로 합계 한 줄 — `9b346e8`. CI 로그: `ModularityTests PASSED` · `ZwfnbApplicationTests PASSED` · **전체 2건, 통과 2**
+  - 처음 쓴 `afterSuite { }` · `exceptionFormat 'full'`은 `--warning-mode all`에서 Gradle 10 폐기 경고 → `addTestListener` · `exceptionFormat = 'full'`
+  - 로그 설정만 바꾸면 테스트는 up-to-date로 다시 안 돈다 → `--rerun`
+  - build.gradle 주석의 🧑‍🏫(ZWJ `0x200D`로 붙인 이모지)를 Groovy 파서가 거부 — build.gradle엔 이모지를 쓰지 않는다
+  - PowerShell에서 한글 합계가 `寃곌낵`로 깨짐: Gradle은 UTF-8, 콘솔은 CP949(949). 리눅스 CI는 정상. PowerShell 프로필에 `[Console]::OutputEncoding` · `InputEncoding` · `$OutputEncoding`을 BOM 없는 UTF-8로 → `chcp` 65001, 한글 합계 정상
+  - VS Code Gradle 확장이 `TestListener`를 "unable to resolve class"(힌트)로 표시 — 확장의 정적 분석이 Gradle 기본 import(`org.gradle.api.tasks.testing.*`)를 모르는 것. 실제 빌드 · CI는 통과
 - 노트북에 GitHub CLI 설치(winget, 2.103.3) + `gh auth login`(HTTPS, git 인증 연동)
 - 검수에서 잡은 것: `upload-artifact@4`(v 빠짐) — GitHub는 시작 전에 `uses:` 액션을 전부 받아서, 실패 때만 도는 단계라도 매번 작업이 시작도 못 한다
 

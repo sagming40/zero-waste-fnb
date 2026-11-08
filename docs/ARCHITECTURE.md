@@ -102,7 +102,7 @@ PlayLedger · cbt-journal에서 검증된 틀을 가져온다 — [0012](decisio
 
 | 기기 | 경로 | 상태 (확인한 날) |
 |---|---|---|
-| 노트북 | `C:\_dev\zero-waste-fnb` | JDK 25.0.5 · Java 팩 · Spring Boot 팩 · Gradle 확장 ✅. ⚠️ `oracle.oracle-java`는 `redhat.java`와 겹쳐 **사용 안 함**으로 끈다. ⚠️ Docker 엔진이 응답하지 않았다 — Docker Desktop을 켜야 한다. 로컬 PostgreSQL 18 서비스 있음 (2026-11-07). GitHub CLI 2.103.3(winget, `gh auth login` HTTPS · git 인증 연동) ✅ (2026-11-08) |
+| 노트북 | `C:\_dev\zero-waste-fnb` | JDK 25.0.5 · Java 팩 · Spring Boot 팩 · Gradle 확장 ✅. ⚠️ `oracle.oracle-java`는 `redhat.java`와 겹쳐 **사용 안 함**으로 끈다. ⚠️ Docker 엔진이 응답하지 않았다 — Docker Desktop을 켜야 한다. 로컬 PostgreSQL 18 서비스 있음 (2026-11-07). GitHub CLI 2.103.3(winget, `gh auth login` HTTPS · git 인증 연동) ✅. PowerShell 프로필(`$PROFILE`)에 콘솔 UTF-8(BOM 없음) 세 줄 — 기본 CP949라 Gradle 한글 출력이 깨졌다, `chcp` → 65001 ✅ (2026-11-08) |
 | 집 PC | `D:\_dev\zero-waste-fnb` | JDK Temurin 25.0.2(PATH, `JAVA_HOME` 비어 있음) · Java 팩 · Gradle · Tailwind 확장 ✅, Docker 29.8.2 엔진 동작 ✅, Node 24.15 · pnpm 12.15. ⚠️ Spring Boot Extension Pack 설치 필요(사용자가 설치한다고 함), Angular Language Service는 프런트가 정해지면 (2026-11-07) |
 | 회사 PC | — | 처음 클론할 때 같은 항목(JDK 25 · VS Code 확장 · Docker 엔진)을 본다 |
 
