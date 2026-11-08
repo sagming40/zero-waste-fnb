@@ -5,23 +5,29 @@
 
 ## 현재 상태
 
-- **지금 단계**: M1 화면 설계 — M0 ✅ 2026-11-08
-- **진행 중**: 컬러(E 올리브) · 마감 입력(휴대폰 A + 데스크톱 A) 채택 — [DESIGN](DESIGN.md), [mockups/](mockups/README.md). 프런트는 Angular([0013](decisions/0013-frontend-angular.md))
-- **다음에 할 일**: 재고 · 입고 · 예측 · 리포트 · 소개 · 로그인 시안 (CI는 백엔드 · 프런트 두 job 초록불, `36e7ce8`)
-- **프런트 켜기**: `frontend/`에서 `pnpm start` → `http://localhost:4200` (백엔드가 켜져 있어야 "정상 (UP)")
-- **개발 DB 켜기**: `docker compose -f infra/compose.local.yaml up -d`, 앱은 `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` (README "시작하기")
-- **목업 보기**: `start docs\mockups\Closing.html` · `start docs\mockups\Loss.html` · `start docs\mockups\Map.html` (서버 없이)
+- **지금 단계**: M1 화면 설계 — 모든 화면 시안을 다 그리고 M2 구현 시작(2026-11-08 결정)
+- **채택된 것**: 컬러 E 올리브 · 마감 입력 · 오늘 손실 · 앱 이동(아래 탭 / 왼쪽 메뉴) · 문구 규칙 — [DESIGN](DESIGN.md) 2 ~ 8절. 프런트 Angular 뼈대 + CI 두 job 초록불. 결정 0013 Angular · 0014 GSAP · 0015 ECharts
+- **다음에 할 일 (회사 PC)**
+  1. [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터 — 클론 전. 특히 Docker 라이선스 · 이 레포만 개인 git 이름 · 회사 네트워크 인증서. 끝나면 8.3 표에 회사 PC 줄
+  2. M2에 필요한 화면 시안: 로그인 · 가입 → 첫 매장 등록 / 매장 고르기 → 메뉴 · 식자재 · 레시피 설정 → 매장 · 직원 (PLAN M1)
+  3. 그다음 M3 · M4 · M5 · 소개 시안
+- **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도) · `Closing.html` · `Loss.html` · `Colors.html`
 - **기기별로 할 일**
-  - 회사 PC: 아직 클론 안 함 → [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터. 특히 Docker 라이선스 · 이 레포만 개인 git 이름 · 회사 네트워크 인증서
+  - 회사 PC: 위 1번
+  - 집 PC · 노트북: 없음 (집 PC 2026-11-08 끝까지 push, 노트북은 다음에 열 때 `git pull`)
 
 ---
 
-## 2026-11-08 (3) · M1 컬러 · 마감 입력 시안 채택, 프런트 Angular 뼈대 (집 PC)
+## 2026-11-08 (3) · M1 컬러 · 마감 입력 · 오늘 손실 · 앱 이동 채택, 프런트 Angular 뼈대 · CI (집 PC)
 
 **한 일**
 - 집 PC 세팅 마무리: GitHub CLI 2.103.3 · 프로필 UTF-8(`chcp` 65001) · VS Code 설정 두 개 → ARCHITECTURE 8.3
 - `docs/mockups/` 시작: 마감 입력 휴대폰 3 · 데스크톱 3 시안, 컬러 8개 비교 보드(WCAG 대비율 표 포함). 주소 파라미터 `v` · `state` · `palette` · `dark` · `device`
 - 채택: 컬러 **E 올리브**, 마감 입력 **휴대폰 A 카드 + 데스크톱 A 표 + 옆 요약** → `DESIGN.md`를 만들어 2 · 3절로 옮겼다
+- 오늘 손실(F19) 시안 휴대폰 3 · 데스크톱 2 → **휴대폰 A 숫자 먼저 + 데스크톱 A 대시보드** 채택, B의 "막대를 누르면 그날" · C의 "한 줄 요약"을 동작으로만 → DESIGN 7절
+- 앱 화면 지도(`Map.html`): 흐름 · 하루 흐름 · 이동 시안(휴대폰 3 · 데스크톱 2) · 점주와 직원 → **아래 탭 + 왼쪽 메뉴(폭 조절 · 접기 · 브라우저 기억)**, 첫 화면은 점주 "오늘"(마감 여부로 바뀜) · 직원 "마감", 직원에게 금액 숨김(화면 + API) → DESIGN 8절
+- 문구 규칙(사용자 지시) → DESIGN 6절: "버리다" 대신 "낭비되다"(수동형), 행동은 "폐기", 남았지만 낭비되지 않은 것은 "절약", 계산에서 빼는 것은 "제외"
+- CI에 프런트 job(pnpm install --frozen-lockfile → test → build), 회사 PC 처음 세팅 체크리스트(ARCHITECTURE 8.2)
 
 **[설계]**
 - 섞되 규칙으로 섞는다: "받는 데이터 모양이 같으면 같은 부품"(한 줄 · 카드). 다른 시안에서는 동작만 가져왔다(키보드 이동 · 분류별 n/m · 빠뜨림 확인)
@@ -34,6 +40,8 @@
 - 프런트 뼈대(내가 침): `pnpm dlx @angular/cli@22 new frontend`(Angular 22.2 · TypeScript 6.0 · Vitest 5) → Tailwind 4.3 + PostCSS → `styles.css`에 E 올리브 토큰(`@theme inline`) → 개발 서버 프록시 `/api` · `/actuator` → 버튼 하나로 health 표시(signal + HttpClient) → 테스트 4건(`HttpTestingController`로 UP · 503 · 확인 중 잠금)
 
 **막힌 것**
+- 왼쪽 메뉴 폭 조절 손잡이가 끌리지 않음 — 원인: 손잡이를 메뉴 바깥(`right: -3px`)에 두었는데 메뉴의 `overflow: auto`가 그 부분을 잘라 냈다. 해결: 안쪽(`right: 0`)으로, 끄는 동안 오른쪽 iframe에 `pointer-events: none`. 배운 것: 스크롤 영역 밖으로 삐져나온 요소는 보이지도 잡히지도 않는다
+- 화면 지도를 그리다 PLAN M1 목록에 M2에서 바로 쓸 설정 화면(로그인 · 매장 등록 · 메뉴 · 레시피 · 직원 초대)이 빠져 있던 것을 찾았다 → PLAN M1에 더함
 - `provideHttpClient(withFetch())`에 취소선 — 원인: Angular 22에서 `withFetch`가 deprecated("`FetchBackend` is the default"). fetch가 기본이 됐다. 해결: `provideHttpClient()`만. 배운 것: 취소선은 "다음 버전에 지울 예정" — 마우스를 올려 이유를 읽고, 옛 글 · AI가 알려 준 코드도 설치된 버전의 타입 파일(`node_modules/@angular/common/types/http.d.ts`)로 확인한다
 - 테스트에서 HTTP 답을 주기 전에 `await fixture.whenStable()`을 기다리면 안 끝난다 — zoneless Angular는 걸려 있는 HTTP 요청도 "할 일"로 센다. "확인 중" 상태는 `fixture.detectChanges()`로 본다(사전 검증에서 발견)
 - `pnpm add` 때 peer 경고(`@emnapi/*` 버전) — `pnpm why`로 보니 `@angular/build`의 WebAssembly 예비 파서 쪽. Windows는 네이티브 파서를 써서 무시
