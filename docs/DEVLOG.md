@@ -15,7 +15,7 @@
   - 문서 함정 경보: 노트북 두 세션 연속 문서 커밋만(M1이 "화면 먼저"라 의도한 것). M3 ~ 소개까지 다 그리면 코드 없는 기간이 길어진다 — M2 구현을 먼저 시작할지 정할 것
 - **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도). 화면마다 폴더(`auth\` · `store\` · `settings\` · `members\` · `closing\` · `loss\`)에 보드 `화면.html`, 공용은 `_shared\` — [mockups README](mockups/README.md). Claude 미리보기는 `.claude/launch.json`의 `mockups`(파이썬) 또는 `mockups-node`(노드, 파이썬 없는 노트북)
 - **기기별로 할 일**
-  - 회사 PC: 세팅 끝(2026-11-09, ARCHITECTURE 8.3) → 위 1번. Docker Desktop 회사 라이선스만 확인
+  - 회사 PC: 세팅 끝(2026-11-09, ARCHITECTURE 8.3) → 위 1번
   - 집 PC · 노트북: 다음에 열면 `git pull`
 
 ---
