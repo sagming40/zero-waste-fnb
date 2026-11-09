@@ -8,18 +8,32 @@
 - **지금 단계**: M1 화면 설계 — 모든 화면 시안을 다 그리고 M2 구현 시작(2026-11-08 결정)
 - **채택된 것**: 컬러 E 올리브 · 마감 입력 · 오늘 손실 · 앱 이동(아래 탭 / 왼쪽 메뉴) · 문구 규칙 · **M2에 필요한 화면 전부**(로그인 · 매장 등록 · 메뉴 · 레시피 · 매장 · 직원) — [DESIGN](DESIGN.md) 2 ~ 12절. 프런트 Angular 뼈대 + CI 두 job 초록불. 결정 0013 Angular · 0014 GSAP · 0015 ECharts
 - **다음에 할 일** (어느 기기든 `git pull`부터)
-  1. 회사 PC에서 처음이면: [ARCHITECTURE 8.2 체크리스트](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 0번부터 — 클론 전. 끝나면 8.3 표에 회사 PC 줄. 목업만 볼 거면 클론 + 브라우저로 충분(Claude 미리보기는 노드나 파이썬 하나)
-  2. **M3 화면 시안** — 새 폴더 `stock/`(재고 F11 · F21 · 재고 탭 안 칩) · `receive/`(입고 F10) · `waste/`(재료 폐기 F09) · `count/`(실사 F12). 만드는 규칙은 [mockups README "파일"](mockups/README.md#파일), 보드 · 상태 파라미터는 `settings/`를 본뜬다. 그리기 전에 볼 것: DATA_MODEL 4절 5 ~ 7(FEFO · 원장 · 실사 조정) · 9(입고 단가가 기본 단가보다 먼저), 직원도 입고 · 재료 폐기를 쓴다 → 금액 숨김(DESIGN 8.4), 이동은 재고 탭 안 칩(DESIGN 8.2)
-  3. 그다음 M4(내일 권장 · 백테스트) · M5(탄소 리포트) · 소개(F27) 시안 → M1 닫기 전 점검(전역 지침)
+  1. **M3 화면 시안** — 새 폴더 `stock/`(재고 F11 · F21 · 재고 탭 안 칩) · `receive/`(입고 F10) · `waste/`(재료 폐기 F09) · `count/`(실사 F12). 만드는 규칙은 [mockups README "파일"](mockups/README.md#파일), 보드 · 상태 파라미터는 `settings/`를 본뜬다. 그리기 전에 볼 것: DATA_MODEL 4절 5 ~ 7(FEFO · 원장 · 실사 조정) · 9(입고 단가가 기본 단가보다 먼저), 직원도 입고 · 재료 폐기를 쓴다 → 금액 숨김(DESIGN 8.4), 이동은 재고 탭 안 칩(DESIGN 8.2)
+  2. 그다음 M4(내일 권장 · 백테스트) · M5(탄소 리포트) · 소개(F27) 시안 → M1 닫기 전 점검(전역 지침)
 - **열린 질문**
   - 비밀번호 찾기 — M2에 메일 발송이 없고, "점주가 직원 비밀번호를 정해 줌"은 다른 매장 계정까지 넘어가서 버렸다. 본인 확인 수단(메일)을 언제 넣을지 — DESIGN 9.4
   - 문서 함정 경보: 노트북 두 세션 연속 문서 커밋만(M1이 "화면 먼저"라 의도한 것). M3 ~ 소개까지 다 그리면 코드 없는 기간이 길어진다 — M2 구현을 먼저 시작할지 정할 것
 - **켜는 법**: 개발 DB `docker compose -f infra/compose.local.yaml up -d` → `backend/`에서 `.\gradlew bootRun --args="--spring.profiles.active=local"` → `frontend/`에서 `pnpm start`(http://localhost:4200). 목업은 서버 없이 `start docs\mockups\Map.html`(화면 지도). 화면마다 폴더(`auth\` · `store\` · `settings\` · `members\` · `closing\` · `loss\`)에 보드 `화면.html`, 공용은 `_shared\` — [mockups README](mockups/README.md). Claude 미리보기는 `.claude/launch.json`의 `mockups`(파이썬) 또는 `mockups-node`(노드, 파이썬 없는 노트북)
 - **기기별로 할 일**
-  - 회사 PC: 위 1번 → 2번
-  - 집 PC · 노트북: 없음 (노트북 2026-11-09 끝까지 push, `05a4e81` 뒤). 다음에 열면 `git pull`
+  - 회사 PC: 세팅 끝(2026-11-09, ARCHITECTURE 8.3) → 위 1번. Docker Desktop 회사 라이선스만 확인
+  - 집 PC · 노트북: 다음에 열면 `git pull`
 
 ---
+
+## 2026-11-09 (3) · 회사 PC 처음 세팅 (회사 PC)
+
+**한 일**
+- [ARCHITECTURE 8.2](ARCHITECTURE.md#82-회사-pc-처음-세팅--체크리스트)를 처음부터 끝까지. 클론 · Docker는 사용자가 먼저 해 뒀고, JDK 25 · GitHub CLI · VS Code Java 확장 · PowerShell 프로필을 더했다. 결과 값은 8.3 회사 PC 줄
+- 확인한 값: `.\gradlew build -x test` 성공 · `pnpm ci` 289개 · `bootRun` → 4200 화면 "정상 (UP)" · `.\gradlew test --rerun` 2건 통과 · `pnpm test --watch=false` 4건 통과 · 목업 `Map.html` 열림
+- 회사 네트워크는 걱정했던 HTTPS 검사(인증서 오류)가 없었다. npm은 내려받기 속도 경고(`below 50 KiB/s`)만
+- `ng test`를 처음 돌리면 Angular가 사용 통계 공유를 묻는다 → No → `angular.json`에 `"analytics": false`가 들어갔다. 다른 기기 · CI에서 다시 묻지 않게 그대로 커밋
+
+**막힌 것**
+- PowerShell 프로필을 넣었는데 한글 깨짐 설정이 일부만 먹었다
+  - 증상: `chcp`는 65001인데, 프로필을 파서로 읽어 보니 `OutputEncoding` 줄 뒤가 전부 주석 하나로 묶였다(오류는 안 뜸)
+  - 원인: 프로필이 BOM 없는 UTF-8로 저장됐다. Windows PowerShell 5.1은 BOM이 없으면 CP949로 읽고, 깨진 한글 주석이 줄바꿈까지 먹어 `InputEncoding` · `$OutputEncoding` 줄이 주석 안으로 들어갔다
+  - 해결: VS Code에서 "UTF-8 with BOM"으로 다시 저장 → `InputEncoding` · `$OutputEncoding` 둘 다 `utf-8`
+  - 배운 것: 5.1용 스크립트에 한글을 쓰면 BOM을 붙인다. 확인은 `chcp` 하나로 부족하다 → 8.1 ②에 확인 명령 두 줄과 함께 적었다
 
 ## 2026-11-09 (2) · M2 화면 시안 끝 — 매장 등록 · 메뉴 · 레시피 · 매장 · 직원 채택 (노트북)
 
