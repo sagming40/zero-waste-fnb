@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실사 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>실사 — 시안 비교</h1>
+<div class="muted small">F12 실사: 센 양과 장부(재고)를 비교해 차이만큼 맞춘다. 모자란 양은 유통기한 빠른 로트부터, 남는 양은 가장 최근 로트에(DATA_MODEL 4절 7). 점주만. 오늘(11월 8일) 마감 전 — 기준은 "어제 마감 뒤 · 영업 전". 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="count.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 먼저 셀 것부터 (채택)', d: '부족 · 만료가 있는 재료를 맨 위에, 나머지는 식자재 순. 지금 있는 데이터만으로 된다.' },
+  { v: 'B', t: 'B · 보관 위치별', d: '냉장고 · 냉동고 · 상온 선반으로 묶어 걷는 순서대로 센다(위치마다 n/m ✓). 식자재에 "보관 위치" 칸을 하나 더해야 한다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 먼저 셀 것부터 (채택)', d: '표(재료 · 장부 · 센 양 · 차이 · 차이 금액 · 같아요) + 옆에 기준 · 합계 · 저장. 마감 입력 · 입고 데스크톱과 같은 틀.' },
+  { v: 'B', t: 'B · 보관 위치별', d: '같은 표를 보관 위치로 묶음.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+st.innerHTML = CNT.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'count';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Count.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Count.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

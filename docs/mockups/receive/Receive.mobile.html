@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>입고 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="receive.css">
+</head>
+<body>
+<div class="phone" id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="receive.js"></script>
+<script>
+// 시안 A: 한 줄씩 더하기(찾기 → 카드) / B: 재료 목록에서 고르기(체크하면 그 자리에서 펼침)
+// 이동 틀 안에서는 재고 탭 위쪽 칩(점주) 또는 아래 탭 "입고"(직원)로 들어온다 — 칩은 이동 틀이 그린다
+const R = RCV;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 줄씩 (채택)'], ['B', 'B 목록에서 고르기']], R.variant],
+  ['상태', 'state', R.STATES, R.state],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], R.role],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:150px');
+
+const isHistory = R.state === 'history', isFill = R.state === 'fill';
+const missAll = STK.RECEIPTS.reduce((s, r) => s + STK.missingPrice(r), 0);
+const head = isFill
+  ? `<header class="top"><button class="back" type="button" data-go="history">${R.ICON.back}입고 기록</button>
+      <h1>${STK.fmtDate(R.FILL.date)} 입고</h1></header>`
+  : `<header class="top"><div class="store">모래내 베이커리 &amp; 델리${R.owner ? '' : ' · 직원'}</div>
+      <div class="row"><h1>입고</h1>${isHistory ? '' : `<div class="datebar"><button class="iconbtn" aria-label="전날">‹</button><span class="datepill">${STK.fmtDate(STK.TODAY)}</span><button class="iconbtn" aria-label="다음날" disabled style="opacity:.35">›</button></div>`}</div>
+      <div class="seg"><button type="button" data-tab="new" aria-pressed="${!isHistory}">새 입고</button>
+        <button type="button" data-tab="history" aria-pressed="${isHistory}">입고 기록${R.owner && missAll ? `<span class="cnt">단가 ${missAll}</span>` : ''}</button></div></header>`;
+
+let body = '', bar = '';
+if (isHistory) body = R.historyList();
+else if (isFill) body = `<div style="padding-top:12px">${R.fillView()}</div>`;
+else if (R.state === 'saved') body = R.savedView();
+else if (R.variant === 'B') {
+  body = R.pickList();
+  bar = R.barInner(R.lines);
+} else {
+  body = (R.state === 'new' ? R.emptyNew() : `<div class="colhead small muted"><span>이번 입고 ${R.lines.length}줄</span><span>누르면 고쳐요</span></div>`)
+    + R.lines.map((l, k) => (l.editing ? R.lineEdit(l, k) : R.lineSum(l, k))).join('')
+    + R.addBox(R.state === 'new');
+  bar = R.barInner(R.lines);
+}
+document.getElementById('root').innerHTML = `${head}${R.state === 'error' ? '<div class="banner err"><b>고칠 곳 1개</b>버터 줄에 양이 비어 있어요.</div>' : ''}
+  <main class="rcv">${body}</main>${bar ? `<div class="bottom"><div class="inner">${bar}</div></div>` : ''}`;
+R.wire(document);
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+/* 재료 폐기 (Waste.*.html). _shared/forms.css(.fld · .inp · .row-between) 위에 얹는다 */
+.grow { flex: 1; min-width: 0; }
+.wide { width: 100%; padding: 12px; }
+.loss-t { color: var(--loss); font-weight: 700; }
+.warn-t { color: var(--warn); }
+.exp-ok, .exp-none { color: var(--muted); }
+.exp-soon { color: var(--warn); font-weight: 700; }
+.exp-over { color: var(--loss); font-weight: 700; }
+.colhead { display: flex; justify-content: space-between; margin: 18px 2px 6px; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.tag { margin: 0; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.tag.loss { background: var(--loss-soft); color: var(--loss); }
+.tag.c-expired { background: var(--loss-soft); color: var(--loss); }
+.tag.c-mistake, .tag.c-other { background: var(--warn-soft); color: var(--warn); }
+.tag.c-trim { background: var(--accent-soft); color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.chips.badc .chip { border-color: var(--loss); }
+.chip.warnchip { border-color: var(--loss); color: var(--loss); }
+.iconbtn.sm { width: 28px; height: 28px; border: 0; background: transparent; color: var(--muted); }
+.seg.sm { margin-top: 0; }
+.seg.sm button { padding: 5px 10px; font-size: 13px; white-space: nowrap; }
+.unitseg { width: 104px; }
+.unit1 { font-weight: 700; color: var(--muted); }
+.qrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.inp.q { width: 110px; }
+.inp.q input { text-align: right; padding: 10px 8px 10px 0; }
+.inp .ic { display: grid; margin-right: 6px; }
+.inp .muted { padding-right: 8px; }
+
+.wform { display: flex; flex-direction: column; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-top: 12px; }
+.wform .seg { margin-top: 0; }
+.wform .inp input { padding: 10px 0; font-size: 15px; }
+.freq { display: flex; flex-direction: column; gap: 6px; }
+.pickedrow { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border-radius: 10px; padding: 8px 6px 8px 12px; }
+.pickedrow b { font-size: 16px; }
+.pickedrow .small { flex: 1; }
+.lots { display: flex; flex-direction: column; gap: 6px; }
+.lotpick { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; cursor: pointer; background: var(--bg); }
+.lotpick .box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line); display: grid; place-items: center; flex: none; }
+.lotpick.on { border-color: var(--accent); background: var(--accent-soft); }
+.lotpick.on .box { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.lotpick .take { font-weight: 700; color: var(--loss); }
+.lossbox { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; background: var(--loss-soft); color: var(--loss); border-radius: 12px; padding: 10px 12px; }
+.lossbox .small { color: var(--loss); opacity: .85; }
+.lossbox b { font-size: 20px; letter-spacing: -0.02em; }
+.lossbox.muted { background: var(--surface-2); color: var(--muted); }
+.expand { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.erow { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.erow:last-child { border-bottom: 0; }
+
+.wrecs { display: flex; flex-direction: column; gap: 6px; }
+.wrec { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+
+/* 여러 줄 */
+.lcard { width: 100%; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.lcard.sum { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-top: 6px; }
+.lcard.edit { padding: 12px; margin-top: 6px; display: flex; flex-direction: column; gap: 12px; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.lcard.bad { border-color: var(--loss); box-shadow: 0 0 0 2px var(--loss-soft); }
+.lh { display: flex; align-items: center; gap: 8px; }
+.lh b { font-size: 16px; }
+.btools { display: flex; gap: 8px; margin-top: 12px; }
+.btools .inp { flex: 1; }
+.btools .inp input { padding: 9px 0; font-size: 15px; }
+.btools .ghost { white-space: nowrap; font-size: 13px; }
+
+.done { display: flex; flex-direction: column; gap: 12px; padding: 20px 0 4px; }
+.done h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+.okmark { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.okmark svg { width: 24px; height: 24px; }
+
+main.wst { padding: 4px 16px 150px; }
+.amt-n { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--loss); }
+
+/* 데스크톱 */
+.dwst { height: 100vh; display: flex; flex-direction: column; }
+.dhead { padding: 18px 24px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.dhead h1 { margin: 2px 0 0; font-size: 22px; letter-spacing: -0.02em; }
+.dbody { flex: 1; min-height: 0; display: grid; grid-template-columns: 520px 1fr; }
+.dbody.b { grid-template-columns: 1fr 300px; }
+.dleft { overflow: auto; padding: 4px 24px 24px; border-right: 1px solid var(--line); }
+.dright { overflow: auto; padding: 4px 24px 24px; }
+.dside { border-left: 1px solid var(--line); padding: 18px 20px; overflow: auto; display: flex; flex-direction: column; gap: 12px; background: var(--surface); }
+.dside h3 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; }
+.dside .big { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--loss); }
+.dside .kv { display: flex; justify-content: space-between; font-size: 14px; }
+.kbd { font-size: 11px; border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; }
+table.wt { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; margin-top: 12px; }
+table.wt th { position: sticky; top: 0; background: var(--bg); text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+table.wt td { padding: 8px; border-bottom: 1px solid var(--line); background: var(--surface); vertical-align: middle; }
+table.wt td.n, table.wt th.n { text-align: right; }
+table.wt td.bad { box-shadow: inset 0 0 0 2px var(--loss); }
+table.wt tr.addrow td { background: var(--bg); }
+table.wt tr.edit td { background: var(--accent-soft); }
+table.wt input, table.wt select { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 5px 6px; width: 100%; outline: none; }
+table.wt input:hover, table.wt select:hover { border-color: var(--line); }
+.bycause { display: flex; flex-direction: column; gap: 6px; }
+.bycause .row-between { font-size: 14px; }
+.cbar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.cbar span { display: block; height: 100%; background: var(--loss); }

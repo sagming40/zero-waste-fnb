@@ -1,0 +1,61 @@
+/* 실사 (Count.*.html). _shared/forms.css(.inp · .row-between) 위에 얹는다 */
+.grow { flex: 1; min-width: 0; }
+.loss-t { color: var(--loss); font-weight: 700; }
+.exp-over { color: var(--loss); font-weight: 700; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.cat span { font-weight: 400; }
+.seg.sm { margin-top: 0; }
+.seg.sm button { padding: 6px 10px; font-size: 13px; white-space: nowrap; }
+
+.basis { margin-top: 12px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.basis.warn { background: var(--warn-soft); color: var(--warn); }
+.basis.warn b { color: var(--warn); }
+
+.crow { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+.crow:not(.done) { border-style: dashed; }
+.crow.big { border-color: var(--loss); box-shadow: 0 0 0 2px var(--loss-soft); }
+.ctop { display: flex; align-items: center; gap: 10px; }
+.cin { display: inline-flex; align-items: center; gap: 4px; }
+.inp.q { width: 96px; padding: 0 8px; }
+.inp.q input { text-align: right; padding: 9px 0; font-size: 16px; }
+.cin .u { width: 22px; font-size: 13px; color: var(--muted); font-weight: 700; }
+.cdiff { display: flex; justify-content: flex-end; gap: 10px; align-items: baseline; }
+.dq { font-weight: 800; font-variant-numeric: tabular-nums; }
+.d-minus { color: var(--loss); }
+.d-plus { color: var(--accent); }
+.d-same { color: var(--muted); font-weight: 600; }
+.same { align-self: flex-end; border: 1px solid var(--line); background: var(--bg); border-radius: 9px; padding: 5px 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.expq { color: var(--muted); }
+
+.cdone { display: flex; flex-direction: column; gap: 12px; padding: 20px 0 4px; }
+.cdone h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+.okmark { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+.adjlist { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px 12px; }
+.adjlist > div { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.adjlist > div:last-child { border-bottom: 0; }
+.lossbox { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.lossbox b { font-size: 20px; }
+
+main.cnt { padding: 4px 16px 160px; }
+.loss-line .num b { font-size: 20px; }
+
+/* 데스크톱 */
+.dcnt { height: 100vh; display: flex; flex-direction: column; }
+.dhead { padding: 18px 24px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.dhead h1 { margin: 2px 0 0; font-size: 22px; letter-spacing: -0.02em; }
+.dbody { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 320px; }
+.dmain { overflow: auto; padding: 4px 24px 32px; }
+.dside { border-left: 1px solid var(--line); padding: 16px 20px; overflow: auto; display: flex; flex-direction: column; gap: 12px; background: var(--surface); }
+.dside .basis { margin-top: 0; }
+.kbd { font-size: 11px; border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; }
+table.ct { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; margin-top: 12px; }
+table.ct th { position: sticky; top: 0; background: var(--bg); text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+table.ct td { padding: 7px 8px; border-bottom: 1px solid var(--line); background: var(--surface); }
+table.ct td.n, table.ct th.n { text-align: right; }
+table.ct tr.grp td { background: var(--surface-2); font-weight: 700; font-size: 12px; color: var(--muted); }
+table.ct tr.big td { background: var(--loss-soft); }
+table.ct tr.todo td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+table.ct .ci { display: inline-flex; align-items: center; gap: 4px; }
+table.ct .ci input { width: 80px; text-align: right; border: 1px solid var(--line); border-radius: 6px; padding: 5px 6px; background: var(--bg); outline: none; }
+table.ct tr.big .ci input { border-color: var(--loss); }
+table.ct .same { padding: 3px 8px; }

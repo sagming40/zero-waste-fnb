@@ -11,6 +11,9 @@
   .app { max-width: 430px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: var(--bg); }
   .content { flex: 1; min-height: 0; overflow: auto; position: relative; }
   .content iframe { width: 100%; height: 100%; border: 0; display: block; }
+  /* 재고 칩 아래에 끼운 화면은 칩 높이만큼 줄인다 (아래 고정 바가 탭에 가리지 않게) */
+  .content:has(> .subnav) { display: flex; flex-direction: column; overflow: hidden; }
+  .content:has(> .subnav) iframe { flex: 1; height: auto; min-height: 0; }
   .tabbar { display: flex; border-top: 1px solid var(--line); background: var(--surface); padding: 4px 4px 10px; }
   .tabbar button { flex: 1; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font-size: 11px; color: var(--muted); }
   .tabbar button[aria-current="page"] { color: var(--accent); font-weight: 700; }
@@ -67,14 +70,22 @@ ZW.switcher([
   ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
 ], 'top:auto;bottom:96px');
 
+// 재고 묶음처럼 화면 목록(nav-data)에 src가 있는 화면은 그 시안을 끼운다 — 채택 전이면 A
+function drawn(id) {
+  const s = NAV.byId[id];
+  if (!s || !s.src) return '';
+  return `<iframe title="${s.label}" src="${NAV.srcFor(id, 'mobile', `v=A&state=${s.srcState || 'entry'}&role=${role}&${common}`)}"></iframe>`;
+}
+
 function screenHtml(id) {
   if (id === 'today') return `<iframe title="오늘" src="${NAV.srcFor('today', 'mobile', `v=A&state=${time === 'before' ? 'before' : 'normal'}&${common}`)}"></iframe>`;
   if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'mobile', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&role=${role}&${common}`)}"></iframe>`;
   if (id === 'settings') return `<iframe title="메뉴 · 레시피" src="${NAV.srcFor('settings', 'mobile', `v=A&state=menus&${common}`)}"></iframe>`;
   if (id === 'store') return `<iframe title="매장 · 직원" src="${NAV.srcFor('store', 'mobile', `v=A&state=main&${common}`)}"></iframe>`;
   if (id === 'stockGroup') {
-    return `<div class="subnav">${STOCK_SUB.map(s => `<button data-sub="${s}" aria-current="${s === stockSub ? 'page' : 'false'}">${NAV.byId[s].label}</button>`).join('')}</div>${NAV.placeholder(stockSub)}`;
+    return `<div class="subnav">${STOCK_SUB.map(s => `<button data-sub="${s}" aria-current="${s === stockSub ? 'page' : 'false'}">${NAV.byId[s].label}</button>`).join('')}</div>${drawn(stockSub) || NAV.placeholder(stockSub)}`;
   }
+  if (drawn(id)) return drawn(id);
   if (id === 'more') {
     const items = role === 'owner'
       ? [['forecast', '내일 권장', 'M4 — 그 전엔 오늘 화면에 자리만'], ['settings', '메뉴 · 레시피', ''], ['store', '매장 · 직원', '']]

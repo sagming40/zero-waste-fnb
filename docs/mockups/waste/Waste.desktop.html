@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재료 폐기 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="waste.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="waste.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만 그린다.
+// 시안 A: 왼쪽 한 건 폼 + 오른쪽 오늘 · 이번 주 기록(원인별) / B: 여러 줄 표 + 옆 요약 (입고 데스크톱 A와 같은 틀)
+const W = WST, S = STK, { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 건 + 기록 (채택)'], ['B', 'B 여러 줄 표']], W.variant],
+  ['상태', 'state', W.STATES, W.state],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], W.role],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const err = W.state === 'error';
+const head = `<header class="dhead"><div><div class="small muted">재고</div><h1>재료 폐기</h1></div>
+  <div class="datebar"><button class="iconbtn" aria-label="전날">‹</button><span class="datepill">${S.fmtDate(S.TODAY)}</span><button class="iconbtn" aria-label="다음날" disabled style="opacity:.35">›</button></div></header>`;
+
+// 이번 주 원인별 (예시 값) — 점주만
+const WEEK = [['expired', 9800], ['trim', 6400], ['mistake', 3100], ['other', 700]];
+function weekBox() {
+  if (!W.owner) return '';
+  const max = Math.max(...WEEK.map(([, v]) => v)), tot = WEEK.reduce((s, [, v]) => s + v, 0);
+  return `<div class="colhead small muted"><span>이번 주 원인별 (월 ~ 오늘)</span><span>합계 <b class="num loss-t">${won(tot)}</b></span></div>
+    <div class="bycause">${WEEK.map(([k, v]) => `<div><div class="row-between"><span>${W.cause(k)}</span><b class="num">${won(v)}</b></div><div class="cbar"><span style="width:${Math.round(v / max * 100)}%"></span></div></div>`).join('')}</div>
+    <p class="small muted">유통기한 만료가 가장 커요 — 재고 화면의 "며칠치"를 보고 덜 사면 줄어요</p>`;
+}
+
+function viewA() {
+  const left = W.state === 'saved' ? W.saved() : `${W.form(W.cur)}${W.cur ? `<div style="margin-top:12px">${err ? '<div class="field-err" style="margin:0 0 6px">고칠 곳 2개 — 원인 · 양</div>' : ''}<button class="primary" type="button" ${err ? 'disabled' : ''} data-go="saved">폐기 기록 <span class="kbd">Ctrl S</span></button></div>` : ''}`;
+  return `<div class="dwst">${head}<div class="dbody"><div class="dleft">${left}</div><div class="dright">${W.todayList()}${weekBox()}</div></div></div>`;
+}
+
+function viewB() {
+  const L = W.state === 'saved' ? [] : W.batchLines();
+  const rows = L.map((l, k) => {
+    if (l.menu) {
+      const m = ZW.MENUS.find((x) => x.id === l.menu);
+      return `<tr><td><b>${m.name}</b> <span class="tag">만든 메뉴</span></td><td class="n num">${l.qty}개</td><td><span class="tag c-${l.cause}">${W.cause(l.cause)}</span></td><td class="small muted">레시피로 재료 ${W.CROISSANT.length}가지 · <span class="loss-t">버터 부족</span></td>${W.owner ? `<td class="n num loss-t">${won(W.lineWon(l))}</td>` : ''}<td></td></tr>`;
+    }
+    const i = S.ingById[l.ing];
+    return `<tr class="${!l.qty || !l.cause ? 'edit' : ''}"><td><b>${i.name}</b></td>
+      <td class="n${!l.qty ? ' bad' : ''}" style="width:110px"><input value="${l.qty ? S.fmtQty(l.qty, i.unit) : ''}" placeholder="양" style="text-align:right"></td>
+      <td class="${!l.cause ? 'bad' : ''}" style="width:150px"><select>${l.cause ? '' : '<option>원인 고르기</option>'}${W.CAUSES.map((c) => `<option ${c.k === l.cause ? 'selected' : ''}>${c.t}</option>`).join('')}</select></td>
+      <td class="small">${l.lots.length ? l.lots.map(([x, q]) => `${S.fmtShort(x.date)} 로트 ${S.fmtQty(q, i.unit)} <span class="exp-${S.expInfo(x.exp).kind}">(${S.expInfo(x.exp).text})</span>`).join(' + ') : '<span class="muted">양을 넣으면 유통기한 빠른 로트부터</span>'}</td>
+      ${W.owner ? `<td class="n num loss-t">${l.qty ? won(W.lineWon(l)) : '—'}</td>` : ''}<td style="width:36px"><button class="iconbtn sm" aria-label="줄 빼기">${W.ICON.x}</button></td></tr>`;
+  }).join('');
+  const total = L.reduce((s, l) => s + W.lineWon(l), 0);
+  const bad = L.filter((l) => !l.menu && (!l.qty || !l.cause)).length;
+  const cols = W.owner ? 6 : 5;
+  const main = W.state === 'saved' ? W.saved() : `<table class="wt"><thead><tr><th>재료 · 메뉴</th><th class="n">양</th><th>원인</th><th>어느 로트에서</th>${W.owner ? '<th class="n">손실</th>' : ''}<th></th></tr></thead>
+    <tbody>${rows}<tr class="addrow"><td colspan="${cols}"><span class="inp" style="max-width:420px"><span class="muted ic">${W.ICON.search}</span><input placeholder="재료 · 메뉴 이름으로 찾기 — Enter로 줄 더하기"></span></td></tr></tbody></table>
+    <p class="small muted">로트 칸을 누르면 바꿀 수 있어요. 만든 메뉴(탄 한 판처럼 마감의 "만든 수량"에 넣지 않은 것)는 레시피로 재료를 빼요.</p>`;
+  return `<div class="dwst">${head}<div class="dbody b"><div class="dright">${main}${W.todayList()}</div>
+    <aside class="dside"><h3>이번에 기록할 것</h3>${W.owner ? `<div class="big num">${won(total)}</div>` : `<div class="big num" style="color:var(--text)">${L.length}줄</div>`}
+      <div class="kv"><span>줄</span><b>${L.length}</b></div>${bad ? `<div class="field-err" style="margin:0">고칠 곳 ${bad}줄</div>` : ''}
+      <button class="primary" type="button" ${bad || !L.length ? 'disabled' : ''} data-go="saved">폐기 기록 <span class="kbd">Ctrl S</span></button>
+      <button class="ghost" type="button" data-toast="따로 둔 만료 로트를 원인 '유통기한 만료'로 한 줄씩 더해요">만료 로트 불러오기 1</button>
+      ${weekBox()}</aside></div></div>`;
+}
+document.getElementById('root').innerHTML = W.variant === 'B' ? viewB() : viewA();
+W.wire(document);
+</script>
+</body>
+</html>

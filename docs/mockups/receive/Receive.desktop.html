@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>입고 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="receive.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="receive.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만 그린다 — Closing.desktop · Settings.desktop과 같다.
+// 시안 A: 표 + 옆 요약 (마감 입력 데스크톱 A와 같은 틀) / B: 왼쪽 입고 기록 + 오른쪽 입력 카드 (메뉴 · 레시피 데스크톱 A와 같은 틀)
+const R = RCV, S = STK, { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 표 + 옆 요약 (채택)'], ['B', 'B 기록 + 입력']], R.variant],
+  ['상태', 'state', R.STATES, R.state],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], R.role],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+const isHistory = R.state === 'history', isFill = R.state === 'fill';
+const missAll = S.RECEIPTS.reduce((s, r) => s + S.missingPrice(r), 0);
+const dateNav = `<div class="datebar"><button class="iconbtn" aria-label="전날">‹</button><span class="datepill">${S.fmtDate(S.TODAY)}</span><button class="iconbtn" aria-label="다음날" disabled style="opacity:.35">›</button></div>`;
+const head = (showTabs = true) => `<header class="dhead"><div><div class="small muted">재고</div><h1>입고</h1></div>
+  <div class="dtools">${!isHistory && !isFill ? dateNav : ''}${showTabs ? `<div class="seg"><button type="button" data-tab="new" aria-pressed="${!isHistory && !isFill}">새 입고</button>
+    <button type="button" data-tab="history" aria-pressed="${isHistory || isFill}">입고 기록${R.owner && missAll ? `<span class="cnt">단가 ${missAll}</span>` : ''}</button></div>` : ''}</div></header>`;
+
+// A ---------------------------------------------------------------------------
+function tableRows(L, opts = {}) {
+  return L.map((l, k) => {
+    const i = S.ingById[l.ing], q = S.inputQty(l.qty, i.unit), e = S.expInfo(l.exp);
+    const bad = R.qtyBad(l);
+    const per = S.fmtPer(S.perUnit(l.price, l.qty), i.unit);
+    const focus = l.editing && !bad ? ' focus' : '';
+    const money = !R.owner ? '' : `<td class="n${l.need ? ' need' : ''}${l.editing && l.price === null ? ' focus' : ''}" style="width:130px"><input value="${l.price === null ? '' : l.price.toLocaleString('ko-KR')}" placeholder="${l.need ? '넣어 주세요' : i.pack ? '기본 단가로' : '단가 없음'}"></td>
+      <td class="small" style="width:230px">${per ? `<span class="muted">${per}</span><br>${R.vsHtml(i, l.price, l.qty)}` : l.price === null && !i.pack ? '<span class="warn-t">기본 단가도 없음 — 손실에서 제외</span>' : l.price === null ? `<span class="muted">${l.need ? '지금은 ' : ''}기본 단가 ${S.fmtPer(S.basePer(i), i.unit)}</span>` : ''}</td>`;
+    return `<tr><td class="small muted" style="width:28px">${k + 1}</td>
+      <td><b>${i.name}</b></td>
+      <td class="${bad ? 'bad' : ''}${opts.ro ? '' : focus}" style="width:150px"><span class="cellq"><input value="${q.v}" placeholder="0"><span class="u">${q.u}</span></span>${bad ? '<div class="field-err" style="margin:2px 0 0">양을 넣어 주세요</div>' : ''}</td>
+      <td style="width:190px"><span class="cellq"><input value="${l.exp ? S.fmtShort(l.exp) + ' (' + S.DOW[new Date(l.exp + 'T00:00:00Z').getUTCDay()] + ')' : '없음'}" style="width:96px;text-align:left"><span class="small exp-${e.kind}">${l.exp ? e.text : ''}</span></span></td>
+      ${money}
+      <td style="width:36px">${opts.ro ? '' : `<button class="iconbtn sm" aria-label="줄 빼기">${R.ICON.x}</button>`}</td></tr>`;
+  }).join('');
+}
+const thead = () => `<thead><tr><th></th><th>식자재</th><th>양</th><th>유통기한</th>${R.owner ? '<th class="n">금액(원)</th><th>1단위당 · 기본 단가와</th>' : ''}<th></th></tr></thead>`;
+function addRow() {
+  const cols = R.owner ? 7 : 5;
+  const box = R.state === 'search'
+    ? `<div class="drop"><div class="small muted">"바질"과 맞는 식자재가 없어요</div>${R.owner
+      ? '<div class="row-between"><span class="small"><b>새 식자재 "바질"</b> · 기본 단위 <b>g</b> ▾ <span class="muted">— 탄소 분류 · 기본 단가는 메뉴 · 레시피에서</span></span><button class="primary inline" type="button">만들고 더하기</button></div>'
+      : '<div class="small muted">식자재는 사장님만 만들 수 있어요. 사장님께 "바질"을 알려 주세요.</div>'}</div>` : '';
+  return `<tr class="addrow"><td></td><td colspan="${cols - 1}"><span class="inp" style="max-width:420px"><span class="muted ic">${R.ICON.search}</span><input value="${R.state === 'search' ? '바질' : ''}" placeholder="재료 이름으로 찾기 — Enter로 이 입고에 더하기"></span>${box}</td></tr>`;
+}
+function side(L, mode) {
+  const t = R.sum(L), err = R.errCount(L);
+  const recent = S.RECEIPTS.slice(0, 3).map((r) => R.receiptCard(r)).join('');
+  if (mode === 'fill') {
+    return `<aside class="dside"><h3>${S.fmtDate(R.FILL.date)} 입고</h3>
+      <div class="kv"><span>넣은 사람</span><b>${S.PEOPLE[R.FILL.by]} · ${R.FILL.time}</b></div>
+      <div class="kv"><span>단가 빈 줄</span><b class="warn-t">${L.filter((l) => l.price === null).length}줄</b></div>
+      <div class="banner warn" style="margin:0"><b>11월 7일 마감에서 사용함</b>단가를 넣으면 그날 손실을 입고 단가로 다시 계산해요.</div>
+      <button class="primary" type="button">단가 저장 <span class="kbd" style="color:inherit;border-color:currentColor">Ctrl S</span></button></aside>`;
+  }
+  return `<aside class="dside"><h3>이번 입고</h3>
+    ${R.owner ? `<div class="big num">${won(t.total)}${t.empty ? ' + ?' : ''}</div>` : `<div class="big num">${t.n}줄</div>`}
+    <div class="kv"><span>줄</span><b>${t.n}</b></div>
+    ${R.owner ? `<div class="kv"><span>단가 빈 줄</span><b>${t.empty}</b></div>` : '<div class="small muted">단가는 사장님이 넣어요. 저장하면 사장님 화면에 "단가 확인 필요"로 보여요.</div>'}
+    ${err ? `<div class="field-err" style="margin:0">고칠 곳 ${err}개 — 고쳐야 저장돼요</div>` : ''}
+    <button class="primary" type="button" ${err || !t.n ? 'disabled' : ''} data-go="saved">입고 저장 <span class="kbd" style="color:inherit;border-color:currentColor">Ctrl S</span></button>
+    <div class="small muted">Tab 옆 칸 · Enter 아래 줄 · 마지막 줄에서 Enter면 재료 찾기</div>
+    <h3 style="margin-top:8px">최근 입고</h3><div class="mini">${recent}</div></aside>`;
+}
+
+function viewA() {
+  if (isHistory) {
+    const rows = S.RECEIPTS.map((r) => {
+      const miss = S.missingPrice(r);
+      return `<tr class="click" data-receipt="${r.id}"><td><b>${S.fmtDate(r.date)}</b></td><td class="muted">${r.time}</td><td>${S.PEOPLE[r.by]}${r.by === 'owner' ? ' <span class="muted small">점주</span>' : ''}</td>
+        <td class="small">${r.lines.map(([id, q]) => `${S.ingById[id].name} ${S.fmtQty(q, S.ingById[id].unit)}`).join(' · ')}</td>
+        ${R.owner ? `<td class="n num">${miss === r.lines.length ? '<span class="muted small">금액 없음</span>' : won(S.receiptTotal(r)) + (miss ? ' + ?' : '')}</td><td>${miss ? `<span class="tag warn">단가 확인 ${miss}줄</span>` : r.filledBy ? '<span class="small muted">나중에 넣음</span>' : ''}</td>` : ''}</tr>`;
+    }).join('');
+    return `<div class="drcv">${head()}<div class="dmain">${R.historyList().split('<div class="rlist">')[0]}
+      <table class="rt" style="margin-top:12px"><thead><tr><th>날짜</th><th>시각</th><th>넣은 사람</th><th>재료</th>${R.owner ? '<th class="n">합계</th><th>단가</th>' : ''}</tr></thead><tbody>${rows}</tbody></table>
+      <p class="dnote">줄을 누르면 그 입고를 열어요. 최근 2주 · 그 전 기록 더 보기</p></div></div>`;
+  }
+  if (isFill) {
+    const L = R.fillLines();
+    return `<div class="drcv">${head()}<div class="dbody"><div class="dmain">
+      <button class="back link" type="button" data-go="history" style="font-size:14px">‹ 입고 기록</button>
+      <h2 style="margin:6px 0 10px;font-size:18px">${S.fmtDate(R.FILL.date)} 입고 <span class="small muted">· ${S.PEOPLE[R.FILL.by]} ${R.FILL.time}</span></h2>
+      <table class="rt">${thead()}<tbody>${tableRows(L, { ro: true })}</tbody></table>
+      <p class="dnote">양 · 유통기한도 이 표에서 고쳐요. 양을 고치면 재고 원장에 고침 줄이 더해지고, 이미 사용한 양보다 적게 고칠 수는 없어요.</p></div>${side(L, 'fill')}</div></div>`;
+  }
+  if (R.state === 'saved') {
+    return `<div class="drcv">${head()}<div class="dmain" style="max-width:560px">${R.savedView()}</div></div>`;
+  }
+  const L = R.lines;
+  const banner = R.state === 'error' ? '<div class="banner err" style="margin:0 0 12px"><b>고칠 곳 1개</b>버터 줄에 양이 비어 있어요. 방울토마토 유통기한(11월 5일)은 이미 지났어요 — 맞으면 그대로 저장돼요.</div>' : '';
+  return `<div class="drcv">${head()}<div class="dbody"><div class="dmain">${banner}
+    ${R.state === 'new' ? '<p class="small muted" style="margin:0 0 10px">명세서 한 장 = 입고 한 번. 재료를 찾아 Enter로 줄을 더하고, 양 · 유통기한' + (R.owner ? ' · 금액' : '') + '을 넣어요.</p>' : ''}
+    <table class="rt">${thead()}<tbody>${tableRows(L)}${addRow()}</tbody></table>
+    ${R.state === 'new' ? `<div class="freq" style="margin-top:12px"><span class="small muted">자주 들어오는 재료</span><div class="chips">${['milk', 'lettuce', 'bread', 'egg', 'tomato', 'ham'].map((id) => `<button type="button" class="chip">+ ${S.ingById[id].name}</button>`).join('')}</div></div>` : ''}
+    <p class="dnote">유통기한 칸에서 <b>지난번처럼</b>(재료마다 지난 입고의 기한) · +3일 · +7일 · 없음을 고를 수 있어요. 금액은 줄 전부, 명세서 금액 그대로.</p></div>
+    ${side(L)}</div></div>`;
+}
+
+// B ---------------------------------------------------------------------------
+function viewB() {
+  const selId = isFill ? 'r1107' : null;
+  const left = `<div class="dleft"><button type="button" class="newbtn${!isHistory && !isFill ? ' sel' : ''}" data-tab="new">+ 새 입고 <span class="small" style="font-weight:400">· ${S.fmtDate(S.TODAY)}</span></button>
+    ${R.historyList(selId)}</div>`;
+  let right;
+  if (isHistory) right = '<div class="inner"><div class="empty">왼쪽에서 입고를 고르면 여기서 고쳐요</div></div>';
+  else if (isFill) right = `<div class="inner"><h2>${S.fmtDate(R.FILL.date)} 입고</h2>${R.fillView()}</div>`;
+  else if (R.state === 'saved') right = `<div class="inner">${R.savedView()}</div>`;
+  else {
+    right = `<div class="inner"><div class="row-between"><h2>새 입고</h2>${dateNav}</div>
+      ${R.state === 'error' ? '<div class="banner err" style="margin:8px 0 0"><b>고칠 곳 1개</b>버터 줄에 양이 비어 있어요.</div>' : ''}
+      ${R.state === 'new' ? R.emptyNew() : ''}
+      ${R.lines.map((l, k) => (l.editing ? R.lineEdit(l, k) : R.lineSum(l, k))).join('')}${R.addBox(R.state === 'new')}</div>
+      <div class="stick">${R.barInner(R.lines)}</div>`;
+  }
+  return `<div class="drcv">${head(false)}<div class="dbody two">${left}<div class="dright">${right}</div></div></div>`;
+}
+
+document.getElementById('root').innerHTML = R.variant === 'B' ? viewB() : viewA();
+R.wire(document);
+</script>
+</body>
+</html>

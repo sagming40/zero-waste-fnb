@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>실사 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="count.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="count.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만 그린다. 표 + 옆 요약(마감 입력 · 입고 데스크톱과 같은 틀).
+// 시안 A: 먼저 셀 것 → 나머지 / B: 보관 위치별 묶음
+const C = CNT, S = STK, { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 먼저 셀 것부터 (채택)'], ['B', 'B 보관 위치별']], C.variant],
+  ['상태', 'state', C.STATES, C.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const first = C.state === 'first';
+function tr(r) {
+  const st = S.stockOf(r.id), q = S.inputQty(r.done ? r.c : null, r.i.unit);
+  const note = first ? '' : st.short ? `<span class="loss-t small">부족 ${S.fmtQty(st.short, r.i.unit)}</span>` : st.expired.length ? `<span class="exp-over small">만료 ${S.fmtQty(st.expired.reduce((s, l) => s + l.left, 0), r.i.unit)} 따로 — 세지 않음</span>` : '';
+  return `<tr class="${r.big ? 'big' : ''}${r.done ? '' : ' todo'}"><td><b>${r.i.name}</b> ${note}</td>
+    ${first ? '' : `<td class="n num muted">${S.fmtQty(r.b, r.i.unit) || '0'}</td>`}
+    <td class="n"><span class="ci"><input value="${q.v}" placeholder="센 양"><span class="small muted">${q.u}</span></span>${r.big ? '<div class="field-err" style="margin:2px 0 0">장부와 많이 달라요 — 0을 더 쳤나요?</div>' : ''}</td>
+    ${first ? `<td class="small muted">${S.fmtPer(S.basePer(r.i), r.i.unit) || '기본 단가 없음'}</td>` : `<td class="n">${r.done ? `<span class="dq d-${r.d === 0 ? 'same' : r.d < 0 ? 'minus' : 'plus'}">${C.fmtD(r)}</span>` : ''}</td>
+    <td class="n num small">${r.done && r.v ? `${r.v > 0 ? '+' : '−'}${won(Math.abs(r.v))}` : ''}</td>
+    <td>${r.done ? '' : '<button type="button" class="same" data-toast="장부와 같은 양으로 채웠어요">같아요</button>'}</td>`}</tr>`;
+}
+let groups;
+if (C.variant === 'B') groups = C.LOCS.map((l) => [l, C.ROWS.filter((r) => C.LOC[r.id] === l)]);
+else {
+  const pri = (r) => { const st = S.stockOf(r.id); return st.short ? 0 : st.expired.length ? 1 : 2; };
+  groups = first ? [['식자재 전체', C.ROWS]] : [['먼저 셀 것 — 부족 · 만료가 있는 재료', C.ROWS.filter((r) => pri(r) < 2)], ['나머지', C.ROWS.filter((r) => pri(r) === 2)]];
+}
+const cols = first ? 3 : 6;
+const table = `<table class="ct"><thead><tr><th>재료</th>${first ? '' : '<th class="n">장부</th>'}<th class="n">센 양</th>${first ? '<th>첫 로트 단가(기본 단가)</th>' : '<th class="n">차이</th><th class="n">차이 금액</th><th></th>'}</tr></thead>
+  <tbody>${groups.map(([t, rs]) => `<tr class="grp"><td colspan="${cols}">${t} · ${rs.filter((r) => r.done).length}/${rs.length}</td></tr>${rs.map(tr).join('')}`).join('')}</tbody></table>
+  <p class="small muted">Tab · Enter로 다음 칸. 비워 둔 재료는 안 센 것으로 보고 그대로 둬요.${C.variant === 'B' ? ' 보관 위치는 식자재 설정의 새 칸.' : ''}</p>`;
+const head = `<header class="dhead"><div><div class="small muted">재고</div><h1>${first ? '처음 재고 넣기' : '실사'}</h1></div><span class="small muted">${C.done.length}/${C.ROWS.length} 셈</span></header>`;
+const side = `<aside class="dside">${C.basisBar()}${first ? '<div class="banner info" style="margin:0"><b>지금 있는 재료를 세어 넣어요</b>센 양이 기본 단가로 첫 로트가 돼요. 안 센 재료는 재고 없이 시작해요.</div>' : ''}${C.barInner()}</aside>`;
+document.getElementById('root').innerHTML = C.state === 'saved'
+  ? `<div class="dcnt">${head}<div class="dmain" style="max-width:560px">${C.saved()}</div></div>`
+  : `<div class="dcnt">${head}<div class="dbody"><div class="dmain">${table}</div>${side}</div></div>`;
+C.wire(document);
+</script>
+</body>
+</html>

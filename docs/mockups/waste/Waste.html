@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재료 폐기 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>재료 폐기 — 시안 비교</h1>
+<div class="muted small">F09 재료 폐기: 원인(유통기한 만료 · 조리 실수 · 손질 · 기타) · 로트 · 양 → 오늘 손실의 "재료". 만든 메뉴(탄 한 판)는 레시피로 펼쳐 뺀다. 직원도 쓰지만 금액은 점주만. 오늘 재료 폐기 합계는 오늘 손실 시안의 ₩4,200과 맞췄다. 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>사람 <select id="role"><option value="owner">점주</option><option value="staff">직원</option></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="waste.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 한 건씩 (채택)', d: '재료 → 원인 → 양 → 로트(자동, 바꿀 수 있음) → 손실 미리 보기 → 저장, 아래 오늘 기록. 일하다 생긴 폐기를 그때그때 넣기 좋다. 재고 화면 "재료 폐기로"에서 오면 다 채워져 있다.' },
+  { v: 'B', t: 'B · 여러 줄 한 번에', d: '입고 화면처럼 줄을 쌓고 한 번에 저장. "만료 로트 불러오기"로 냉장고 정리를 한 번에. 한 건만 넣을 때는 한 단계 많다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 한 건 + 기록 (채택)', d: '왼쪽 한 건 폼(휴대폰 A와 같은 부품), 오른쪽 오늘 기록과 이번 주 원인별 합계(점주).' },
+  { v: 'B', t: 'B · 여러 줄 표', d: '입고 데스크톱 A와 같은 표 + 옆 요약. 원인은 줄마다 고르기, 로트는 자동.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), role = document.getElementById('role'), dk = document.getElementById('dk');
+st.innerHTML = WST.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'entry';
+role.value = ZW.params.get('role') === 'staff' ? 'staff' : 'owner';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&role=${role.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&role=${role.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Waste.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Waste.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; role.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

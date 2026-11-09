@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재료 폐기 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="waste.css">
+</head>
+<body>
+<div class="phone" id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="waste.js"></script>
+<script>
+// 시안 A: 한 건씩(폼 하나 → 저장, 아래 오늘 기록) / B: 여러 줄 한 번에(입고 화면처럼 줄을 쌓고 한 번에 저장 — 냉장고 정리용)
+// 이동 틀 안에서는 재고 탭 위쪽 칩(점주) 또는 아래 탭 "재료 폐기"(직원)로 들어온다
+const W = WST, { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 한 건씩 (채택)'], ['B', 'B 여러 줄']], W.variant],
+  ['상태', 'state', W.STATES, W.state],
+  ['사람', 'role', [['owner', '점주'], ['staff', '직원']], W.role],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:150px');
+
+const head = `<header class="top"><div class="store">모래내 베이커리 &amp; 델리${W.owner ? '' : ' · 직원'}</div>
+  <div class="row"><h1>재료 폐기</h1><div class="datebar"><button class="iconbtn" aria-label="전날">‹</button><span class="datepill">${STK.fmtDate(STK.TODAY)}</span><button class="iconbtn" aria-label="다음날" disabled style="opacity:.35">›</button></div></div></header>`;
+const err = W.state === 'error';
+let body, bar = '';
+if (W.state === 'saved') body = W.saved() + W.todayList();
+else if (W.variant === 'B') {
+  const L = W.batchLines();
+  const editK = err ? L.length - 1 : 0;
+  body = `<div class="btools"><span class="inp"><span class="muted ic">${W.ICON.search}</span><input placeholder="재료 찾기"></span><button class="ghost" type="button" data-toast="따로 둔 만료 로트(방울토마토 300g)를 원인 '유통기한 만료'로 한 줄씩 더해요">만료 로트 불러오기 1</button></div>
+    ${L.length ? `<div class="colhead small muted"><span>이번에 기록할 것 ${L.length}줄</span><span>누르면 고쳐요</span></div>` : '<p class="small muted" style="margin:16px 2px">냉장고를 정리할 때처럼 여러 재료를 한 번에 넣고 한 번에 저장해요.</p>'}
+    ${L.map((l, k) => (k === editK && !l.menu && W.state !== 'menu' ? W.lineEdit(l) : W.lineSum(l, k))).join('')}
+    <button type="button" class="ghost wide" style="margin-top:8px" data-go="menu">+ 만든 메뉴 폐기 (조리 실수)</button>
+    ${W.todayList()}`;
+  const total = L.reduce((s, l) => s + W.lineWon(l), 0);
+  const bad = L.filter((l) => !l.menu && (!l.qty || !l.cause)).length;
+  bar = `${bad ? `<div class="field-err" style="margin:0 0 6px">고칠 곳 ${bad}줄 — 고쳐야 저장돼요</div>` : ''}
+    <div class="loss-line"><span class="small muted">${L.length}줄${W.owner ? ' · 손실' : ' · 금액은 사장님만 봐요'}</span>${W.owner ? `<span class="amt-n num">${won(total)}</span>` : ''}</div>
+    <button class="primary" type="button" ${bad || !L.length ? 'disabled' : ''} data-go="saved">폐기 기록 (${L.length}줄)</button>`;
+} else {
+  body = W.form(W.cur) + W.todayList();
+  const c = W.cur;
+  bar = c ? `${err ? '<div class="field-err" style="margin:0 0 6px">고칠 곳 2개 — 원인 · 양</div>' : ''}
+    <button class="primary" type="button" ${err ? 'disabled' : ''} data-go="saved">폐기 기록</button>` : '';
+}
+document.getElementById('root').innerHTML = `${head}<main class="wst">${body}</main>${bar ? `<div class="bottom"><div class="inner">${bar}</div></div>` : ''}`;
+W.wire(document);
+</script>
+</body>
+</html>

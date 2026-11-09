@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>재고 — 시안 비교</h1>
+<div class="muted small">F11 현재 재고 · 원장, F21 유통기한 임박. 점주만 본다. 오늘(11월 8일) 마감 전이라 재고는 어제 마감까지 차감된 값. 안쪽 재료 · 카드를 눌러 상태를 오갈 수 있다(우유 · 방울토마토 · 버터). 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="stock.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 재료 목록 (채택)', d: '위에 "확인할 것"(만료 · 임박 · 부족 · 단가 확인)을 카드로, 아래 재료마다 재고 · 며칠치 · 가장 빠른 유통기한. "얼마나 남았지?"에 바로 답한다.' },
+  { v: 'B', t: 'B · 유통기한 순', d: '로트를 지남 · 오늘 · 내일 · 이번 주 · 그 뒤로 묶는다. "무엇부터 써야 하지?"에 바로 답하지만 재료 하나의 합계는 흩어진다.' },
+];
+const VD = [
+  { v: 'A', t: 'A · 재료 표 + 상세 (채택)', d: '왼쪽 재료 표(재고 · 며칠치 · 유통기한 · 로트 · 금액, 거르기), 오른쪽에 확인할 것 또는 고른 재료의 로트 · 원장. 메뉴 · 레시피 데스크톱 A와 같은 틀.' },
+  { v: 'B', t: 'B · 숫자 + 로트 표', d: '위 숫자 넷(재고 금액 · 만료 · 임박 · 부족), 아래 로트 표를 유통기한 순으로 묶음, 만료 줄에서 바로 재료 폐기. 오늘 손실 데스크톱 A처럼.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), dk = document.getElementById('dk');
+st.innerHTML = SKV.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'list';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Stock.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Stock.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고 — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="stock.css">
+</head>
+<body>
+<div class="phone" id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="stock.js"></script>
+<script>
+// 시안 A: 재료 목록(확인할 것이 위) / B: 로트 타임라인(유통기한 순으로 묶음). 재료를 누르면 상세(로트 · 원장)는 같다
+// 이동 틀 안에서는 재고 탭 위쪽 칩 "재고"로 들어온다(점주만) — 칩은 이동 틀이 그린다
+const K = SKV;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 재료 목록 (채택)'], ['B', 'B 유통기한 순']], K.variant],
+  ['상태', 'state', K.STATES, K.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+const root = document.getElementById('root');
+if (K.detailIng) {
+  root.innerHTML = `<header class="top"><button class="back" type="button" data-go="list">${K.ICON.back}재고</button><h1>${K.I(K.detailIng).name}</h1></header>
+    <main class="stk" style="padding-top:12px">${K.detail(K.detailIng)}</main>`;
+} else {
+  root.innerHTML = `<header class="top"><div class="store">모래내 베이커리 &amp; 델리</div><h1>재고</h1>
+    ${K.state === 'empty' ? '' : `<div class="seg"><button type="button" data-filter aria-pressed="true">전체</button><button type="button" data-filter>확인할 것 ${K.alerts().n}</button></div>`}</header>
+    <main class="stk">${K.state === 'empty' ? K.empty() : K.variant === 'B' ? K.timeline() : K.list()}</main>
+    ${K.state === 'bulk' ? `<div class="sheet-scrim" data-go="list"></div><section class="sheet" role="dialog" aria-label="한 번에 폐기"><div class="grab"></div><h2>만료 · 임박 로트 한 번에 폐기</h2><div class="sb">${K.bulk()}</div></section>` : ''}`;
+}
+K.wire(document);
+</script>
+</body>
+</html>

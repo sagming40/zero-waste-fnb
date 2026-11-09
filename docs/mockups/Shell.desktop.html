@@ -81,6 +81,9 @@ function screenHtml(id) {
   if (id === 'closing') return `<iframe title="마감" src="${NAV.srcFor('closing', 'desktop', `v=A&state=${time === 'before' ? 'entry' : 'reentry'}&role=${role}&${common}`)}"></iframe>`;
   if (id === 'settings') return `<iframe title="메뉴 · 레시피" src="${NAV.srcFor('settings', 'desktop', `v=A&state=menu&${common}`)}"></iframe>`;
   if (id === 'store') return `<iframe title="매장 · 직원" src="${NAV.srcFor('store', 'desktop', `v=B&state=main&${common}`)}"></iframe>`;
+  // 재고 묶음처럼 화면 목록(nav-data)에 src가 있는 화면은 그 시안을 끼운다 — 채택 전이면 A
+  const s = NAV.byId[id];
+  if (s && s.src) return `<iframe title="${s.label}" src="${NAV.srcFor(id, 'desktop', `v=A&state=${s.srcState || 'entry'}&role=${role}&${common}`)}"></iframe>`;
   return NAV.placeholder(id);
 }
 const storePick = `<button class="storepick" title="매장 바꾸기">${NAV.icon('store', 18)}<span class="lbl"> 모래내 베이커리 &amp; 델리 ▾</span><small>${role === 'owner' ? '점주' : '직원'} · 매장 2곳</small></button>`;

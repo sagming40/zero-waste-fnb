@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>입고 시안 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<style>
+  body { padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .ctl { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0 20px; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .ctl select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); }
+  .board { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; }
+  .col { flex: 0 0 auto; }
+  .col h2 { font-size: 16px; margin: 0 0 2px; }
+  .col p { margin: 0 0 10px; font-size: 13px; color: var(--muted); max-width: 390px; }
+  iframe { width: 390px; height: 844px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); display: block; }
+</style>
+</head>
+<body>
+<h1>입고 — 시안 비교</h1>
+<div class="muted small">F10 입고: 명세서 한 장 = 입고 한 번, 재료마다 양 · 유통기한 · 금액 → 로트. 직원도 쓰지만 금액은 점주만(직원이 넣은 입고의 단가는 점주가 나중에 — 2026-11-09 결정). 안쪽 탭 · 줄을 눌러 상태를 오갈 수 있다. 예시 데이터는 지어낸 값.</div>
+<div class="ctl">
+  <label>기기 <select id="dev"><option value="mobile">휴대폰</option><option value="desktop">데스크톱</option></select></label>
+  <label>상태 <select id="st"></select></label>
+  <label>사람 <select id="role"><option value="owner">점주</option><option value="staff">직원</option></select></label>
+  <label>화면 <select id="dk"><option value="0">밝게</option><option value="1">어둡게</option></select></label>
+</div>
+<div class="board" id="board"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="receive.js"></script>
+<script>
+const VM = [
+  { v: 'A', t: 'A · 한 줄씩 더하기 (채택)', d: '재료를 찾아 줄을 더한다. 고치는 줄 하나만 펼치고 나머지는 한 줄 요약. 메뉴 · 레시피의 "재료 더하기"와 같은 손놀림.' },
+  { v: 'B', t: 'B · 목록에서 고르기', d: '모든 식자재가 자주 들어오는 순으로 깔려 있고 체크하면 그 자리에서 펼친다. 매번 들어오는 재료가 비슷하면 빠르다. "지난 입고 재료 고르기".' },
+];
+const VD = [
+  { v: 'A', t: 'A · 표 + 옆 요약 (채택)', d: '한 줄 = 재료 하나, 칸을 Tab · Enter로 옮겨 다닌다. 오른쪽에 합계 · 빈 단가 · 저장 · 최근 입고. 마감 입력 데스크톱 A와 같은 틀.' },
+  { v: 'B', t: 'B · 기록 + 입력 두 칸', d: '왼쪽 입고 기록(단가 확인 필요가 바로 보임), 오른쪽에 휴대폰 A와 같은 카드. 메뉴 · 레시피 데스크톱 A와 같은 틀.' },
+];
+const dev = document.getElementById('dev'), st = document.getElementById('st'), role = document.getElementById('role'), dk = document.getElementById('dk');
+st.innerHTML = RCV.STATES.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+dev.value = ZW.params.get('device') === 'desktop' ? 'desktop' : 'mobile';
+st.value = ZW.params.get('state') || 'entry';
+role.value = ZW.params.get('role') === 'staff' ? 'staff' : 'owner';
+dk.value = ZW.dark ? '1' : '0';
+function draw() {
+  document.documentElement.dataset.theme = dk.value === '1' ? 'dark' : 'light';
+  ZW.applyPalette(ZW.paletteKey, dk.value === '1');
+  try { history.replaceState(null, '', `?device=${dev.value}&state=${st.value}&role=${role.value}&dark=${dk.value}`); } catch (e) { /* file:// */ }
+  const q = `state=${st.value}&role=${role.value}&dark=${dk.value}&palette=${ZW.paletteKey}&embed=1`;
+  const board = document.getElementById('board');
+  if (dev.value === 'desktop') {
+    const w = Math.min(1100, document.body.clientWidth - 32), sc = w / 1280;
+    board.style.flexDirection = 'column';
+    board.innerHTML = VD.map(x => `<div class="col"><h2>${x.t}</h2><p style="max-width:none">${x.d}</p>
+      <div style="width:${w}px;height:${800 * sc}px;overflow:hidden;border:1px solid var(--line);border-radius:14px">
+      <iframe title="데스크톱 시안 ${x.v}" src="Receive.desktop.html?v=${x.v}&${q}" style="width:1280px;height:800px;border:0;border-radius:0;transform:scale(${sc});transform-origin:0 0"></iframe></div></div>`).join('');
+  } else {
+    board.style.flexDirection = '';
+    board.innerHTML = VM.map(x => `<div class="col"><h2>${x.t}</h2><p>${x.d}</p>
+      <iframe title="시안 ${x.v}" src="Receive.mobile.html?v=${x.v}&${q}"></iframe></div>`).join('');
+  }
+}
+dev.onchange = draw; st.onchange = draw; role.onchange = draw; dk.onchange = draw;
+draw();
+</script>
+</body>
+</html>

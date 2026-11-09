@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고 (데스크톱) — 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="../_shared/shared.css">
+<link rel="stylesheet" href="../_shared/forms.css">
+<link rel="stylesheet" href="stock.css">
+</head>
+<body>
+<div id="root"></div>
+<script src="../_shared/shared.js"></script>
+<script src="../_shared/stock-data.js"></script>
+<script src="stock.js"></script>
+<script>
+// 앱 틀(왼쪽 메뉴) 안의 내용 영역만 그린다.
+// 시안 A: 재료 표 + 오른쪽 상세 (메뉴 · 레시피 데스크톱 A와 같은 틀) / B: 위 숫자 넷 + 로트 표(유통기한 순) + 오른쪽 상세 (오늘 손실 데스크톱 A처럼)
+const K = SKV, S = STK, { won } = ZW;
+ZW.switcher([
+  ['시안', 'v', [['A', 'A 재료 표 + 상세 (채택)'], ['B', 'B 숫자 + 로트 표']], K.variant],
+  ['상태', 'state', K.STATES, K.state],
+  ['화면', 'dark', [['0', '밝게'], ['1', '어둡게']], ZW.dark ? '1' : '0'],
+], 'top:auto;bottom:8px');
+
+const a = K.alerts();
+const head = `<header class="dhead"><div><div class="small muted">재고</div><h1>재고</h1></div>
+  <div style="display:flex;gap:8px;align-items:center"><button class="ghost" type="button" data-toast="입고 화면으로">+ 입고</button><button class="ghost" type="button" data-toast="실사 화면으로">실사</button></div></header>`;
+const sel = K.detailIng;
+const right = K.state === 'bulk' ? `<h2>만료 · 임박 로트 한 번에 폐기</h2>${K.bulk()}` : sel ?`<h2>${K.I(sel).name}</h2>${K.detail(sel)}` : `<h2>확인할 것 <span class="muted small">${a.n}</span></h2>${K.alertCards()}<p class="small muted">재료를 누르면 로트 · 원장이 여기 열려요</p>`;
+
+function viewA() {
+  const live = S.STOCK.filter((s) => s.qty || s.short);
+  const total = S.STOCK.reduce((x, s) => x + s.value, 0);
+  const rows = live.map((s) => {
+    const i = K.I(s.ing);
+    const flag = s.short ? `<span class="loss-t">부족 ${S.fmtQty(s.short, i.unit)}</span>` : s.expired.length ? `<span class="exp-over">만료 ${S.fmtQty(s.expired.reduce((x, l) => x + l.left, 0), i.unit)}</span>` : '';
+    return `<tr class="${s.ing === sel ? 'sel' : ''}" data-ing="${s.ing}"><td><b>${i.name}</b> ${flag}</td>
+      <td class="n num"><b>${s.qty ? S.fmtQty(s.liveQty, i.unit) : '0'}</b></td><td class="n small muted">${K.daysText(s)}</td>
+      <td class="small">${s.first ? K.expSpan(s.first.exp) : '<span class="exp-none">없음</span>'}</td>
+      <td class="n small muted">${s.lots.length}</td><td class="n num">${s.liveQty ? K.valueText(s) : '—'}${s.noPrice ? ' <span class="warn-t small">단가 ' + s.noPrice + '</span>' : ''}</td></tr>`;
+  }).join('');
+  return `<div class="dstk">${head}<div class="dbody"><div class="dmain">${K.closedNote()}
+    <div class="dsearch"><span class="inp"><span class="muted ic">${K.ICON.search}</span><input placeholder="재료 찾기"></span>
+      <div class="seg sm" style="width:auto"><button type="button" data-filter aria-pressed="true">전체 ${live.length}</button><button type="button" data-filter>확인할 것 ${a.n}</button><button type="button" data-filter>며칠치 적은 순</button></div>
+      <span class="grow"></span><span class="small muted">재고 금액 <b class="num" style="color:var(--text);font-size:16px">${won(total)} + ?</b></span></div>
+    <table class="sk"><thead><tr><th>재료</th><th class="n">재고</th><th class="n">며칠치</th><th>가장 빠른 유통기한</th><th class="n">로트</th><th class="n">재고 금액</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="small muted">며칠치 = 만료 안 된 재고 ÷ 최근 7 영업일 하루 평균 사용량. 재고 금액은 만료 제외, 단가 빈 로트는 기본 단가로.</p></div>
+    <aside class="dside">${right}</aside></div></div>`;
+}
+
+function viewB() {
+  const total = S.STOCK.reduce((x, s) => x + s.value, 0);
+  const lots = S.LOTS.filter((l) => l.left > 0);
+  const G = [['over', '지남 — 차감하지 않아요', (e) => e.kind === 'over'], ['soon', '오늘 · 내일', (e) => e.kind === 'soon'], ['week', '이번 주 (7일 안)', (e) => e.kind === 'ok' && e.d <= 7], ['later', '그 뒤', (e) => e.kind === 'ok' && e.d > 7], ['none', '유통기한 없음', (e) => e.kind === 'none']];
+  const rows = G.map(([k, t, f]) => {
+    const ls = lots.filter((l) => f(S.expInfo(l.exp))).sort((x, y) => (x.exp || '').localeCompare(y.exp || ''));
+    if (!ls.length) return '';
+    return `<tr class="grp t-${k}"><td colspan="6">${t} · ${ls.length}</td></tr>` + ls.map((l) => {
+      const i = K.I(l.ing), v = S.lotValue(l);
+      return `<tr class="${l.ing === sel ? 'sel' : ''}" data-ing="${l.ing}"><td><b>${i.name}</b></td><td class="n num">${S.fmtQty(l.left, i.unit)} <span class="small muted">/ ${S.fmtQty(l.qty0, i.unit)}</span></td>
+        <td class="small">${l.exp ? K.expSpan(l.exp) : '<span class="exp-none">없음</span>'}</td><td class="small muted">${S.fmtShort(l.date)}</td>
+        <td class="n num">${v === null ? '—' : won(v)}${l.price === null ? ' <span class="warn-t small">기본 단가로</span>' : ''}</td>
+        <td>${k === 'over' ? '<button class="mini-btn loss" type="button" data-toast="재료 폐기 화면이 원인 · 로트 · 양으로 채워져 열려요">재료 폐기로</button>' : ''}</td></tr>`;
+    }).join('');
+  }).join('');
+  const short = S.STOCK.filter((s) => s.short);
+  return `<div class="dstk">${head}<div class="dbody"><div class="dmain">${K.closedNote()}
+    <div class="cards4"><div><span class="small muted">재고 금액 (만료 제외)</span><b class="num">${won(total)} + ?</b></div>
+      <div class="c-over"><span class="small muted">만료 — 따로 둠</span><b>${a.expired.length}</b><span class="small muted">로트</span></div>
+      <div class="c-soon"><span class="small muted">오늘 · 내일까지</span><b>${a.soon.length}</b><span class="small muted">로트</span></div>
+      <div class="c-short"><span class="small muted">부족</span><b>${short.length}</b><span class="small muted">${short.map((s) => K.I(s.ing).name).join(' · ')}</span></div></div>
+    <table class="sk"><thead><tr><th>재료</th><th class="n">남은 양 / 처음</th><th>유통기한</th><th>입고</th><th class="n">금액</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <aside class="dside">${right}</aside></div></div>`;
+}
+
+document.getElementById('root').innerHTML = K.state === 'empty'
+  ? `<div class="dstk">${head}<div class="dmain" style="max-width:560px;margin:0 auto">${K.empty()}</div></div>`
+  : K.variant === 'B' ? viewB() : viewA();
+K.wire(document);
+</script>
+</body>
+</html>
